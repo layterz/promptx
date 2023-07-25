@@ -4,7 +4,7 @@ A lightweight library, built on top of pandas and pydantic, that lets you intera
 
 ## Getting starting
 
-To follow along and run the examples interactively using [./getting-started.ipynb]() or on [colab]().
+To follow along and run the examples interactively using [./getting-started.ipynb](https://github.com/layterz/promptz/blob/main/getting-started.ipynb) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/layterz/promptz/blob/main/getting-started.ipynb)
 
 ```python
 pip install promptz
