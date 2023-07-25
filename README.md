@@ -4,7 +4,7 @@ A lightweight library, built on top of pandas and pydantic, that lets you intera
 
 ## Getting starting
 
-To follow along and run the examples interactively using [./getting-started.ipynb](https://github.com/layterz/promptz/blob/main/getting-started.ipynb) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/layterz/promptz/blob/main/getting-started.ipynb)
+To follow along and run the examples interactively you can use [./getting-started.ipynb](https://github.com/layterz/promptz/blob/main/getting-started.ipynb) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/layterz/promptz/blob/main/getting-started.ipynb)
 
 ```python
 pip install promptz
@@ -57,7 +57,7 @@ for his relentless pursuit of justice and his unwavering commitment to
 protecting Gotham City. He is intensely focused, often seen as aloof and...
 ```
 
-The response is a raw string of the response from the model. This might be what you want if you're writing an email or asking a question, but other times you'll need to convert the response into structured data.
+The response is a raw string from the model output. This might be what you want if you're writing an email or asking a question, but other times you'll need to convert the response into structured data.
 
 To do that, you can pass a `pydantic.BaseModel` as `output=` when calling `prompt`. This will add format instructions, based on the pydantic schema and field annotations, and return an instance of the output model using the generated data.
 
@@ -196,7 +196,7 @@ For example, `[{name: 'Batman'}, {description: 'Batman, also known as...'}, {age
 ```python
 from promptz import query
 
-villains = query('they are a villain').first
+villains = query('they are a villain')
 ```
 ```
     id	                                    description	                                        type	    name	            age
