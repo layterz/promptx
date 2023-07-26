@@ -10,6 +10,8 @@ To follow along and run the examples interactively you can use [./getting-starte
 pip install promptz
 ```
 
+*Note: if install hangs or returns `Killed`, try running `pip install promptz --no-cache-dir`*
+
 First, you need to initialize the library, specifying the language model and embedding function to use.
 
 ```python

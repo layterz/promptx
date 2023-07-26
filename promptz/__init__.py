@@ -1,3 +1,4 @@
+from logging import LogRecord
 import os
 import inspect
 import logging
@@ -24,17 +25,25 @@ import colorama
 
 colorama.just_fix_windows_console()
 
+FORMAT_INSTRUCTIONS = logging.DEBUG + 1
+CONTEXT = logging.DEBUG + 2
+EXAMPLES = logging.DEBUG + 3
+METRICS = logging.DEBUG + 4
+HISTORY = logging.DEBUG + 5
+INSTRUCTIONS = logging.INFO + 1
+INPUT = logging.INFO + 2
+OUTPUT = logging.INFO + 3
 
-class PromptLogger(logging.Logger):
+logging.addLevelName(FORMAT_INSTRUCTIONS, "FORMAT INSTRUCTIONS")
+logging.addLevelName(CONTEXT, "CONTEXT")
+logging.addLevelName(EXAMPLES, "EXAMPLES")
+logging.addLevelName(INSTRUCTIONS, "INSTRUCTIONS")
+logging.addLevelName(INPUT, "INPUT")
+logging.addLevelName(OUTPUT, "OUTPUT")
+logging.addLevelName(METRICS, "METRICS")
+logging.addLevelName(HISTORY, "HISTORY")
 
-    FORMAT_INSTRUCTIONS = logging.DEBUG + 1
-    CONTEXT = logging.DEBUG + 2
-    EXAMPLES = logging.DEBUG + 3
-    METRICS = logging.DEBUG + 4
-    HISTORY = logging.DEBUG + 5
-    INSTRUCTIONS = logging.INFO + 1
-    INPUT = logging.INFO + 2
-    OUTPUT = logging.INFO + 3
+class NotebookFormatter(logging.Formatter):
 
     colors = {
         FORMAT_INSTRUCTIONS: colorama.Fore.CYAN,
@@ -49,120 +58,32 @@ class PromptLogger(logging.Logger):
         logging.INFO: colorama.Fore.WHITE,
         logging.DEBUG: colorama.Style.DIM,
     }
-    
-    def __init__(self, name, level=logging.DEBUG, formatter=None):
-        super().__init__(name)
-        logging.addLevelName(self.FORMAT_INSTRUCTIONS, "FORMAT INSTRUCTIONS")
-        logging.addLevelName(self.CONTEXT, "CONTEXT")
-        logging.addLevelName(self.EXAMPLES, "EXAMPLES")
-        logging.addLevelName(self.INSTRUCTIONS, "INSTRUCTIONS")
-        logging.addLevelName(self.INPUT, "INPUT")
-        logging.addLevelName(self.OUTPUT, "OUTPUT")
-        logging.addLevelName(self.METRICS, "METRICS")
-        logging.addLevelName(self.HISTORY, "HISTORY")
 
-        if formatter is None:
-            formatter = logging.Formatter('%(message)s')
-        ch = logging.StreamHandler()
-        ch.setLevel(level)
-        ch.setFormatter(formatter)
-        self.addHandler(ch)
-        self.setLevel(level)
+    def __init__(self, width=80, **kwargs):
+        super().__init__(**kwargs)
+        self.width = width
 
-    def format_instructions(self, msg, *args, **kwargs):
-        self._log(self.FORMAT_INSTRUCTIONS, msg, args, **kwargs)
-
-    def context(self, msg, *args, **kwargs):
-        self._log(self.CONTEXT, msg, args, **kwargs)
-
-    def examples(self, msg, *args, **kwargs):
-        self._log(self.EXAMPLES, msg, args, **kwargs)
-    
-    def instructions(self, msg, *args, **kwargs):
-        self._log(self.INSTRUCTIONS, msg, args, **kwargs)
-
-    def input(self, msg, *args, **kwargs):
-        self._log(self.INPUT, msg, args, **kwargs)
-
-    def output(self, msg, *args, **kwargs):
-        self._log(self.OUTPUT, msg, args, **kwargs)
-    
-    def error(self, msg, *args, **kwargs):
-        self._log(logging.ERROR, msg, args, **kwargs)
-    
-    def debug(self, msg, *args, **kwargs):
-        self._log(logging.DEBUG, msg, args, **kwargs)
-    
-    def metrics(self, msg, *args, **kwargs):
-        self._log(self.METRICS, msg, args, **kwargs)
-    
-    def history(self, msg, *args, **kwargs):
-        self._log(self.HISTORY, msg, args, **kwargs)
+    def format(self, record) -> str:
+        color = self.colors.get(record.levelno, None)
+        msg = f'{color}{record.getMessage()}{colorama.Style.RESET_ALL}'
+        return '\n'.join([
+            textwrap.fill(line.strip(), width=self.width).ljust(self.width, ' ')
+            for line in msg.split('\n')
+        ])
 
 
-class NotebookLogger(PromptLogger):
-    
-    def _log(self, level, msg, *args, wrap=False, **kwargs):
-        color = self.colors.get(level, None)
-        if wrap:
-            width = 80
-            msg = '\n'.join([
-                textwrap.fill(line.strip(), width=80).ljust(width, ' ')
-                for line in msg.split('\n')
-            ])
-        msg = f'{color}{msg}{colorama.Style.RESET_ALL}'
-        return super()._log(level, msg, *args, **kwargs)
-    
-    def format_instructions(self, msg, *args, **kwargs):
-        self._log(self.FORMAT_INSTRUCTIONS, f'''
-        FORMAT
-        ===
-        {msg}
-        ''', args, wrap=True, **kwargs)
-
-    def context(self, msg, *args, **kwargs):
-        self._log(self.CONTEXT, f'CONTEXT: {msg}', args, wrap=True, **kwargs)
-
-    def examples(self, msg, *args, **kwargs):
-        self._log(self.EXAMPLES, f'''
-        EXAMPLES
-        ===
-        {msg}
-        ''', args, wrap=True, **kwargs)
-    
-    def instructions(self, msg, *args, **kwargs):
-        self._log(self.INSTRUCTIONS, f'''
-        INSTRUCTIONS
-        ===
-        {msg}
-        ''', args, wrap=True, **kwargs)
-
-    def input(self, msg, *args, **kwargs):
-        self._log(self.INPUT, f'''
-        INPUT:
-        ===
-        {msg}
-        ''', args, wrap=True, **kwargs)
-
-    def output(self, msg, *args, **kwargs):
-        self._log(self.OUTPUT, f'''
-        OUTPUT
-        ===
-        {msg}
-        ''', args, wrap=True, **kwargs)
-    
-    def error(self, msg, *args, **kwargs):
-        self._log(logging.ERROR, f'ERROR', args, wrap=True, **kwargs)
-        self._log(logging.ERROR, msg, args, wrap=True, **kwargs)
-    
-    def debug(self, msg, *args, **kwargs):
-        self._log(logging.DEBUG, msg, args, wrap=True, **kwargs)
-    
-    def metrics(self, msg, *args, **kwargs):
-        self._log(self.METRICS, msg, args, **kwargs)
-    
-    def history(self, msg, *args, **kwargs):
-        self._log(self.HISTORY, msg, args, wrap=True, **kwargs)
+class JSONLogFormatter(logging.Formatter):
+    def format(self, record):
+        msg = super().format(record)
+        log_entry = {
+            "timestamp": record.created,
+            "level": record.levelname,
+            "message": msg,
+            "filename": record.filename,
+            "lineno": record.lineno,
+            "funcName": record.funcName,
+        }
+        return json.dumps(log_entry)
 
 
 class Callback(BaseModel):
@@ -466,17 +387,7 @@ class Prompt(nn.Module):
     def __init__(self, instructions=None, output=None, context=None, template=None, examples=None, num_examples=None, history=None, llm=None, logger=None, debug=False, silent=False, tools: ToolList = None):
         super().__init__()
 
-        if logger is None:
-            logger = NotebookLogger(f'prompt.{self.__class__.__name__}')
-
-        level = logging.INFO
-        if debug:
-            level = logging.DEBUG
-        elif silent:
-            level = logging.ERROR
-        logger.setLevel(level)
         self.logger = logger
-
         self.name = self.__class__.__name__
         self.llm = llm or self.llm
         self.context = context or self.context
@@ -617,7 +528,9 @@ class Prompt(nn.Module):
     
     def forward(self, x, retries=3, dryrun=False, **kwargs):
         if retries and retries <= 0:
-            raise MaxRetriesExceeded(f'{self.name} failed to forward {x}')
+            e = MaxRetriesExceeded(f'{self.name} failed to forward {x}')
+            self.logger.error(e)
+            raise e
         
         if dryrun:
             self.logger.debug(f'Dryrun: {self.output}')
@@ -630,13 +543,13 @@ class Prompt(nn.Module):
         if self.template is not None and self.template != '':
             prompt_input = self.render({'input': px})
             if self.context: self.logger.context(self.context)
-            self.logger.history('\n\n\n'.join([f'''
+            self.logger.log(HISTORY, '\n\n\n'.join([f'''
             {log.input}
             {log.output}
             ''' for log in self.history]))
-            self.logger.instructions(self.instructions)
-            if len(self.examples): self.logger.examples(self.render_examples())
-            if len(px): self.logger.input(px)
+            self.logger.log(INSTRUCTIONS, self.instructions)
+            if len(self.examples): self.logger.log(EXAMPLES, self.render_examples())
+            if len(px): self.logger.log(INPUT, px)
             tools = [t.info for t in self.tools]
             response = llm.generate(prompt_input, context=self.context, history=self.history, tools=tools)
             if response.callback is not None:
@@ -646,20 +559,20 @@ class Prompt(nn.Module):
                           for p in tool.parameters}
                 rsp = tool(**params)
                 return None
-            if self.output: self.logger.format_instructions(self.render_format(px))
+            if self.output: self.logger.log(FORMAT_INSTRUCTIONS, self.render_format(px))
             try:
-                self.logger.output(response.raw)
+                self.logger.log(OUTPUT, response.raw)
                 response.content = self.process(px, response.raw, **kwargs)
             except ValidationError as e:
-                self.logger.error(f'Output validation failed: {e} {response.content}')
+                self.logger.warn(f'Output validation failed: {e} {response.content}')
                 return self.forward(x, retries=retries-1, **kwargs)
             except JSONDecodeError as e:
-                self.logger.error(f'Failed to decode JSON from {response.content}: {e}')
+                self.logger.warn(f'Failed to decode JSON from {response.content}: {e}')
                 return self.forward(x, retries=retries-1, **kwargs)
             except RateLimitError as e:
-                self.logger.error(f'Hit rate limit for {self}: {e}')
+                self.logger.warn(f'Hit rate limit for {self}: {e}')
                 return self.forward(x, retries=retries-1, **kwargs)
-            self.logger.metrics(response.metrics)
+            self.logger.log(METRICS, response.metrics)
             return response
 
 
@@ -892,7 +805,7 @@ class Session:
         self._collection = default_collection
         if collections is not None:
             self._collections = collections 
-        self.logger = logger or NotebookLogger(name)
+        self.logger = logger
         self._history = []
         self.use_cache = use_cache
     
@@ -934,6 +847,12 @@ class Session:
             yield o
 
     def prompt(self, instructions=None, input=None, output=None, prompt=None, context=None, template=None, llm=None, examples=None, num_examples=1, history=None, tools=None, dryrun=False, retries=3, debug=False, silent=False, **kwargs):
+        logger = self.logger.getChild('prompt')
+        level = logging.INFO
+        if debug: level = logging.DEBUG
+        elif silent: level = logging.ERROR
+        logger.setLevel(level)
+
         if prompt is None:
             p = Prompt(
                 output=output,
@@ -947,7 +866,7 @@ class Session:
                 template=template,
                 debug=debug,
                 silent=silent,
-                logger=self.logger,
+                logger=logger,
             )
         else:
             p = prompt
@@ -1089,23 +1008,35 @@ class System:
 
 
 class World:
+    name: str
     sessions: List[Session]
     collections: Dict[str, Collection]
     systems: List[System]
 
-    def __init__(self, systems=None, llm=None, ef=None, logger=None, db=None):
+    def __init__(self, name, systems=None, llm=None, ef=None, logger=None, db=None):
+        self.name = name
         self.sessions = []
         self.collections = {}
         self.systems = systems
         self.llm = llm or MockLLM()
         self.ef = ef or (lambda x: [0] * len(x))
         self.db = db or ChromaVectorDB
-        self.logger = logger or NotebookLogger(self.__class__.__name__)
+        self.logger = logger or logging.getLogger(self.name)
     
-    def create_session(self, name=None, db=None, llm=None, ef=None, logger=None, use_cache=False):
+    def create_session(self, name=None, db=None, llm=None, ef=None, logger=None, silent=False, debug=False, use_cache=False, log_format='notebook'):
         llm = llm or self.llm
         ef = ef or self.ef
         db = db or self.db()
+        logger = logger or self.logger.getChild(f'session.{name}')
+        ch = logging.StreamHandler()
+        ch.setLevel(logging.INFO)
+        formatter = JSONLogFormatter() if log_format == 'json' else NotebookFormatter()
+        ch.setFormatter(formatter)
+        self.logger.addHandler(ch)
+        level = logging.INFO
+        if debug: level = logging.DEBUG
+        elif silent: level = logging.ERROR
+        logger.setLevel(level)
         session = Session(name=name, db=db, llm=llm, ef=ef, logger=logger,
                           collections=self.collections, use_cache=use_cache)
         self.sessions = self.sessions.append(session)
@@ -1197,8 +1128,8 @@ Embedding = List[float]
 EmbedFunction = Callable[[List[str]], List[Embedding]]
 
 
-def init(llm=None, ef=None, logger=None, use_cache=False, **kwargs):
-    w = World(llm=llm, ef=ef, logger=logger, **kwargs)
-    session = w.create_session(use_cache=use_cache)
+def init(llm=None, ef=None, logger=None, use_cache=False, log_format='notebook', **kwargs):
+    w = World('test', llm=llm, ef=ef, logger=logger, **kwargs)
+    session = w.create_session(use_cache=use_cache, log_format=log_format)
     set_default_world(w)
     set_default_session(session)
