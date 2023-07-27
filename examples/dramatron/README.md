@@ -9,20 +9,20 @@ Implementation of Dramatron, Deepmind's generative story prompt model, which sta
 This is a generated script (using GPT-4) for the first scene using The Matrix as the logline.
 
 > INT. NEO'S APARTMENT - NIGHT
-<br>
- The room is dimly lit by the glow of multiple computer monitors, the hum of processors hanging in the air. Stacks of papers, computer parts strewn about, and the rapid flicker of code tracing across the screens.
- <br>
- <br>
- NEO, a man caught between reality and the digital world, sits hunched over the mass of technology, his fingers moving with a practiced ease over the keyboard. He hacks away, oblivious to the world outside his door.
- <br>
- <br>
- Suddenly, a knock JOLTS him from his trance. He glances at the time - 3:00 AM. He looks at his computer screen. The hacking effort halted, half-finished lines of code hanging in the digital ether.\n\nAnother KNOCK, louder this time. Neo stirs, stands up slowly, stretching his tired muscles. Curiosity piques him, he moves to open the door.
- <br>
- <br>
- INT. NEO'S APARTMENT - MORNING
- <br>
- <br>
- The sun rises, revealing the stark contrast of Neo's reality. A whole other life filled with paperwork, sterile cubicles and menial tasks. The simple monotony a stark contrast to the thrill and wonder of the night before.\n\nNeo looks at the solar glare reflecting off the glass buildings, a world of illusions. He takes a deep breath and prepares himself for another day in the ordinary world.
+> <br>
+>  The room is dimly lit by the glow of multiple computer monitors, the hum of processors hanging in the air. Stacks of papers, computer parts strewn about, and the rapid flicker of code tracing across the screens.
+>  <br>
+>  <br>
+> NEO, a man caught between reality and the digital world, sits hunched over the mass of technology, his fingers moving with a practiced ease over the keyboard. He hacks away, oblivious to the world outside his door.
+> <br>
+> <br>
+> Suddenly, a knock JOLTS him from his trance. He glances at the time - 3:00 AM. He looks at his computer screen. The hacking effort halted, half-finished lines of code hanging in the digital ether.\n\nAnother KNOCK, louder this time. Neo stirs, stands up slowly, stretching his tired muscles. Curiosity piques him, he moves to open the door.
+> <br>
+> <br>
+> INT. NEO'S APARTMENT - MORNING
+> <br>
+> <br>
+> The sun rises, revealing the stark contrast of Neo's reality. A whole other life filled with paperwork, sterile cubicles and menial tasks. The simple monotony a stark contrast to the thrill and wonder of the night before.\n\nNeo looks at the solar glare reflecting off the glass buildings, a world of illusions. He takes a deep breath and prepares himself for another day in the ordinary world.
 
 And this is the generated script using Westworld as the logline.
 
