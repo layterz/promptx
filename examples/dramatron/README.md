@@ -1,6 +1,6 @@
 <img src="./dramatron.png" />
 
-## Dramatron
+## Dramatron [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/layterz/promptz/blob/main/examples/dramatron/dramatron.ipynb)
 
 Implementation of Dramatron, Deepmind's generative story prompt model, which starts with a logline and progressively builds elements of a story ending with dialogue for each scene.
 
