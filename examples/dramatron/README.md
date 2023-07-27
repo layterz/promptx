@@ -2,11 +2,11 @@
 
 ## Dramatron [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/layterz/promptz/blob/main/examples/dramatron/dramatron.ipynb)
 
-Implementation of Dramatron, Deepmind's generative story prompt model, which starts with a logline and progressively builds elements of a story ending with dialogue for each scene.
+Implementation of [Deepmind's Dramatron](https://arxiv.org/pdf/2209.14958.pdf), a generative story prompt model, which starts with a logline and progressively builds elements of a story ending with dialogue for each scene.
 
 ### Output
 
-This is a generated script (using GPT-4) for the first scene using The Matrix as the logline.
+This is a generated script (using GPT-4) for the first scene using The Matrix as input.
 
 > INT. NEO'S APARTMENT - NIGHT
 > <br>
