@@ -1,4 +1,4 @@
-<img src="./dramatron.png" width="500px" />
+<img src="./dramatron.png" />
 
 ## Dramatron
 
