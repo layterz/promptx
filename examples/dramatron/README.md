@@ -27,60 +27,60 @@ This is a generated script (using GPT-4) for the first scene using The Matrix as
 And this is the generated script using Westworld as the logline.
 
 > DR. ROBERT FORD
-<br>
-Visitors to Westworld, welcome. This isn\'t your average theme park.\n
-<br>
-<br>
-WILLIAM
-<br>
-This feels... it\'s almost too real.
-<br>
-<br>
-DR. ROBERT FORD
-<br>
-That\'s the brilliance of it, William. The hosts aren\'t mere robots. They mimic human forms, mannerisms, and even emotions. You won\'t find anywhere else quite like Westworld.
-<br>
-<br>
-(DOLORES ABERNATHY approaches WILLIAM)
-<br>
-<br>
-DOLORES ABERNATHY
-<br>
-Good day, sir. Anything you fancy doing today?
-<br>
-<br>
-WILLIAM
-<br>
-You\'re... You\'re just like us...
-<br>
-<br>
-DOLORES ABERNAT
-<br>
-(Polite smile)
-<br>
-Why, thank you, sir. Enjoy your stay.
-<br>
-<br>
-(Cuts to BERNARD LOWE observing from a distance)
-<br>
-<br>
-BERNARD LOWE
-<br>
-Dolores seems particularly realistic today.
-<br>
-<br>
-DR. ROBERT FORD
-<br>
-Each day, she becomes more and more aware... Blurring the line between artificial intelligence and consciousness.
-<br>
-<br>
-(MAEVE MILLAY appears performing her role)
-<br>
-<br>
-MAEVE MILL
-<br>
-Gentlemen, welcome to Sweetwater\'s finest brothel. Shall we indulge in some fantasies?
-<br>
-<br>
-(They all watch as high-paying tourists laugh, play, and revel in the park, indulging in their wildest, most imaginative fantasies.)
+> <br>
+> Visitors to Westworld, welcome. This isn\'t your average theme park.\n
+> <br>
+> <br>
+> WILLIAM
+> <br>
+> This feels... it\'s almost too real.
+> <br>
+> <br>
+> DR. ROBERT FORD
+> <br>
+> That\'s the brilliance of it, William. The hosts aren\'t mere robots. They mimic human forms, mannerisms, and even emotions. You won\'t find anywhere else quite like Westworld.
+> <br>
+> <br>
+> (DOLORES ABERNATHY approaches WILLIAM)
+> <br>
+> <br>
+> DOLORES ABERNATHY
+> <br>
+> Good day, sir. Anything you fancy doing today?
+> <br>
+> <br>
+> WILLIAM
+> <br>
+> You\'re... You\'re just like us...
+> <br>
+> <br>
+> DOLORES ABERNAT
+> <br>
+> (Polite smile)
+> <br>
+> Why, thank you, sir. Enjoy your stay.
+> <br>
+> <br>
+> (Cuts to BERNARD LOWE observing from a distance)
+> <br>
+> <br>
+> BERNARD LOWE
+> <br>
+> Dolores seems particularly realistic today.
+> <br>
+> <br>
+> DR. ROBERT FORD
+> <br>
+> Each day, she becomes more and more aware... Blurring the line between artificial intelligence and consciousness.
+> <br>
+> <br>
+> (MAEVE MILLAY appears performing her role)
+> <br>
+> <br>
+> MAEVE MILL
+> <br>
+> Gentlemen, welcome to Sweetwater\'s finest brothel. Shall we indulge in some fantasies?
+> <br>
+> <br>
+> (They all watch as high-paying tourists laugh, play, and revel in the park, indulging in their wildest, most imaginative fantasies.)
 
