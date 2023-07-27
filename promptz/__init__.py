@@ -1,4 +1,3 @@
-from logging import LogRecord
 import os
 import inspect
 import logging
@@ -10,6 +9,8 @@ from json import JSONDecodeError
 from enum import Enum
 from typing import Type, Callable, List, Tuple, Dict, Union, Any, Literal 
 from abc import abstractmethod
+import base64
+from IPython.display import display, HTML, Image
 import torch
 from torch import nn
 import numpy as np
@@ -216,6 +217,34 @@ class ChatGPT(LLM):
                 input_tokens=output.usage.get('prompt_tokens'),
                 output_tokens=output.usage.get('completion_tokens')
             ),
+        )
+
+
+class ImageResponse(Response):
+    
+    def __repr__(self) -> str:
+        image_bytes = base64.b64decode(self.raw)
+        display(Image(data=image_bytes))
+
+
+class DALL_E(LLM):
+    
+    def __init__(self, api_key=None, org_id=None):
+        openai.api_key = api_key or os.environ.get('OPENAI_API_KEY')
+        openai.organization = org_id or os.environ.get('OPENAI_ORG_ID')
+
+    def generate(self, x, **kwargs) -> Response:
+        output = openai.Image.create(
+            prompt=x,
+            n=1,
+            size='512x512',
+            response_format='b64_json',
+        )
+        return ImageResponse(
+            raw=output['data'][0]['b64_json'],
+            metrics=Metrics(
+                input_tokens=len(x),
+            )
         )
 
 
@@ -633,6 +662,24 @@ class Entity(BaseModel):
     
     def __repr__(self):
         return self.json()
+    
+    def display(self):
+        # Check if we're in an IPython environment
+        try:
+            get_ipython
+        except NameError:
+            # If we're not in an IPython environment, fall back to json
+            return self.json()
+
+        # Convert the dictionary to a HTML table
+        html = '<table>'
+        for field, value in self.dict().items():
+            html += f'<tr><td>{field}</td><td>{value}</td></tr>'
+        html += '</table>'
+
+        # Display the table
+        display(HTML(html))
+        return self.json()
 
 
 class EntitySeries(pd.Series):
@@ -844,7 +891,7 @@ class Session:
     def _run_batch(self, p, inputs, dryrun=False, retries=3, **kwargs):
         for input in inputs:
             o = self._run_prompt(p, input, dryrun=dryrun, retries=retries, **kwargs)
-            yield o
+            yield o.content
 
     def prompt(self, instructions=None, input=None, output=None, prompt=None, context=None, template=None, llm=None, examples=None, num_examples=1, history=None, tools=None, dryrun=False, retries=3, debug=False, silent=False, **kwargs):
         logger = self.logger.getChild('prompt')
@@ -890,14 +937,14 @@ class Session:
         elif isinstance(item, list):
             return [self.embed(i, field=field) for i in item]
     
-    def query(self, query=None, field=None, where=None, collection=None):
+    def query(self, *texts, field=None, where=None, collection=None):
         c = self.collection(collection)
-        if query is None and field is None and where is None:
+        if len(texts) == 0 and field is None and where is None:
             return c
         where = where or {}
         if field is not None:
             where['field'] = field
-        return c(query, where=where)
+        return c(*texts, where=where)
 
     def store(self, *items, collection=None):
         def flatten(lst):
@@ -1029,7 +1076,6 @@ class World:
         db = db or self.db()
         logger = logger or self.logger.getChild(f'session.{name}')
         ch = logging.StreamHandler()
-        ch.setLevel(logging.INFO)
         formatter = JSONLogFormatter() if log_format == 'json' else NotebookFormatter()
         ch.setFormatter(formatter)
         self.logger.addHandler(ch)
@@ -1082,9 +1128,9 @@ def store(*items, collection=None, **kwargs) -> Collection:
     return DEFAULT_SESSION.store(*items, collection=collection, **kwargs)
 
 
-def query(query=None, field=None, where=None, collection=None, **kwargs) -> Collection:
+def query(*texts, field=None, where=None, collection=None, **kwargs) -> Collection:
     return DEFAULT_SESSION.query(
-        query, field=field, where=where, collection=collection, **kwargs)
+        *texts, field=field, where=where, collection=collection, **kwargs)
 
 
 def collection(name=None) -> Collection:
