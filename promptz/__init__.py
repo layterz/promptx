@@ -1,4 +1,5 @@
 import os
+import glob
 import inspect
 import logging
 import random
@@ -19,6 +20,7 @@ from jinja2 import Template
 from pydantic import BaseModel, ValidationError 
 from datetime import datetime
 from transformers import PreTrainedModel, PreTrainedTokenizer, LlamaForCausalLM, LlamaTokenizer
+from fastapi import FastAPI, HTTPException
 import openai
 from openai.error import RateLimitError
 import chromadb
@@ -368,6 +370,8 @@ class Prompt(nn.Module):
     '''
 
     template = """
+    INSTRUCTIONS
+    ---
     {{instructions}}
     {{format}}
     {{examples}}
@@ -376,19 +380,29 @@ class Prompt(nn.Module):
     """
 
     input_template = """
-    INPUT: {{input}}
+    INPUT
+    ---
+    {{input}}
+    END_INPUT
     """
 
     output_template = """
-    OUTPUT: {{output}}
+    OUTPUT
+    ---
+    {{output}}
     """
 
     example_template = f"""
+    EXAMPLES
+    ---
     {input_template}
     {output_template}
+    END_EXAMPLES
     """
 
     format_template = """
+    FORMAT INSTRUCTIONS
+    ---
     {% if list_output %}
     Return a list of valid JSON objects with the fields described below.
     {% else %}
@@ -403,6 +417,7 @@ class Prompt(nn.Module):
     if it's defined and you are unsure what to use. 
     If you are unsure about any optional fields use `null` or the default value,
     but try your best to fill them out.
+    END_FORMAT_INSTRUCTIONS
     """
 
     instructions: str = None
@@ -428,6 +443,7 @@ class Prompt(nn.Module):
                 if base.__doc__ is not None and issubclass(base, Prompt):
                     instructions = base.__doc__
                     break
+        print('instructions', instructions)
         self.instructions = textwrap.dedent(instructions) if instructions is not None else None
 
         self.num_examples = num_examples or self.num_examples
@@ -512,7 +528,7 @@ class Prompt(nn.Module):
             list_output = True
             item_type = self.output.__args__[0]
             if item_type is str:
-                return 'Return a list of strings with double quotes around each string.'
+                return 'Return a JSON list of strings with double quotes around each string.'
             else:
                 cls = item_type
         fields = [self.format_field(f) for f in cls.__fields__.values()]
@@ -580,6 +596,7 @@ class Prompt(nn.Module):
             if len(self.examples): self.logger.log(EXAMPLES, self.render_examples())
             if len(px): self.logger.log(INPUT, px)
             tools = [t.info for t in self.tools]
+            self.logger.debug(f'FULL INPUT: {prompt_input}')
             response = llm.generate(prompt_input, context=self.context, history=self.history, tools=tools)
             if response.callback is not None:
                 function_name = response.callback.name
@@ -1059,8 +1076,9 @@ class World:
     sessions: List[Session]
     collections: Dict[str, Collection]
     systems: List[System]
+    prompts: Dict[str, Prompt]
 
-    def __init__(self, name, systems=None, llm=None, ef=None, logger=None, db=None):
+    def __init__(self, name, systems=None, llm=None, ef=None, logger=None, db=None, prompts=None):
         self.name = name
         self.sessions = []
         self.collections = {}
@@ -1069,6 +1087,7 @@ class World:
         self.ef = ef or (lambda x: [0] * len(x))
         self.db = db or ChromaVectorDB
         self.logger = logger or logging.getLogger(self.name)
+        self.prompts = prompts or {}
     
     def create_session(self, name=None, db=None, llm=None, ef=None, logger=None, silent=False, debug=False, use_cache=False, log_format='notebook'):
         llm = llm or self.llm
@@ -1085,7 +1104,7 @@ class World:
         logger.setLevel(level)
         session = Session(name=name, db=db, llm=llm, ef=ef, logger=logger,
                           collections=self.collections, use_cache=use_cache)
-        self.sessions = self.sessions.append(session)
+        self.sessions.append(session)
         return session
     
     def __call__(self, *args: Any, **kwds: Any) -> Any:
@@ -1096,6 +1115,61 @@ class World:
             updates = system(items)
             session.store(updates)
         return session
+
+
+class PromptInput(BaseModel):
+    input: Any
+
+
+class API:
+    world: World
+
+    def __init__(self, world):
+        self.world = world
+        self.fastapi_app = FastAPI()
+        
+        @self.fastapi_app.get("/prompts")
+        async def get_prompt():
+            return {"response": self.world.prompts}
+
+        @self.fastapi_app.get("/prompts/{name}")
+        async def get_prompt(name: str):
+            return {"response": self.world.prompts[name]}
+
+        @self.fastapi_app.post("/prompts/{name}/run")
+        async def run_prompt(name: str, input: PromptInput = None):
+            session = self.world.create_session()
+            if name not in self.world.prompts:
+                raise HTTPException(status_code=404, detail="Prompt not found")
+            prompt_config = self.world.prompts[name]
+            d = {**prompt_config, 'input': input}
+            print('prompt_config', d)
+            response = session.prompt(**{**prompt_config, 'input': input})
+            return {"response": response}
+
+
+class App:
+    name: str
+    world: World
+    prompts_dir: str = 'prompts'
+
+    def __init__(self, name, world=None, llm=None, ef=None, logger=None, db=None):
+        self.name = name
+        prompts = self._load_prompts()
+        self.world = world or World(name, prompts=prompts, llm=llm, ef=ef, logger=logger, db=db)
+        self.api = API(self.world)
+    
+    def _load_prompts(self):
+        prompts = {}
+        for file in glob.glob(os.path.join(self.prompts_dir, '*.json')):
+            with open(file, 'r') as f:
+                file_name = os.path.splitext(os.path.basename(file))[0]
+                prompts[file_name] = json.load(f)
+        return prompts
+    
+    def serve(self, host='0.0.0.0', port=8000):
+        import uvicorn
+        uvicorn.run(self.api.fastapi_app, host=host, port=port)
 
 
 def prompt(instructions=None, input=None, output=None, prompt=None, context=None, template=None, llm=None, examples=None, num_examples=1, history=None, tools=None, dryrun=False, retries=3, debug=False, silent=False, **kwargs):
@@ -1179,3 +1253,11 @@ def init(llm=None, ef=None, logger=None, use_cache=False, log_format='notebook',
     session = w.create_session(use_cache=use_cache, log_format=log_format)
     set_default_world(w)
     set_default_session(session)
+
+
+# TODO
+# - add dash admin to view all prompts
+# - proxy cli to api requests
+# - cli repl
+# - magic methods for notebooks and repl
+# - notebook init
