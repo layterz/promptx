@@ -1,6 +1,7 @@
-import importlib
 import os
 import glob
+import importlib
+import threading
 import inspect
 import logging
 import random
@@ -18,10 +19,12 @@ from torch import nn
 import numpy as np
 import pandas as pd
 from jinja2 import Template
+from dash import Dash, html, dcc, page_container, page_registry
 from pydantic import BaseModel, ValidationError 
 from datetime import datetime
 from transformers import PreTrainedModel, PreTrainedTokenizer, LlamaForCausalLM, LlamaTokenizer
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.wsgi import WSGIMiddleware
 import openai
 from openai.error import RateLimitError
 import chromadb
@@ -1163,6 +1166,29 @@ class API:
             return {"response": response}
 
 
+class Admin:
+    world: World
+
+    def __init__(self, world):
+        self.world = world
+        layout = html.Div([
+            html.H1('Promptz Admin'),
+            html.Div(
+                [
+                    html.Div(
+                        dcc.Link(
+                            f"{page['name']} - {page['path']}", href=page["relative_path"]
+                        )
+                    )
+                    for page in page_registry.values()
+                ]
+            ),
+
+            page_container
+        ])
+        self.app = Dash(world.name, use_pages=True, pages_folder='admin')
+
+
 class App:
     name: str
     world: World
@@ -1175,6 +1201,7 @@ class App:
         systems = self._load_systems()
         self.world = world or World(name, prompts=prompts, systems=systems, llm=llm, ef=ef, logger=logger, db=db)
         self.api = API(self.world)
+        self.admin = Admin(self.world)
     
     def _load_prompts(self):
         prompts = {}
@@ -1192,9 +1219,19 @@ class App:
         #    systems[file_name] = module
         return systems
     
-    def serve(self, host='0.0.0.0', port=8000):
+    def _serve_api(self, host='0.0.0.0', port=8000):
         import uvicorn
         uvicorn.run(self.api.fastapi_app, host=host, port=port)
+    
+    def _serve_admin(self, host='0.0.0.0', port=8001):
+        from waitress import serve
+        serve(self.admin.app.server, host=host, port=port)
+    
+    def serve(self, host='0.0.0.0', port=8000, admin_port=8001):
+        api = threading.Thread(target=lambda: self._serve_api(host=host, port=port))
+        admin = threading.Thread(target=lambda: self._serve_admin(host=host, port=admin_port))
+        api.start()
+        admin.start()
 
 
 def prompt(instructions=None, input=None, output=None, prompt=None, context=None, template=None, llm=None, examples=None, num_examples=1, history=None, tools=None, dryrun=False, retries=3, debug=False, silent=False, **kwargs):

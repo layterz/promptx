@@ -1,7 +1,40 @@
 import os
+import shutil
 import click
 import requests
 from IPython import embed
+from jinja2 import Environment, FileSystemLoader, select_autoescape
+
+
+def create_project_structure(template_path, project_path, variables):
+    # Initialize a Jinja2 environment
+    env = Environment(loader=FileSystemLoader(template_path), autoescape=select_autoescape(['html', 'xml']))
+
+    for root, dirs, files in os.walk(template_path):
+        # Create the directories in the new location
+        for dir_name in dirs:
+            dest_dir = os.path.join(project_path, os.path.relpath(root, template_path), dir_name)
+            os.makedirs(dest_dir, exist_ok=True)
+
+        # Copy the files to the new location, rendering them if necessary
+        for file_name in files:
+            # If the file is a Jinja2 template
+            if file_name.endswith('.j2'):
+                # Remove the .j2 extension to get the output file name
+                dest_file = os.path.join(project_path, os.path.relpath(root, template_path), file_name[:-3])
+
+                # Load the template
+                template = env.get_template(os.path.relpath(os.path.join(root, file_name), template_path))
+
+                # Render the template with the provided variables and write it to the file
+                with open(dest_file, 'w') as f:
+                    f.write(template.render(variables))
+            else:
+                # If the file is not a Jinja2 template, just copy it
+                src_file = os.path.join(root, file_name)
+                dest_file = os.path.join(project_path, os.path.relpath(root, template_path), file_name)
+                shutil.copy(src_file, dest_file)
+
 
 
 API_ENDPOINT = os.environ.get('API_ENDPOINT', 'http://localhost:8000')
@@ -12,28 +45,11 @@ def cli():
 
 @cli.command(name="create")
 @click.argument('project_name')
-def create_project(project_name):
-    create_project_structure(project_name)
-
-def create_project_structure(project_name):
-    directories = [
-        f"{project_name}/prompts",
-        f"{project_name}/systems",
-        f"{project_name}/admin",
-        f"{project_name}/notebooks",
-    ]
-    for directory in directories:
-        os.makedirs(directory, exist_ok=True)
-    
-    with open(os.path.join(f'{project_name}/systems', "__init__.py"), "w") as init_file:
-        init_file.write('')
-    
-    with open(os.path.join(project_name, "app.py"), "w") as app_file:
-        app_file.write(f'''from promptz import App
-
-def create_app():
-    app = App(name="{project_name}")
-    return app''')
+@click.option('--template', default='default')
+def create_project(project_name, template='default'):
+    current_dir = os.path.dirname(__file__)
+    template_dir = os.path.join(current_dir, f'templates/{template}')
+    create_project_structure(template_dir, project_name, {'project_name': project_name})
 
 @cli.group()
 def prompts():
