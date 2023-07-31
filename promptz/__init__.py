@@ -7,19 +7,21 @@ import logging
 import random
 import uuid
 import textwrap
+import base64
 import json
 from json import JSONDecodeError
 from enum import Enum
 from typing import Type, Callable, List, Tuple, Dict, Union, Any, Literal 
 from abc import abstractmethod
-import base64
 from IPython.display import display, HTML, Image
+import requests
 import torch
 from torch import nn
 import numpy as np
 import pandas as pd
 from jinja2 import Template
-from dash import Dash, html, dcc, page_container, page_registry
+from dash import Dash, html, dcc, dash_table, page_container, page_registry, register_page
+import dash_bootstrap_components as dbc
 from pydantic import BaseModel, ValidationError 
 from datetime import datetime
 from transformers import PreTrainedModel, PreTrainedTokenizer, LlamaForCausalLM, LlamaTokenizer
@@ -31,6 +33,9 @@ import chromadb
 import colorama
 
 colorama.just_fix_windows_console()
+
+API_URL = os.getenv('API_URL', 'http://localhost:8000')
+
 
 FORMAT_INSTRUCTIONS = logging.DEBUG + 1
 CONTEXT = logging.DEBUG + 2
@@ -447,7 +452,6 @@ class Prompt(nn.Module):
                 if base.__doc__ is not None and issubclass(base, Prompt):
                     instructions = base.__doc__
                     break
-        print('instructions', instructions)
         self.instructions = textwrap.dedent(instructions) if instructions is not None else None
 
         self.num_examples = num_examples or self.num_examples
@@ -532,7 +536,7 @@ class Prompt(nn.Module):
             list_output = True
             item_type = self.output.__args__[0]
             if item_type is str:
-                return 'Return a JSON list of strings with double quotes around each string.'
+                return 'Return an array of strings wrapped in double quotes.'
             else:
                 cls = item_type
         fields = [self.format_field(f) for f in cls.__fields__.values()]
@@ -1142,7 +1146,6 @@ class API:
                 raise HTTPException(status_code=404, detail="Prompt not found")
             prompt_config = self.world.prompts[name]
             d = {**prompt_config, 'input': input}
-            print('prompt_config', d)
             response = session.prompt(**{**prompt_config, 'input': input})
             return {"response": response}
         
@@ -1171,13 +1174,82 @@ class Admin:
 
     def __init__(self, world):
         self.world = world
-        layout = html.Div([
-            html.H1('Promptz Admin'),
+        self.app = Dash(
+            world.name, 
+            use_pages=True,
+            pages_folder='admin',
+            external_stylesheets=[dbc.themes.ZEPHYR],
+        )
+
+        register_page(
+            'Home',
+            layout=html.Div(children=[
+                html.H1(children='Home'),
+            ]),
+            path='/',
+            order=0,
+        )
+
+        def prompts_list_layout():
+            API_URL = os.getenv('API_URL', 'http://localhost:8000')
+            response = requests.get(f'{API_URL}/prompts')
+            if response.status_code == 200:
+                prompts = response.json()
+            else:
+                raise Exception(f'Error getting prompts: {response.status_code}')
+            
+            return html.Div(children=[
+                html.H1(children='Prompts'),
+                html.Ul([
+                    html.Li(html.A(name, href=f'/prompts/{name}')) for name in prompts['response'].keys()
+                ]),
+            ])
+
+        register_page(
+            'Prompts',
+            layout=prompts_list_layout,
+            path='/prompts',
+            order=1,
+        )
+
+        def prompt_details_layout(name):
+            API_URL = os.getenv('API_URL', 'http://localhost:8000')
+            response = requests.get(f'{API_URL}/prompts/{name}')
+            if response.status_code == 200:
+                prompt = response.json()
+            else:
+                raise Exception(f'Error getting prompts: {response.status_code}')
+            
+            return html.Div(children=[
+                html.H1(children=name),
+                html.P(prompt['response']['description']),
+                html.P(prompt['response']['query']),
+                html.P(prompt['response']['collection']),
+                html.P(prompt['response']['input']),
+            ])
+        
+        register_page(
+            'Prompt Details',
+            layout=prompt_details_layout,
+            path='/prompts/<name>',
+        )
+        
+        def notebook_list_layout():
+            pass
+
+        register_page(
+            'Notebooks',
+            layout=notebook_list_layout,
+            path='/notebooks',
+            order=2,
+        )
+
+        self.app.layout = html.Div([
             html.Div(
                 [
                     html.Div(
                         dcc.Link(
-                            f"{page['name']} - {page['path']}", href=page["relative_path"]
+                            f"{page['name']}", href=page["relative_path"]
                         )
                     )
                     for page in page_registry.values()
@@ -1186,7 +1258,6 @@ class Admin:
 
             page_container
         ])
-        self.app = Dash(world.name, use_pages=True, pages_folder='admin')
 
 
 class App:
