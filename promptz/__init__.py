@@ -1,3 +1,4 @@
+import importlib
 import os
 import glob
 import inspect
@@ -622,12 +623,10 @@ class Prompt(nn.Module):
             return response
 
 
-class Query:
-
-    def __init__(self, query=None, where=None, collection=None, **kwargs):
-        self.query = query
-        self.where = where or {}
-        self.collection = collection
+class Query(BaseModel):
+    query: str
+    where: Dict[str, Any] = None
+    collection: str = None
 
 
 class ChatPrompt(Prompt):
@@ -1075,19 +1074,19 @@ class World:
     name: str
     sessions: List[Session]
     collections: Dict[str, Collection]
-    systems: List[System]
+    systems: Dict[str, System]
     prompts: Dict[str, Prompt]
 
     def __init__(self, name, systems=None, llm=None, ef=None, logger=None, db=None, prompts=None):
         self.name = name
         self.sessions = []
         self.collections = {}
-        self.systems = systems
         self.llm = llm or MockLLM()
         self.ef = ef or (lambda x: [0] * len(x))
         self.db = db or ChromaVectorDB
         self.logger = logger or logging.getLogger(self.name)
         self.prompts = prompts or {}
+        self.systems = systems or {}
     
     def create_session(self, name=None, db=None, llm=None, ef=None, logger=None, silent=False, debug=False, use_cache=False, log_format='notebook'):
         llm = llm or self.llm
@@ -1107,14 +1106,11 @@ class World:
         self.sessions.append(session)
         return session
     
-    def __call__(self, *args: Any, **kwds: Any) -> Any:
-        session = self.create_session(
-            f'{self.__class__.__name__}.session-{uuid.uuid4()}')
-        for system in self.systems:
+    def __call__(self, session, *args: Any, **kwds: Any) -> Any:
+        for system in self.systems.values():
             items = session.query(system.query)
             updates = system(items)
             session.store(updates)
-        return session
 
 
 class PromptInput(BaseModel):
@@ -1146,17 +1142,38 @@ class API:
             print('prompt_config', d)
             response = session.prompt(**{**prompt_config, 'input': input})
             return {"response": response}
+        
+        @self.fastapi_app.get("/systems")
+        async def get_systems():
+            return {"response": self.world.systems.keys()}
+        
+        @self.fastapi_app.get("/systems/{name}")
+        async def get_system(name: str):
+            return {"response": self.world.systems[name]}
+        
+        @self.fastapi_app.post("/systems/run")
+        async def run_systems():
+            session = self.world.create_session()
+            return {"response": self.world(session)}
+        
+        @self.fastapi_app.post("/query")
+        async def query(query: Query):
+            session = self.world.create_session()
+            response = session.query(query.query, where=query.where, collection=query.collection)
+            return {"response": response}
 
 
 class App:
     name: str
     world: World
     prompts_dir: str = 'prompts'
+    systems_dir: str = 'systems'
 
     def __init__(self, name, world=None, llm=None, ef=None, logger=None, db=None):
         self.name = name
         prompts = self._load_prompts()
-        self.world = world or World(name, prompts=prompts, llm=llm, ef=ef, logger=logger, db=db)
+        systems = self._load_systems()
+        self.world = world or World(name, prompts=prompts, systems=systems, llm=llm, ef=ef, logger=logger, db=db)
         self.api = API(self.world)
     
     def _load_prompts(self):
@@ -1166,6 +1183,14 @@ class App:
                 file_name = os.path.splitext(os.path.basename(file))[0]
                 prompts[file_name] = json.load(f)
         return prompts
+    
+    def _load_systems(self):
+        systems = {}
+        #for file in glob.glob(os.path.join(self.systems_dir, '*.py')):
+        #    file_name = os.path.splitext(os.path.basename(file))[0]
+        #    module = importlib.import_module(f'{self.systems_dir}.{file_name}')
+        #    systems[file_name] = module
+        return systems
     
     def serve(self, host='0.0.0.0', port=8000):
         import uvicorn
@@ -1256,8 +1281,6 @@ def init(llm=None, ef=None, logger=None, use_cache=False, log_format='notebook',
 
 
 # TODO
-# - add dash admin to view all prompts
-# - proxy cli to api requests
 # - cli repl
 # - magic methods for notebooks and repl
 # - notebook init

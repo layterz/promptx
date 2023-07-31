@@ -1,5 +1,10 @@
 import os
 import click
+import requests
+from IPython import embed
+
+
+API_ENDPOINT = os.environ.get('API_ENDPOINT', 'http://localhost:8000')
 
 @click.group()
 def cli():
@@ -12,19 +17,23 @@ def create_project(project_name):
 
 def create_project_structure(project_name):
     directories = [
-        f"{project_name}/{project_name}",
         f"{project_name}/prompts",
         f"{project_name}/systems",
-        f"{project_name}/models",
         f"{project_name}/admin",
-        f"{project_name}/api",
         f"{project_name}/notebooks",
     ]
     for directory in directories:
         os.makedirs(directory, exist_ok=True)
-        # Create __init__.py file in each directory
-        with open(os.path.join(directory, "__init__.py"), "w") as init_file:
-            init_file.write("")
+    
+    with open(os.path.join(f'{project_name}/systems', "__init__.py"), "w") as init_file:
+        init_file.write('')
+    
+    with open(os.path.join(project_name, "app.py"), "w") as app_file:
+        app_file.write(f'''from promptz import App
+
+def create_app():
+    app = App(name="{project_name}")
+    return app''')
 
 @cli.group()
 def prompts():
@@ -36,32 +45,23 @@ def prompt(input: str):
     _prompt(input)
 
 def _prompt(input: str):
-    print(f'Prompting with {input}')
-
-@prompts.command(name="create")
-@click.argument('name')
-def create_prompt(name):
-    _create_prompt(name)
-
-def _create_prompt(name):
-    with open(f"prompts/{name}.py", "w") as prompt_file:
-        prompt_file.write(f"def {name}():\n    pass\n")
+    return requests.post(f'http://{API_ENDPOINT}/prompt', data=input)
 
 @prompts.command(name="list")
 def list_prompts():
     _list_prompts()
 
 def _list_prompts():
-    for prompt in os.listdir("prompts"):
-        print(prompt)
+    return requests.get(f'http://{API_ENDPOINT}/prompts')
 
 @prompts.command(name="run")
 @click.argument('name')
-def run_prompt(name):
-    _run_prompt(name)
+@click.argument('input')
+def run_prompt(name, input):
+    _run_prompt(name, input)
 
-def _run_prompt(name):
-    print(f'Running prompt {name}')
+def _run_prompt(name, input):
+    return requests.post(f'http://{API_ENDPOINT}/prompts/{name}/run', data=input)
 
 @cli.command(name='query')
 @click.argument('texts', nargs=-1)
@@ -71,51 +71,20 @@ def query(*texts, where=None, field=None):
     _query(*texts, where=where, field=field)
 
 def _query(*texts, where=None, field=None):
-    print(f'Querying {texts}')
-
-
-@cli.group()
-def models():
-    pass
-
-@models.command(name="create")
-@click.argument('name')
-def create_model(name):
-    _create_model(name)
-
-def _create_model(name):
-    with open(f"models/{name}.py", "w") as model_file:
-        model_file.write(f"def {name}():\n    pass\n")
-
-@models.command(name="list")
-def list_models():
-    _list_models()
-
-def _list_models():
-    for model in os.listdir("models"):
-        print(model)
+    query = { 'texts': texts, 'where': where, 'field': field }
+    return requests.post(f'http://{API_ENDPOINT}/query', data=query)
 
 
 @cli.group()
 def systems():
     pass
 
-@systems.command(name="create")
-@click.argument('name')
-def create_system(name):
-    _create_system(name)
-
-def _create_system(name):
-    with open(f"systems/{name}.py", "w") as system_file:
-        system_file.write(f"def {name}():\n    pass\n")
-
 @systems.command(name="list")
 def list_systems():
     _list_systems()
 
 def _list_systems():
-    for system in os.listdir("systems"):
-        print(system)
+    return requests.get(f'http://{API_ENDPOINT}/systems')
 
 @systems.command(name="run")
 @click.argument('name')
@@ -123,7 +92,8 @@ def run_system(name):
     _run_system(name)
 
 def _run_system(name):
-    print(f'Running system {name}')
+    # call the /systems/run endpoint
+    return requests.post(f'http://{API_ENDPOINT}/systems/run')
 
 
 @cli.command(name='repl')
@@ -131,7 +101,20 @@ def repl():
     _repl()
 
 def _repl():
-    print(f'Opening REPL')
+    from promptz import World
+    world = World('test')
+    session = world.create_session()
+    query = session.query
+    store = session.store
+    prompt = session.prompt
+    history = session.history
+    evaluate = session.evaluate
+    collection = session.collection
+    chain = session.chain
+    run = session.run
+    embed(
+        header='promptz',
+    )
 
 
 @cli.command(name='serve')
