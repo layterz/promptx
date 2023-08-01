@@ -11,7 +11,7 @@ import base64
 import json
 from json import JSONDecodeError
 from enum import Enum
-from typing import Type, Callable, List, Tuple, Dict, Union, Any, Literal 
+from typing import Type, Callable, List, Tuple, Dict, Union, Any, get_origin, get_args
 from abc import abstractmethod
 from IPython.display import display, HTML, Image
 import requests
@@ -501,18 +501,25 @@ class Prompt(nn.Module):
     def format_field(self, field):
         instructions = field.field_info.description or ''
         options = ''
-        type_ = field.outer_type_
+        outer_type_ = field.outer_type_.__name__
         if issubclass(field.type_, BaseModel):
             return None
-        if field.type_ is Literal or type_ is Literal:
-            options += f'Select only one option: {", ".join(field.type_.__args__)}'
-        elif isinstance(field.type_, List):
-            item_type = field.type_.__args__[0]
+
+        if get_origin(field.outer_type_) is list:
+            item_type = get_args(field.outer_type_)[0]
             type_ = f'{item_type.__name__}[]'
-        elif isinstance(type_, type(Enum)):
+            if isinstance(item_type, type(Enum)):
+                type_ = 'str[]'
+                options += f'''Select any relevant options from: {", ".join([
+                    member.value for member in item_type
+                ])}'''
+        elif isinstance(field.type_, type(Enum)):
+            type_ = 'str'
             options += f'''Select only one option: {", ".join([
                 member.value for member in field.type_
             ])}'''
+        else:
+            type_ = field.type_.__name__
 
         if len(options) > 0:
             instructions += ' ' + options
@@ -912,9 +919,12 @@ class Session:
             return None
     
     def _run_batch(self, p, inputs, dryrun=False, retries=3, **kwargs):
+        o = []
         for input in inputs:
-            o = self._run_prompt(p, input, dryrun=dryrun, retries=retries, **kwargs)
-            yield o.content
+            r = self._run_prompt(p, input, dryrun=dryrun, retries=retries, **kwargs)
+            if r is not None:
+                o.append(r.content)
+        return o
 
     def prompt(self, instructions=None, input=None, output=None, prompt=None, context=None, template=None, llm=None, examples=None, num_examples=1, history=None, tools=None, dryrun=False, retries=3, debug=False, silent=False, **kwargs):
         logger = self.logger.getChild('prompt')
@@ -949,6 +959,8 @@ class Session:
             o = self._run_batch(p, input, dryrun=dryrun, retries=retries, **kwargs)
         else:
             r = self._run_prompt(p, input, dryrun=dryrun, retries=retries, **kwargs)
+            if r is None:
+                return None
             o = r.content
         return o
     
