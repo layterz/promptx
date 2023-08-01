@@ -22,7 +22,9 @@ import pandas as pd
 from jinja2 import Template
 import nbformat
 from nbconvert import HTMLExporter
-from dash import Dash, html, dcc, dash_table, page_container, page_registry, register_page
+from dash import Dash, html, dcc, dash_table, page_container, page_registry, register_page, callback_context
+from dash.exceptions import PreventUpdate
+from dash.dependencies import Output, Input, State
 from dash_dangerously_set_inner_html import DangerouslySetInnerHTML
 import dash_bootstrap_components as dbc
 from pydantic import BaseModel, ValidationError 
@@ -1240,10 +1242,26 @@ class Admin:
         def prompt_layout(name: str = None):
             return html.Div(children=[
                 html.H1(name),
-                html.Button('Run', id='run-prompt'),
+                dbc.Button('Run', id='run-prompt', n_clicks=0, name=name, color='primary'),
+                dcc.Store(id='api-call-result', storage_type='session'),
+                html.Div(name, id='prompt-name', style={'display': 'none'}),
             ])
 
         register_page('Prompt', layout=prompt_layout, path_template='/prompts/<name>')
+
+        @self.app.callback(
+            Output('api-call-result', 'data'),
+            [Input('run-prompt', 'n_clicks')],
+            [State('api-call-result', 'data'),
+             State('prompt-name', 'children')],
+        )
+        def run_prompt(n_clicks, current_data, name):
+            if n_clicks is None or n_clicks == 0:
+                raise PreventUpdate
+            else:
+                response = requests.post(f'{API_URL}/prompts/{name}/run')
+                data = response.json()
+                return data
 
         def systems_list_layout():
             response = requests.get(f'{API_URL}/systems')
