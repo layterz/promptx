@@ -1182,12 +1182,11 @@ class Admin:
         )
 
         register_page(
-            'Home',
+            'Inbox',
             layout=html.Div(children=[
-                html.H1(children='Home'),
+                html.H1(children='Inbox'),
             ]),
             path='/',
-            order=0,
         )
 
         def prompts_list_layout():
@@ -1209,31 +1208,25 @@ class Admin:
             'Prompts',
             layout=prompts_list_layout,
             path='/prompts',
-            order=1,
         )
 
-        def prompt_details_layout(name):
-            API_URL = os.getenv('API_URL', 'http://localhost:8000')
-            response = requests.get(f'{API_URL}/prompts/{name}')
-            if response.status_code == 200:
-                prompt = response.json()
-            else:
-                raise Exception(f'Error getting prompts: {response.status_code}')
-            
+        def prompt_layout(name: str = None):
             return html.Div(children=[
-                html.H1(children=name),
-                html.P(prompt['response']['description']),
-                html.P(prompt['response']['query']),
-                html.P(prompt['response']['collection']),
-                html.P(prompt['response']['input']),
+                html.H1(name),
+                html.Button('Run', id='run-prompt'),
             ])
-        
+
+        register_page('Prompt', layout=prompt_layout, path_template='/prompts/<name>')
+
+        def systems_list_layout():
+            pass
+
         register_page(
-            'Prompt Details',
-            layout=prompt_details_layout,
-            path='/prompts/<name>',
+            'Systems',
+            layout=systems_list_layout,
+            path='/systems',
         )
-        
+
         def notebook_list_layout():
             pass
 
@@ -1241,22 +1234,40 @@ class Admin:
             'Notebooks',
             layout=notebook_list_layout,
             path='/notebooks',
-            order=2,
         )
 
-        self.app.layout = html.Div([
-            html.Div(
-                [
+        def chatbots_list_layout():
+            pass
+
+        register_page(
+            'Chats',
+            layout=chatbots_list_layout,
+            path='/chats',
+            order=3,
+        )
+
+        menu = [
+            'Inbox',
+            'Prompts',
+            'Notebooks',
+            'Systems',
+            'Chats',
+        ]
+
+        self.app.layout = dbc.Row([
+            dbc.Col([
+                dbc.Row(
                     html.Div(
                         dcc.Link(
-                            f"{page['name']}", href=page["relative_path"]
+                            f"{page_registry[name]['name']}", href=page_registry[name]["relative_path"]
                         )
-                    )
-                    for page in page_registry.values()
-                ]
-            ),
-
-            page_container
+                    ),
+                )
+                for name in menu
+            ], width=3),
+            dbc.Col([
+                page_container
+            ], width=9),
         ])
 
 
