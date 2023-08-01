@@ -20,7 +20,10 @@ from torch import nn
 import numpy as np
 import pandas as pd
 from jinja2 import Template
+import nbformat
+from nbconvert import HTMLExporter
 from dash import Dash, html, dcc, dash_table, page_container, page_registry, register_page
+from dash_dangerously_set_inner_html import DangerouslySetInnerHTML
 import dash_bootstrap_components as dbc
 from pydantic import BaseModel, ValidationError 
 from datetime import datetime
@@ -1095,8 +1098,9 @@ class World:
     collections: Dict[str, Collection]
     systems: Dict[str, System]
     prompts: Dict[str, Prompt]
+    notebooks: Dict[str, str]
 
-    def __init__(self, name, systems=None, llm=None, ef=None, logger=None, db=None, prompts=None):
+    def __init__(self, name, systems=None, llm=None, ef=None, logger=None, db=None, prompts=None, notebooks=None):
         self.name = name
         self.sessions = []
         self.collections = {}
@@ -1106,6 +1110,7 @@ class World:
         self.logger = logger or logging.getLogger(self.name)
         self.prompts = prompts or {}
         self.systems = systems or {}
+        self.notebooks = notebooks or {}
     
     def create_session(self, name=None, db=None, llm=None, ef=None, logger=None, silent=False, debug=False, use_cache=False, log_format='notebook'):
         llm = llm or self.llm
@@ -1144,7 +1149,7 @@ class API:
         self.fastapi_app = FastAPI()
         
         @self.fastapi_app.get("/prompts")
-        async def get_prompt():
+        async def get_prompts():
             return {"response": self.world.prompts}
 
         @self.fastapi_app.get("/prompts/{name}")
@@ -1179,6 +1184,18 @@ class API:
             session = self.world.create_session()
             response = session.query(query.query, where=query.where, collection=query.collection)
             return {"response": response}
+        
+        @self.fastapi_app.get("/notebooks")
+        async def get_notebooks():
+            return {"response": self.world.notebooks}
+        
+        @self.fastapi_app.get("/notebooks/{name}")
+        async def get_notebook(name: str):
+            return {"response": self.world.notebooks[name]}
+        
+        @self.fastapi_app.get("/chats")
+        async def get_chats():
+            return {"response": {}}
 
 
 class Admin:
@@ -1196,13 +1213,11 @@ class Admin:
         register_page(
             'Inbox',
             layout=html.Div(children=[
-                html.H1(children='Inbox'),
             ]),
             path='/',
         )
 
         def prompts_list_layout():
-            API_URL = os.getenv('API_URL', 'http://localhost:8000')
             response = requests.get(f'{API_URL}/prompts')
             if response.status_code == 200:
                 prompts = response.json()
@@ -1231,7 +1246,18 @@ class Admin:
         register_page('Prompt', layout=prompt_layout, path_template='/prompts/<name>')
 
         def systems_list_layout():
-            pass
+            response = requests.get(f'{API_URL}/systems')
+            if response.status_code == 200:
+                systems = response.json()
+            else:
+                raise Exception(f'Error getting systems: {response.status_code}')
+            
+            return html.Div(children=[
+                html.H1(children='Systems'),
+                html.Ul([
+                    html.Li(html.A(name, href=f'/systems/{name}')) for name in systems['response'].keys()
+                ]),
+            ])
 
         register_page(
             'Systems',
@@ -1240,7 +1266,18 @@ class Admin:
         )
 
         def notebook_list_layout():
-            pass
+            response = requests.get(f'{API_URL}/notebooks')
+            if response.status_code == 200:
+                notebooks = response.json()
+            else:
+                raise Exception(f'Error getting notebooks: {response.status_code}')
+            
+            return html.Div(children=[
+                html.H1(children='Notebooks'),
+                html.Ul([
+                    html.Li(html.A(name, href=f'/notebooks/{name}')) for name in notebooks['response'].keys()
+                ]),
+            ])
 
         register_page(
             'Notebooks',
@@ -1248,38 +1285,61 @@ class Admin:
             path='/notebooks',
         )
 
+        def notebook_layout(name: str = None):
+            response = requests.get(f'{API_URL}/notebooks/{name}')
+            notebook_html = response.json()['response']
+            return html.Div(children=[
+                html.H1(name),
+                DangerouslySetInnerHTML(notebook_html)
+            ])
+
+        register_page('Notebook', layout=notebook_layout, path_template='/notebooks/<name>')
+
         def chatbots_list_layout():
-            pass
+            response = requests.get(f'{API_URL}/chats')
+            if response.status_code == 200:
+                chats = response.json()
+            else:
+                raise Exception(f'Error getting chats: {response.status_code}')
+            
+            return html.Div(children=[
+                html.H1(children='Chats'),
+                html.Ul([
+                    html.Li(html.A(name, href=f'/chats/{name}')) for name in chats['response'].keys()
+                ]),
+            ])
 
         register_page(
             'Chats',
             layout=chatbots_list_layout,
             path='/chats',
-            order=3,
         )
 
         menu = [
-            'Inbox',
             'Prompts',
             'Notebooks',
-            'Systems',
-            'Chats',
         ]
 
         self.app.layout = dbc.Row([
             dbc.Col([
                 dbc.Row(
-                    html.Div(
-                        dcc.Link(
-                            f"{page_registry[name]['name']}", href=page_registry[name]["relative_path"]
-                        )
-                    ),
-                )
-                for name in menu
-            ], width=3),
+                    html.H3('promptz', style={'color': 'white'})
+                ),
+                *[
+                    dbc.Row(
+                        html.Div(
+                            dcc.Link(
+                                f"{page_registry[name]['name']}", href=page_registry[name]["relative_path"],
+                                style={'color': 'white', 'text-decoration': 'none'}
+                            )
+                        ),
+                    )
+                    for name in menu
+                ]
+            ], width=3, style={'background-color': '#663399', 'padding': '10px 20px', 'height': '100vh'}),
             dbc.Col([
                 page_container
-            ], width=9),
+            ], width=9, style={'padding': '10px'}),
         ])
 
 
@@ -1288,12 +1348,14 @@ class App:
     world: World
     prompts_dir: str = 'prompts'
     systems_dir: str = 'systems'
+    notebooks_dirs: str = ['notebooks']
 
     def __init__(self, name, world=None, llm=None, ef=None, logger=None, db=None):
         self.name = name
         prompts = self._load_prompts()
         systems = self._load_systems()
-        self.world = world or World(name, prompts=prompts, systems=systems, llm=llm, ef=ef, logger=logger, db=db)
+        notebooks = self._load_notebooks()
+        self.world = world or World(name, prompts=prompts, systems=systems, notebooks=notebooks, llm=llm, ef=ef, logger=logger, db=db)
         self.api = API(self.world)
         self.admin = Admin(self.world)
     
@@ -1304,6 +1366,18 @@ class App:
                 file_name = os.path.splitext(os.path.basename(file))[0]
                 prompts[file_name] = json.load(f)
         return prompts
+    
+    def _load_notebooks(self):
+        html_notebooks = {}
+        for dir in self.notebooks_dirs:
+            for file in glob.glob(os.path.join(dir, '*.ipynb')):
+                with open(file, 'r') as f:
+                    file_name = os.path.splitext(os.path.basename(file))[0]
+                    html_exporter = HTMLExporter()
+                    notebook_node = nbformat.read(f, as_version=4)
+                    body, resources = html_exporter.from_notebook_node(notebook_node)
+                    html_notebooks[file_name] = body
+        return html_notebooks
     
     def _load_systems(self):
         systems = {}
@@ -1409,9 +1483,3 @@ def init(llm=None, ef=None, logger=None, use_cache=False, log_format='notebook',
     session = w.create_session(use_cache=use_cache, log_format=log_format)
     set_default_world(w)
     set_default_session(session)
-
-
-# TODO
-# - cli repl
-# - magic methods for notebooks and repl
-# - notebook init
