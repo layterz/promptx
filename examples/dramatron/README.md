@@ -6,7 +6,7 @@ Implementation of [Deepmind's Dramatron](https://arxiv.org/pdf/2209.14958.pdf), 
 
 ### Output
 
-This is a generated script (using GPT-4) for the first scene using The Matrix as input.
+This is a generated script (using GPT-4) for the first scene using "The Matrix" as input.
 
 > INT. NEO'S APARTMENT - NIGHT
 > <br>
@@ -24,7 +24,7 @@ This is a generated script (using GPT-4) for the first scene using The Matrix as
 > <br>
 > The sun rises, revealing the stark contrast of Neo's reality. A whole other life filled with paperwork, sterile cubicles and menial tasks. The simple monotony a stark contrast to the thrill and wonder of the night before.\n\nNeo looks at the solar glare reflecting off the glass buildings, a world of illusions. He takes a deep breath and prepares himself for another day in the ordinary world.
 
-And this is the generated script using Westworld as the logline.
+And this is the generated script using "Westworld" as input.
 
 > DR. ROBERT FORD
 > <br>
@@ -84,7 +84,7 @@ And this is the generated script using Westworld as the logline.
 > <br>
 > (They all watch as high-paying tourists laugh, play, and revel in the park, indulging in their wildest, most imaginative fantasies.)
 
-And finally, this is the generated script for the first scene in Uncut Gems.
+And finally, this is the generated script for the first scene using "Uncut Gems" as input.
 
 > "INT. NEW YORK CITY JEWELRY SHOP - DAY                                     
 >                                                                                 

@@ -9,4 +9,9 @@ setup(
     description='A Python package for interactive prompts',
     packages=['promptz'],
     install_requires=requirements,
+    entry_points={
+        "console_scripts": [
+            "pz = promptz.cli:main",
+        ],
+    },
 )
