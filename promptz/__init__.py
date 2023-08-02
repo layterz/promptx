@@ -179,6 +179,7 @@ class GPT(LLM):
 
 
 class ChatLog(BaseModel):
+    prompt: str = None
     input: str = None
     output: str = None
 
@@ -434,6 +435,8 @@ class Prompt(nn.Module):
     END_FORMAT_INSTRUCTIONS
     """
 
+    id: str 
+    name: str = None
     instructions: str = None
     context: str = None
     history: List[ChatLog] = []
@@ -442,9 +445,11 @@ class Prompt(nn.Module):
     output: Type[BaseModel] = None
     llm: LLM = MockLLM()
 
-    def __init__(self, instructions=None, output=None, context=None, template=None, examples=None, num_examples=None, history=None, llm=None, logger=None, debug=False, silent=False, tools: ToolList = None):
+    def __init__(self, instructions=None, output=None, context=None, template=None, examples=None, num_examples=None, history=None, llm=None, logger=None, debug=False, silent=False, tools: ToolList = None, name=None):
         super().__init__()
 
+        self.id = str(uuid.uuid4())
+        self.name = name
         self.logger = logger
         self.name = self.__class__.__name__
         self.llm = llm or self.llm
@@ -590,6 +595,13 @@ class Prompt(nn.Module):
             return Collection(rows)
         else:
             return output
+    
+    def dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'instructions': self.instructions,
+        }
     
     def forward(self, x, retries=3, dryrun=False, **kwargs):
         if retries and retries <= 0:
@@ -914,7 +926,7 @@ class Session:
                         )
 
             r = p(input, dryrun=dryrun, retries=retries, **kwargs)
-            log = ChatLog(input=rendered, output=r.raw)
+            log = ChatLog(prompt=p.id, input=rendered, output=r.raw)
             self._history.append(log)
             collection = self.collection('history')
             collection.embed(log)
@@ -1108,16 +1120,19 @@ class World:
         self.collections = {}
         self.llm = llm or MockLLM()
         self.ef = ef or (lambda x: [0] * len(x))
-        self.db = db or ChromaVectorDB
+        self.db = db or ChromaVectorDB()
         self.logger = logger or logging.getLogger(self.name)
         self.prompts = prompts or {}
         self.systems = systems or {}
         self.notebooks = notebooks or {}
+
+        collection = self.db.get_or_create_collection('history', metadata={"hnsw:space": "cosine"})
+        self.collections['history'] = collection
     
     def create_session(self, name=None, db=None, llm=None, ef=None, logger=None, silent=False, debug=False, use_cache=False, log_format='notebook'):
         llm = llm or self.llm
         ef = ef or self.ef
-        db = db or self.db()
+        db = db or self.db
         logger = logger or self.logger.getChild(f'session.{name}')
         ch = logging.StreamHandler()
         formatter = JSONLogFormatter() if log_format == 'json' else NotebookFormatter()
@@ -1152,11 +1167,19 @@ class API:
         
         @self.fastapi_app.get("/prompts")
         async def get_prompts():
-            return {"response": self.world.prompts}
+            return {"response": {k: v.dict() for k, v in self.world.prompts.items()}}
 
-        @self.fastapi_app.get("/prompts/{name}")
-        async def get_prompt(name: str):
-            return {"response": self.world.prompts[name]}
+        @self.fastapi_app.get("/prompts/{id}")
+        async def get_prompt(id: str):
+            history = self.world.collections['history']
+            c = Collection.load(history)
+            if c.empty:
+                results = []
+            else:
+                results = c[c['prompt'] == id].to_dict('records')
+            prompt = self.world.prompts[id]
+            print('results', results, c, id)
+            return {'prompt': prompt, 'results': results}
 
         @self.fastapi_app.post("/prompts/{name}/run")
         async def run_prompt(name: str, input: PromptInput = None):
@@ -1226,10 +1249,11 @@ class Admin:
             else:
                 raise Exception(f'Error getting prompts: {response.status_code}')
             
+            print('prompts', prompts)
             return html.Div(children=[
                 html.H1(children='Prompts'),
                 html.Ul([
-                    html.Li(html.A(name, href=f'/prompts/{name}')) for name in prompts['response'].keys()
+                    html.Li(html.A(p['name'], href=f'/prompts/{id}')) for id, p in prompts['response'].items()
                 ]),
             ])
 
@@ -1239,29 +1263,38 @@ class Admin:
             path='/prompts',
         )
 
-        def prompt_layout(name: str = None):
+        def prompt_layout(id: str = None):
+            response = requests.get(f'{API_URL}/prompts/{id}')
+            if response.status_code == 200:
+                data = response.json()
+                prompt = data['prompt']
+                results = data['results']
+            else:
+                raise Exception(f'Error getting prompt: {response.status_code}')
+
             return html.Div(children=[
-                html.H1(name),
-                dbc.Button('Run', id='run-prompt', n_clicks=0, name=name, color='primary'),
+                html.H1(id),
+                dbc.Button('Run', id='run-prompt', n_clicks=0, name=id, color='primary'),
                 dcc.Store(id='api-call-result', storage_type='session'),
-                html.Div(name, id='prompt-name', style={'display': 'none'}),
+                html.Div(id, id='prompt-id', style={'display': 'none'}),
+                html.Div(id='prompt-results', children=[
+                    html.P(result) for result in results
+                ]),
             ])
 
-        register_page('Prompt', layout=prompt_layout, path_template='/prompts/<name>')
+        register_page('Prompt', layout=prompt_layout, path_template='/prompts/<id>')
 
         @self.app.callback(
             Output('api-call-result', 'data'),
             [Input('run-prompt', 'n_clicks')],
             [State('api-call-result', 'data'),
-             State('prompt-name', 'children')],
+             State('prompt-id', 'children')],
         )
-        def run_prompt(n_clicks, current_data, name):
+        def run_prompt(n_clicks, current_data, id):
             if n_clicks is None or n_clicks == 0:
                 raise PreventUpdate
             else:
-                response = requests.post(f'{API_URL}/prompts/{name}/run')
-                data = response.json()
-                return data
+                requests.post(f'{API_URL}/prompts/{id}/run')
 
         def systems_list_layout():
             response = requests.get(f'{API_URL}/systems')
@@ -1370,6 +1403,7 @@ class App:
 
     def __init__(self, name, world=None, llm=None, ef=None, logger=None, db=None):
         self.name = name
+        self.logger = logger or logging.getLogger(self.name)
         prompts = self._load_prompts()
         systems = self._load_systems()
         notebooks = self._load_notebooks()
@@ -1381,8 +1415,9 @@ class App:
         prompts = {}
         for file in glob.glob(os.path.join(self.prompts_dir, '*.json')):
             with open(file, 'r') as f:
-                file_name = os.path.splitext(os.path.basename(file))[0]
-                prompts[file_name] = json.load(f)
+                prompt = Prompt(**json.load(f))
+                prompts[prompt.id] = prompt
+        self.logger.info(f'Loaded {len(prompts)} prompts: {prompts}')
         return prompts
     
     def _load_notebooks(self):
