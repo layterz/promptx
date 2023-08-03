@@ -5,7 +5,7 @@ with open('requirements.txt') as f:
 
 setup(
     name='promptz',
-    version='0.0.8',
+    version='0.0.9',
     description='A Python package for interactive prompts',
     packages=['promptz'],
     install_requires=requirements,
