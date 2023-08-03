@@ -1,4 +1,8 @@
-# Introduction
+---
+sidebar_position: 1
+---
+
+# Getting started
 
 **promptz** is a framework for building complex prompt-based applications. It provides a simple, flexible API for interacting with generative models, which uses **Pydantic** models to define the expected prompt output. Once you have generated some data you can store the output as **embeddings** in collections, which use **Pandas** to provide a simple, familiar interface.
 
@@ -230,7 +234,7 @@ store(villains)
 
 This adds an `evil` column to the dataframe and assigns it a value of `True` for all rows in the villain collection.
 
-## Wrap up
+## Wrapping up
 
 Finally, lets use the techniques we've learned to generate some story ideas:
 
@@ -270,3 +274,5 @@ collection('story_ideas')
 ```
 
 ## Next steps
+
+This should give you a good idea of what **promptz** can do. To learn more, check out the [guides](/docs/category/guides) for more in-depth tutorials, the [API reference](/docs/category/api-reference) for a complete list of available functions, or the [examples](/examples) for some practical use cases.
