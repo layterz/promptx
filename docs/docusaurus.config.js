@@ -11,15 +11,16 @@ const config = {
   //favicon: 'img/favicon.ico',
 
   // Set the production url of your site here
-  url: 'https://your-docusaurus-test-site.com',
+  url: 'https://layterz.github.io',
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
-  baseUrl: '/',
+  baseUrl: '/promptz',
 
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
   organizationName: 'layterz', // Usually your GitHub org/user name.
   projectName: 'promptz', // Usually your repo name.
+  trailingSlash: false,
 
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
@@ -39,14 +40,9 @@ const config = {
       ({
         docs: {
           sidebarPath: require.resolve('./sidebars.js'),
+          routeBasePath: '/', // Serve the docs at the site's root
         },
-        blog: {
-          showReadingTime: true,
-          // Please change this to your repo.
-          // Remove this to remove the "edit this page" links.
-          editUrl:
-            'https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/',
-        },
+        blog: false,
         theme: {
           customCss: require.resolve('./src/css/custom.css'),
         },
@@ -62,10 +58,9 @@ const config = {
       navbar: {
         title: '👌promptz',
         items: [
-          {to: '/docs/getting-started', label: 'Getting Started', position: 'left'},
-          {to: '/docs/category/guides', label: 'Guides', position: 'left'},
-          {to: '/docs/category/api-reference', label: 'API Reference', position: 'left'},
-          {to: '/docs/examples', label: 'Examples', position: 'left'},
+          {to: '/', label: 'Getting Started', position: 'left'},
+          {to: '/category/guides', label: 'Guides', position: 'left'},
+          {to: '/examples', label: 'Examples', position: 'left'},
           {
             href: 'https://github.com/layterz/promptz',
             label: 'GitHub',
