@@ -73,6 +73,9 @@ const config = {
         links: [],
         copyright: `Copyright © ${new Date().getFullYear()} Richard Layte.`,
       },
+      colorMode: {
+        defaultMode: 'dark',
+      },
       prism: {
         theme: lightCodeTheme,
         darkTheme: darkCodeTheme,

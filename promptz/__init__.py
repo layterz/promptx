@@ -660,6 +660,9 @@ class Query(BaseModel):
     where: Dict[str, Any] = None
     collection: str = None
 
+    def __init__(self, query, where=None, collection=None, **kwargs):
+        super().__init__(query=query, where=where, collection=collection, **kwargs)
+
 
 class ChatPrompt(Prompt):
     '''

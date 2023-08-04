@@ -116,8 +116,76 @@ pz prompts run qa "What is the capital of Germany?"
 
 ## Admin
 
-Next, let's look at the admin interface. By default, admin pages are created for prompts, notebooks, systems, and collections. If you navigate to `http://localhost:8001/prompts` you'll see a list of all the prompts that you have created. Click on the `qa` to access the prompt we created above.
+Next, let's look at the admin interface. By default, admin pages are created for prompts, notebooks, systems, and collections using the **Dash** framework. If you navigate to `http://localhost:8001/prompts` you'll see a list of all the prompts that you have created. Click on the `qa` prompt and you'll see something like:
+
+![prompt admin](../../static/img/prompts-admin.png)
+
+Currently, you can only update prompts in code, but you can trigger them and see a log of past results from the admin page.
+
+:::caution
+The admin interface is still in a very early stage of development. Prompts and notebooks are the only things that are currently supported, but we plan to add support for systems and collections soon as well as support for custom admin pages.
+:::
 
 ## Notebooks
 
+**Notebooks** are loaded from the `/notebooks` directory and can be viewed from the admin interface. They are rendered as html using `nbconvert` and provide a simple way to share experiments, reports, etc. with others.
+
+To initialize a notebook with the current state of the app, you can import the `create_app` function from `app.py` and use it to create a new **session**:
+
+```python
+from ../app import create_app
+
+app = create_app()
+session = app.world.create_session()
+
+session.prompt('What is the capital of France?')
+>>> 'Paris'
+```
+
+Alternatively, you can set the default session, which will bind the top-level helpers to it:
+
+```python
+from promptz import set_default_session
+
+set_default_session(session)
+prompt('What is the capital of France?')
+>>> 'Paris'
+```
+
 ## Systems
+
+The structure of **Apps** are inspired by **entity-component-systems** from game development, where the stored embeddings act as the entities/components. **Systems** let you define some transformation logic on stored entities, much like you would define models to update data in **dbt**.
+
+Here's a simple example that updates the age of all villain characters:
+
+```python
+from promptz import System
+
+class UpdateAge(System):
+    query = Query(
+        'they are a villain',
+        where={'type': 'character'}
+    )
+
+    def process(self, entities):
+        entities['age'] = entities['age'] + 1
+        return entities
+```
+
+**Systems** are loaded into the app from the `/systems` directory. To run all systems, you can call the app's world instance with a session:
+
+```python
+session = app.world.create_session()
+app.world(session)
+```
+
+Or call this from the API or cli:
+
+```bash
+curl -X POST http://localhost:8000/systems/run
+
+# cli usage
+pz systems run
+```
+
+This will run all systems in the order defined. Support for running individual systems and subsets of systems is will be added soon.
