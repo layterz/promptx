@@ -35,6 +35,7 @@ from fastapi.middleware.wsgi import WSGIMiddleware
 import openai
 from openai.error import RateLimitError
 import chromadb
+import chromadb.utils.embedding_functions as embedding_functions
 import colorama
 
 colorama.just_fix_windows_console()
@@ -891,11 +892,11 @@ class Session:
     use_cache = False
     cache_threshold = 85.0
 
-    def __init__(self, name, db, llm, ef, default_collection='default', logger=None, collections=None, use_cache=False):
+    def __init__(self, name, db, llm, ef=None, default_collection='default', logger=None, collections=None, use_cache=False):
         self.name = name
         self.db = db
         self.llm = llm
-        self.ef = ef
+        self.ef = ef or embedding_functions.DefaultEmbeddingFunction()
         self._collection = default_collection
         if collections is not None:
             self._collections = collections 
@@ -1060,9 +1061,10 @@ class Session:
         
         return Collection.load(collection)
     
-    def score(self, x, y, threshold=0.69):
-        ex = self.embed(x)
-        ey = self.embed(y)
+    def evaluate(self, actual, expected, **kwargs):
+        threshold = 0.69
+        ex = self.embed(actual)
+        ey = self.embed(expected)
         dot_product = np.dot(ex, ey)
         norm_1 = np.linalg.norm(ex)
         norm_2 = np.linalg.norm(ey)
@@ -1072,11 +1074,6 @@ class Session:
             cosine_similarity = 0
         rescaled = (cosine_similarity - threshold) * (100 / (1 - threshold))
         return max(0, rescaled)
-    
-    def evaluate(self, *testcases, **kwargs):
-        rows = [(self.score(x, y), x, y) for x, y in testcases]
-        df = pd.DataFrame(rows, columns=['score', 'result', 'expected'])
-        return df
     
     def __call__(self, collection: Collection, *args, **kwargs):
         return self.run(collection, *self._processors, **kwargs)
