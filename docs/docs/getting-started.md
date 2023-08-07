@@ -273,7 +273,3 @@ collection('story_ideas')
 2	47ee7f37-07d3-4b79-862a-387f52ef7779	Deadly Pursuit	        Talon embarks on a relentless pursuit to elimi...	storyidea	[Talon, Batman, Shadow]
 3	d62d296e-5821-4455-8d48-335749d01e59	The Reign of Black Mask	Black Mask's grip on Gotham City tightens as h...	storyidea	[Black Mask, Batman]
 ```
-
-## Next steps
-
-This should give you a good idea of what **promptz** can do. To learn more, check out the [guides](/docs/category/guides) for more in-depth tutorials, the [API reference](/docs/category/api-reference) for a complete list of available functions, or the [examples](/examples) for some practical use cases.
