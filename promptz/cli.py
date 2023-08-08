@@ -2,6 +2,7 @@ import os
 import shutil
 import click
 import requests
+import pprint
 from IPython import embed
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
@@ -36,7 +37,6 @@ def create_project_structure(template_path, project_path, variables):
                 shutil.copy(src_file, dest_file)
 
 
-
 API_ENDPOINT = os.environ.get('API_ENDPOINT', 'http://localhost:8000')
 
 @click.group()
@@ -61,14 +61,12 @@ def prompt(input: str):
     _prompt(input)
 
 def _prompt(input: str):
-    return requests.post(f'http://{API_ENDPOINT}/prompt', data=input)
+    return requests.post(f'{API_ENDPOINT}/prompt', data=input)
 
 @prompts.command(name="list")
 def list_prompts():
-    _list_prompts()
-
-def _list_prompts():
-    return requests.get(f'http://{API_ENDPOINT}/prompts')
+    r = requests.get(f'{API_ENDPOINT}/prompts')
+    pprint.pprint(r.json()['response'])
 
 @prompts.command(name="run")
 @click.argument('name')
@@ -77,7 +75,14 @@ def run_prompt(name, input):
     _run_prompt(name, input)
 
 def _run_prompt(name, input):
-    return requests.post(f'http://{API_ENDPOINT}/prompts/{name}/run', data=input)
+    return requests.post(f'{API_ENDPOINT}/prompts/{name}/run', data=input)
+
+@prompts.command(name="create")
+@click.argument('name')
+@click.argument('instructions')
+def create_prompt(name, instructions):
+    return requests.post(f'{API_ENDPOINT}/prompts', 
+                         json={'name': name, 'instructions': instructions})
 
 @cli.command(name='query')
 @click.argument('texts', nargs=-1)
@@ -88,7 +93,7 @@ def query(*texts, where=None, field=None):
 
 def _query(*texts, where=None, field=None):
     query = { 'texts': texts, 'where': where, 'field': field }
-    return requests.post(f'http://{API_ENDPOINT}/query', data=query)
+    return requests.post(f'{API_ENDPOINT}/query', data=query)
 
 
 @cli.group()
@@ -97,19 +102,12 @@ def systems():
 
 @systems.command(name="list")
 def list_systems():
-    _list_systems()
-
-def _list_systems():
-    return requests.get(f'http://{API_ENDPOINT}/systems')
+    return requests.get(f'{API_ENDPOINT}/systems')
 
 @systems.command(name="run")
 @click.argument('name')
 def run_system(name):
-    _run_system(name)
-
-def _run_system(name):
-    # call the /systems/run endpoint
-    return requests.post(f'http://{API_ENDPOINT}/systems/run')
+    return requests.post(f'{API_ENDPOINT}/systems/run')
 
 
 @cli.command(name='repl')

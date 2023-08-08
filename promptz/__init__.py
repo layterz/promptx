@@ -703,6 +703,7 @@ class ChromaVectorDB(VectorDB):
 
 
 class Entity(BaseModel):
+    id: str = None
 
     class Config:
         extra = 'allow'
@@ -880,12 +881,11 @@ class Collection(pd.DataFrame):
             metadatas=[r['metadata'] for r in records],
         )
 
-        docs = [json.loads(r['document']) for r in new_items]
-        _collection = self.collection
-        self = pd.concat([self, Collection(docs)], ignore_index=True)
-        if len(unique_columns) > 0:
-            self.drop_duplicates(subset=list(unique_columns.keys()), inplace=True)
-        self.collection = _collection
+        docs = [{'id': r['id'], **json.loads(r['document'])} for r in new_items]
+        df = pd.concat([self, Collection(docs)], ignore_index=True)
+        self.drop(self.index, inplace=True)
+        for column in df.columns:
+            self[column] = df[column]
         return self
 
 
@@ -1106,12 +1106,16 @@ class System:
         return self.process(*args, **kwds)
 
 
+class PromptDetails(BaseModel):
+    name: str
+    instructions: str = None
+
+
 class World:
     name: str
     sessions: List[Session]
     collections: Dict[str, Collection]
     systems: Dict[str, System]
-    prompts: Dict[str, Prompt]
     notebooks: Dict[str, str]
 
     def __init__(self, name, systems=None, llm=None, ef=None, logger=None, db=None, prompts=None, notebooks=None):
@@ -1122,12 +1126,15 @@ class World:
         self.ef = ef or (lambda x: [0] * len(x))
         self.db = db or ChromaVectorDB()
         self.logger = logger or logging.getLogger(self.name)
-        self.prompts = prompts or {}
         self.systems = systems or {}
         self.notebooks = notebooks or {}
 
-        collection = self.db.get_or_create_collection('history', metadata={"hnsw:space": "cosine"})
-        self.collections['history'] = collection
+        self.create_collection('prompts')
+        for p in prompts:
+            self.create_prompt(p)
+
+        history = self.db.get_or_create_collection('history', metadata={"hnsw:space": "cosine"})
+        self.collections['history'] = history
     
     def create_session(self, name=None, db=None, llm=None, ef=None, logger=None, silent=False, debug=False, use_cache=False, log_format='notebook'):
         llm = llm or self.llm
@@ -1147,6 +1154,21 @@ class World:
         self.sessions.append(session)
         return session
     
+    def create_collection(self, name, metadata=None):
+        if metadata is None:
+            metadata = {"hnsw:space": "cosine"}
+        collection = self.db.get_or_create_collection(name, metadata=metadata)
+        self.collections[name] = Collection.load(collection)
+        return collection
+
+    def create_prompt(self, details: PromptDetails):
+        c = self.prompts.embed(details)
+        return c
+
+    @property
+    def prompts(self):
+        return self.collections['prompts']
+
     def __call__(self, session, *args: Any, **kwds: Any) -> Any:
         for system in self.systems.values():
             items = session.query(system.query)
@@ -1155,7 +1177,7 @@ class World:
 
 
 class PromptInput(BaseModel):
-    input: Any
+    input: Any = None
 
 
 class API:
@@ -1167,7 +1189,7 @@ class API:
         
         @self.fastapi_app.get("/prompts")
         async def get_prompts():
-            return {"response": {k: v.dict() for k, v in self.world.prompts.items()}}
+            return {"response": self.world.prompts().objects}
 
         @self.fastapi_app.get("/prompts/{id}")
         async def get_prompt(id: str):
@@ -1177,9 +1199,13 @@ class API:
                 results = []
             else:
                 results = c[c['prompt'] == id].to_dict('records')
-            prompt = self.world.prompts[id]
-            print('results', results, c, id)
+            prompt = self.world.prompts(where={'id': id}).first
             return {'prompt': prompt, 'results': results}
+        
+        @self.fastapi_app.post("/prompts")
+        async def create_prompt(details: PromptDetails):
+            p = self.world.create_prompt(details)
+            return p.first.id
 
         @self.fastapi_app.post("/prompts/{name}/run")
         async def run_prompt(name: str, input: PromptInput = None):
@@ -1249,11 +1275,11 @@ class Admin:
             else:
                 raise Exception(f'Error getting prompts: {response.status_code}')
             
-            print('prompts', prompts)
             return html.Div(children=[
                 html.H1(children='Prompts'),
                 html.Ul([
-                    html.Li(html.A(p['name'], href=f'/prompts/{id}')) for id, p in prompts['response'].items()
+                    html.Li(html.A(p['name'], href=f'/prompts/{p["id"]}')) 
+                    for p in prompts['response']
                 ]),
             ])
 
@@ -1412,11 +1438,11 @@ class App:
         self.admin = Admin(self.world)
     
     def _load_prompts(self):
-        prompts = {}
+        prompts = []
         for file in glob.glob(os.path.join(self.prompts_dir, '*.json')):
             with open(file, 'r') as f:
-                prompt = Prompt(**json.load(f))
-                prompts[prompt.id] = prompt
+                prompt = PromptDetails(**json.load(f))
+                prompts.append(prompt)
         self.logger.info(f'Loaded {len(prompts)} prompts: {prompts}')
         return prompts
     
