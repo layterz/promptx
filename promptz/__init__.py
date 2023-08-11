@@ -1,3 +1,4 @@
+import os
 from typing import Callable, List
 
 from .collection import Collection 
@@ -80,19 +81,53 @@ Embedding = List[float]
 EmbedFunction = Callable[[List[str]], List[Embedding]]
 
 
-def load_app():
+def load_app(path):
     import os
     import sys
-    module_path = os.path.abspath(os.path.join('..'))
+    
+    module_path = os.path.abspath(path)
+
     if module_path not in sys.path:
         sys.path.append(module_path)
     
+    os.environ['PROMPTZ_PATH'] = path
     from app import create_app
     return create_app()
 
 
+def load_config(filename="promptz.env"):
+    home_dir = os.path.expanduser("~")
+    current_dir = os.getcwd()
+
+    while current_dir != home_dir:
+        file_path = os.path.join(current_dir, filename)
+
+        if os.path.exists(file_path):
+            with open(file_path, 'r') as f:
+                config = {
+                    line.split('=', 1)[0].strip(): line.split('=', 1)[1].strip()
+                    for line in f if '=' in line
+                }
+                return (current_dir, config)
+
+        current_dir = os.path.dirname(current_dir)
+
+    file_path = os.path.join(home_dir, filename)
+    if os.path.exists(file_path):
+        with open(file_path, 'r') as f:
+            config = {
+                line.split('=', 1)[0].strip(): line.split('=', 1)[1].strip()
+                for line in f if '=' in line
+            }
+            return (home_dir, config)
+
+    return None
+
+
 def load(llm=None, ef=None, logger=None, log_format='notebook', **kwargs):
-    app = load_app()
+    path, config = load_config()
+    print('config', path, config)
+    app = load_app(path)
     session = app.world.create_session()
     set_default_session(session)
 

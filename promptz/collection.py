@@ -35,8 +35,8 @@ class VectorDB:
 
 class ChromaVectorDB(VectorDB):
 
-    def __init__(self, endpoint=None, api_key=None, **kwargs):
-        self.client = chromadb.Client()
+    def __init__(self, endpoint=None, api_key=None, path=None, **kwargs):
+        self.client = chromadb.PersistentClient(path=f'{path}/.db' if path else "./.db")
 
     def query(self, texts, where=None, **kwargs):
         return self.client.query(texts, where=where, **kwargs)

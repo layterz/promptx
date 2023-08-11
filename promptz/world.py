@@ -1,3 +1,4 @@
+import os
 import uuid
 import logging
 import numpy as np
@@ -216,7 +217,7 @@ class World:
         self.collections = {}
         self.llm = llm or MockLLM()
         self.ef = ef or (lambda x: [0] * len(x))
-        self.db = db or ChromaVectorDB()
+        self.db = db or ChromaVectorDB(path=os.environ.get('PROMPTZ_PATH'))
         self.logger = logger or logging.getLogger(self.name)
         self.systems = systems or {}
         self.notebooks = notebooks or {}
