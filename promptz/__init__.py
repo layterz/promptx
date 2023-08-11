@@ -446,10 +446,10 @@ class Prompt(nn.Module):
     output: Type[BaseModel] = None
     llm: LLM = MockLLM()
 
-    def __init__(self, instructions=None, output=None, context=None, template=None, examples=None, num_examples=None, history=None, llm=None, logger=None, debug=False, silent=False, tools: ToolList = None, name=None):
+    def __init__(self, instructions=None, output=None, context=None, template=None, examples=None, id=None, num_examples=None, history=None, llm=None, logger=None, debug=False, silent=False, tools: ToolList = None, name=None):
         super().__init__()
 
-        self.id = str(uuid.uuid4())
+        self.id = id or str(uuid.uuid4())
         self.name = name
         self.logger = logger
         self.name = self.__class__.__name__
@@ -772,12 +772,12 @@ class Collection(pd.DataFrame):
         c.collection = collection
         return c
     
-    def embedding_query(self, *texts, where=None, threshold=0.69, **kwargs):
+    def embedding_query(self, *texts, ids=None, where=None, threshold=0.69, **kwargs):
         texts = [t for t in texts if t is not None]
         
         scores = {}
         if len(texts) == 0:
-            results = self.collection.get(where=where, **kwargs)
+            results = self.collection.get(ids=ids, where=where, **kwargs)
             for id, m in zip(results['ids'], results['metadatas']):
                 if m.get('item') != 1:
                     id = m.get('item_id')
@@ -786,7 +786,7 @@ class Collection(pd.DataFrame):
                 else:
                     scores[id] += 1
         else:
-            results = self.collection.query(query_texts=texts, where=where, **kwargs)
+            results = self.collection.query(query_texts=texts, ids=ids, where=where, **kwargs)
             for i in range(len(results['ids'])):
                 for id, d, m in zip(results['ids'][i], results['distances'][i], results['metadatas'][i]):
                     if m.get('item') != 1:
@@ -819,7 +819,10 @@ class Collection(pd.DataFrame):
     
     @property
     def first(self):
-        return self.objects[0]
+        if len(self.objects) == 0:
+            return None
+        else:
+            return self.objects[0]
     
     def embed(self, *items, **kwargs):
         records = []
@@ -890,12 +893,9 @@ class Collection(pd.DataFrame):
 
 
 class Session:
-    _history = []
-    _collections = {}
-    use_cache = False
-    cache_threshold = 85.0
 
-    def __init__(self, name, db, llm, ef=None, default_collection='default', logger=None, collections=None, use_cache=False):
+    def __init__(self, world, name, db, llm, ef=None, default_collection='default', logger=None, collections=None):
+        self.world = world
         self.name = name
         self.db = db
         self.llm = llm
@@ -903,9 +903,7 @@ class Session:
         self._collection = default_collection
         if collections is not None:
             self._collections = collections 
-        self.logger = logger
-        self._history = []
-        self.use_cache = use_cache
+        self.logger = logger or self.world.logger.getChild(self.name)
     
     def activate(self):
         set_default_session(self)
@@ -914,26 +912,9 @@ class Session:
         e = None
         try:
             rendered = p.render({'input': p.parse(input)})
-            if self.use_cache:
-                rs = self.history(rendered)
-                if rs is not None and len(rs) > 0:
-                    scores = self.evaluate(*[
-                        (rendered, r.input) for r in rs.objects
-                    ])
-                    scores = scores[scores['score'] >= self.cache_threshold]
-                    if len(scores) > 0:
-                        r = rs.first
-                        return Response(
-                            raw=r.output,
-                            cached=True,
-                            content=p.process(input, r.output, **kwargs),
-                        )
-
             r = p(input, dryrun=dryrun, retries=retries, **kwargs)
             log = ChatLog(prompt=p.id, input=rendered, output=r.raw)
-            self._history.append(log)
-            collection = self.collection('history')
-            collection.embed(log)
+            self.store(log, collection='history')
             return r
         except MaxRetriesExceeded as e:
             self.logger.error(f'Max retries exceeded: {e}')
@@ -947,7 +928,7 @@ class Session:
                 o.append(r.content)
         return o
 
-    def prompt(self, instructions=None, input=None, output=None, prompt=None, context=None, template=None, llm=None, examples=None, num_examples=1, history=None, tools=None, dryrun=False, retries=3, debug=False, silent=False, **kwargs):
+    def prompt(self, instructions=None, input=None, output=None, id=None, prompt=None, context=None, template=None, llm=None, examples=None, num_examples=1, history=None, tools=None, dryrun=False, retries=3, debug=False, silent=False, **kwargs):
         logger = self.logger.getChild('prompt')
         level = logging.INFO
         if debug: level = logging.DEBUG
@@ -956,6 +937,7 @@ class Session:
 
         if prompt is None:
             p = Prompt(
+                id=id,
                 output=output,
                 instructions=instructions,
                 llm=llm or self.llm,
@@ -1057,10 +1039,10 @@ class Session:
         if name is None:
             name = self._collection
         try:
-            collection = self._collections[name]
+            collection = self.world.collections[name]
         except KeyError:
             collection = self.db.get_or_create_collection(name, metadata={"hnsw:space": "cosine"})
-            self._collections[name] = collection
+            self.world.collections[name] = collection
         
         return Collection.load(collection)
     
@@ -1136,7 +1118,7 @@ class World:
         history = self.db.get_or_create_collection('history', metadata={"hnsw:space": "cosine"})
         self.collections['history'] = history
     
-    def create_session(self, name=None, db=None, llm=None, ef=None, logger=None, silent=False, debug=False, use_cache=False, log_format='notebook'):
+    def create_session(self, name=None, db=None, llm=None, ef=None, logger=None, silent=False, debug=False, log_format='notebook'):
         llm = llm or self.llm
         ef = ef or self.ef
         db = db or self.db
@@ -1149,8 +1131,8 @@ class World:
         if debug: level = logging.DEBUG
         elif silent: level = logging.ERROR
         logger.setLevel(level)
-        session = Session(name=name, db=db, llm=llm, ef=ef, logger=logger,
-                          collections=self.collections, use_cache=use_cache)
+        session = Session(self, name=name, db=db, llm=llm, ef=ef, logger=logger,
+                          collections=self.collections)
         self.sessions.append(session)
         return session
     
@@ -1183,13 +1165,20 @@ class PromptInput(BaseModel):
 class API:
     world: World
 
-    def __init__(self, world):
+    def __init__(self, world, logger=None):
         self.world = world
+        self.logger = logger or world.logger.getChild('api')
         self.fastapi_app = FastAPI()
         
         @self.fastapi_app.get("/prompts")
         async def get_prompts():
-            return {"response": self.world.prompts().objects}
+            r = self.world.prompts()
+            if r is None:
+                prompts = []
+            else:
+                prompts = r.objects
+
+            return {"response": prompts}
 
         @self.fastapi_app.get("/prompts/{id}")
         async def get_prompt(id: str):
@@ -1199,7 +1188,7 @@ class API:
                 results = []
             else:
                 results = c[c['prompt'] == id].to_dict('records')
-            prompt = self.world.prompts(where={'id': id}).first
+            prompt = self.world.prompts(ids=[id]).first
             return {'prompt': prompt, 'results': results}
         
         @self.fastapi_app.post("/prompts")
@@ -1207,16 +1196,21 @@ class API:
             p = self.world.create_prompt(details)
             return p.first.id
 
-        @self.fastapi_app.post("/prompts/{name}/run")
-        async def run_prompt(name: str, input: PromptInput = None):
+        @self.fastapi_app.post("/prompts/{id}/run")
+        async def run_prompt(id: str, input: PromptInput = None):
             session = self.world.create_session()
-            if name not in self.world.prompts:
+            prompt_config = self.world.prompts(ids=[id]).first
+            if prompt_config is None:
+                self.logger.info(f'prompts: {self.world.prompts()}')
                 raise HTTPException(status_code=404, detail="Prompt not found")
-            prompt_config = self.world.prompts[name]
-            d = {**prompt_config, 'input': input}
-            response = session.prompt(**{**prompt_config, 'input': input})
+            response = session.prompt(**{**dict(prompt_config), 'input': input})
             return {"response": response}
         
+        @self.fastapi_app.get("/history")
+        async def get_history():
+            history = Collection.load(self.world.collections['history'])
+            return {'response': history()}
+
         @self.fastapi_app.get("/systems")
         async def get_systems():
             return {"response": self.world.systems.keys()}
@@ -1252,20 +1246,14 @@ class API:
 class Admin:
     world: World
 
-    def __init__(self, world):
+    def __init__(self, world, logger=None):
         self.world = world
+        self.logger = logger or world.logger.getChild('admin')
         self.app = Dash(
             world.name, 
             use_pages=True,
-            pages_folder='admin',
+            pages_folder='',
             external_stylesheets=[dbc.themes.ZEPHYR],
-        )
-
-        register_page(
-            'Inbox',
-            layout=html.Div(children=[
-            ]),
-            path='/',
         )
 
         def prompts_list_layout():
@@ -1275,12 +1263,23 @@ class Admin:
             else:
                 raise Exception(f'Error getting prompts: {response.status_code}')
             
-            return html.Div(children=[
-                html.H1(children='Prompts'),
-                html.Ul([
-                    html.Li(html.A(p['name'], href=f'/prompts/{p["id"]}')) 
-                    for p in prompts['response']
-                ]),
+            df = pd.DataFrame(prompts['response'])
+
+            def generate_open_link(row):
+                return f'[{row["name"]}](/prompts/{row["id"]})'
+            
+            df['name'] = df.apply(lambda row: generate_open_link(row), axis=1)
+            df = df[
+                ['name', 'instructions']
+            ]
+
+            return html.Div([
+                html.H1('Prompts'),
+                dash_table.DataTable(
+                    id='prompts-table',
+                    columns=[{"name": i, "id": i, 'presentation': 'markdown'} for i in df.columns],
+                    data=df.to_dict('records'),
+                ),
             ])
 
         register_page(
@@ -1299,10 +1298,12 @@ class Admin:
                 raise Exception(f'Error getting prompt: {response.status_code}')
 
             return html.Div(children=[
-                html.H1(id),
+                html.H1(prompt['name']),
+                html.P(prompt['instructions']),
                 dbc.Button('Run', id='run-prompt', n_clicks=0, name=id, color='primary'),
                 dcc.Store(id='api-call-result', storage_type='session'),
                 html.Div(id, id='prompt-id', style={'display': 'none'}),
+                html.H2('Results'),
                 html.Div(id='prompt-results', children=[
                     html.P(result) for result in results
                 ]),
@@ -1322,102 +1323,111 @@ class Admin:
             else:
                 requests.post(f'{API_URL}/prompts/{id}/run')
 
-        def systems_list_layout():
-            response = requests.get(f'{API_URL}/systems')
+        def history_layout():
+            response = requests.get(f'{API_URL}/history')
             if response.status_code == 200:
-                systems = response.json()
+                history = response.json()['response']
             else:
-                raise Exception(f'Error getting systems: {response.status_code}')
+                raise Exception(f'Error getting prompts: {response.status_code}')
             
+            if history is None:
+                return html.Div(children=[
+                    html.H1(children='History'),
+                    html.P('No history yet'),
+                ])
+
             return html.Div(children=[
-                html.H1(children='Systems'),
+                html.H1(children='History'),
                 html.Ul([
-                    html.Li(html.A(name, href=f'/systems/{name}')) for name in systems['response'].keys()
+                    html.Li(
+                        h['prompt'],
+                        h['input'],
+                        h['output'],
+                    )
+                    for h in history
                 ]),
             ])
 
         register_page(
-            'Systems',
-            layout=systems_list_layout,
-            path='/systems',
+            'History',
+            layout=history_layout,
+            path='/history',
         )
 
-        def notebook_list_layout():
-            response = requests.get(f'{API_URL}/notebooks')
-            if response.status_code == 200:
-                notebooks = response.json()
-            else:
-                raise Exception(f'Error getting notebooks: {response.status_code}')
-            
-            return html.Div(children=[
-                html.H1(children='Notebooks'),
-                html.Ul([
-                    html.Li(html.A(name, href=f'/notebooks/{name}')) for name in notebooks['response'].keys()
-                ]),
-            ])
+        def noop_layout(name: str):
+            def f():
+                return html.Div(children=[
+                    html.H1(name),
+                    html.P('Not implemented yet'),
+                ])
+            return f
 
         register_page(
-            'Notebooks',
-            layout=notebook_list_layout,
-            path='/notebooks',
+            'Inbox',
+            layout=noop_layout('Inbox'),
+            path='/inbox',
         )
-
-        def notebook_layout(name: str = None):
-            response = requests.get(f'{API_URL}/notebooks/{name}')
-            notebook_html = response.json()['response']
-            return html.Div(children=[
-                html.H1(name),
-                DangerouslySetInnerHTML(notebook_html)
-            ])
-
-        register_page('Notebook', layout=notebook_layout, path_template='/notebooks/<name>')
-
-        def chatbots_list_layout():
-            response = requests.get(f'{API_URL}/chats')
-            if response.status_code == 200:
-                chats = response.json()
-            else:
-                raise Exception(f'Error getting chats: {response.status_code}')
-            
-            return html.Div(children=[
-                html.H1(children='Chats'),
-                html.Ul([
-                    html.Li(html.A(name, href=f'/chats/{name}')) for name in chats['response'].keys()
-                ]),
-            ])
 
         register_page(
             'Chats',
-            layout=chatbots_list_layout,
+            layout=noop_layout('Chats'),
             path='/chats',
         )
 
+        register_page(
+            'Collections',
+            layout=noop_layout('Collections'),
+            path='/collections',
+        )
+
+        register_page(
+            'Systems',
+            layout=noop_layout('Systems'),
+            path='/systems',
+        )
+
         menu = [
+            'Inbox',
             'Prompts',
-            'Notebooks',
+            'Chats',
+            'Collections',
+            'Systems',
+            'History',
         ]
 
-        self.app.layout = dbc.Row([
-            dbc.Col([
-                dbc.Row(
-                    html.H3('promptz', style={'color': 'white'})
-                ),
-                *[
-                    dbc.Row(
-                        html.Div(
-                            dcc.Link(
-                                f"{page_registry[name]['name']}", href=page_registry[name]["relative_path"],
-                                style={'color': 'white', 'text-decoration': 'none'}
+        self.app.layout = dbc.Container(
+            dbc.Row(
+                [
+                    dbc.Col(
+                        [
+                            dbc.Row(
+                                html.Div(
+                                    dcc.Link(
+                                        f"{page_registry[name]['name']}", 
+                                        href=page_registry[name]["relative_path"],
+                                    )
+                                ),
                             )
-                        ),
-                    )
-                    for name in menu
-                ]
-            ], width=3, style={'background-color': '#663399', 'padding': '10px 20px', 'height': '100vh'}),
-            dbc.Col([
-                page_container
-            ], width=9, style={'padding': '10px'}),
-        ])
+                            for name in menu
+                        ], 
+                        width=3,
+                        style={
+                            'border-right': '1px solid black',
+                            'background-color': 'lightgray',
+                            'height': '100vh',
+                            'overflow-y': 'scroll',
+                        }
+                    ),
+                    dbc.Col(
+                        [
+                            page_container
+                        ], 
+                        width=9,
+                    ),
+                ],
+            ),
+            fluid=True,
+        )
 
 
 class App:
@@ -1557,8 +1567,25 @@ Embedding = List[float]
 EmbedFunction = Callable[[List[str]], List[Embedding]]
 
 
-def init(llm=None, ef=None, logger=None, use_cache=False, log_format='notebook', **kwargs):
+def load_app():
+    import os
+    import sys
+    module_path = os.path.abspath(os.path.join('..'))
+    if module_path not in sys.path:
+        sys.path.append(module_path)
+    
+    from app import create_app
+    return create_app()
+
+
+def load(llm=None, ef=None, logger=None, log_format='notebook', **kwargs):
+    app = load_app()
+    session = app.world.create_session()
+    set_default_session(session)
+
+
+def init(llm=None, ef=None, logger=None, log_format='notebook', **kwargs):
     w = World('test', llm=llm, ef=ef, logger=logger, **kwargs)
-    session = w.create_session(use_cache=use_cache, log_format=log_format)
+    session = w.create_session(log_format=log_format)
     set_default_world(w)
     set_default_session(session)
