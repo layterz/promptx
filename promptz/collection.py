@@ -121,7 +121,6 @@ class Collection(pd.DataFrame):
         scores = {}
         if len(texts) == 0:
             results = self.collection.get(ids=ids, where=where, **kwargs)
-            print('results', results)
             for id, m in zip(results['ids'], results['metadatas']):
                 if m.get('item') != 1:
                     id = m.get('item_id')
@@ -141,15 +140,11 @@ class Collection(pd.DataFrame):
                         scores[id] += 1 - d
         
         try:
-            print('scores', scores)
-            print('self', self)
             df = self
             df['score'] = df['id'].map(scores)
-            print('AAA', df)
             df = df[df['score'].notna()]
             df = df.sort_values('score', ascending=False)
             df = df.drop(columns=['score'])
-            print('BBB', df)
             return df
         except KeyError as e:
             return None

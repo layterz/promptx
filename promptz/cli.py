@@ -52,17 +52,14 @@ def create_project(project_name, template='default'):
     create_project_structure(template_dir, project_name, {'project_name': project_name})
 
 
-@cli.group()
-def prompts():
-    pass
-
-@prompts.command()
-@click.argument('input', nargs=-1)
+@cli.command()
+@click.argument('input', nargs=1)
 def prompt(input: str):
     _prompt(input)
 
 def _prompt(input: str):
-    return requests.post(f'{API_ENDPOINT}/prompts', data=input)
+    print(f'Prompting: {input}')
+    return requests.post(f'{API_ENDPOINT}/prompt', json={'name': 'n/a', 'instructions': input})
 
 
 @cli.group()

@@ -147,7 +147,7 @@ class Session:
         ])
         
         c = self.collection(collection)
-        c.embed(*[item for item in items if item is not None])
+        c.embed(*[dict(item) for item in items if item is not None])
         return self.collection(collection)
     
     def chain(self, *steps, llm=None, **kwargs):
@@ -188,11 +188,9 @@ class Session:
             name = self._collection
         try:
             collection = self.world.collections[name]
+            return collection
         except KeyError:
-            collection = self.db.get_or_create_collection(name, metadata={"hnsw:space": "cosine"})
-            self.world.collections[name] = collection
-        
-        return Collection.load(collection)
+            return None
     
     def evaluate(self, actual, expected, **kwargs):
         threshold = 0.69

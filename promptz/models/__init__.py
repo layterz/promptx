@@ -1,4 +1,5 @@
 import base64
+import uuid
 from typing import Any, Dict
 from abc import abstractmethod
 from pydantic import BaseModel
@@ -6,9 +7,15 @@ from IPython.display import display, Image
 
 
 class ChatLog(BaseModel):
+    id: str
+    type: str = 'chatlog'
     template: str = None
     input: str = None
     output: str = None
+
+    def __init__(self, **data):
+        super().__init__(
+            id=str(uuid.uuid4()), **data)
 
 
 class Callback(BaseModel):

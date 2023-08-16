@@ -1,8 +1,10 @@
+import os
+import json
 from urllib.parse import urljoin
 import requests
 import pandas as pd
 from pydantic import BaseModel
-from dash import Dash, html, dcc, dash_table, page_container, page_registry, register_page, Output, Input, State
+from dash import Dash, html, dcc, dash_table, no_update, page_container, page_registry, register_page, Output, Input, State
 from dash.exceptions import PreventUpdate
 import dash_bootstrap_components as dbc
 
@@ -12,25 +14,44 @@ API_URL = 'http://localhost:8000'
 
 
 class AdminPage(BaseModel):
+    app: Dash
     name: str
     path: str = None
     path_template: str = None
     menu: bool = False
     api_path: str = None
 
-    def __init__(self, name, path=None, path_template=None, menu=False):
+    class Config:
+        arbitrary_types_allowed = True
+
+    def __init__(self, app, name, path=None, path_template=None, menu=False):
         super().__init__(
+            app=app,
             name=name,
             path=path,
             path_template=path_template,
             menu=menu,
         )
+        self.register_callbacks()
 
     def layout(self, **kwargs):
+        content = self.render(**kwargs)
+        return html.Div(children=[
+            dcc.Interval(
+                id='fetch-interval',
+                interval=1,  # Set an interval that triggers once
+                max_intervals=1  # Only trigger once
+            ),
+            content,
+        ])
+    
+    def render(self):
         return html.Div(children=[
             html.H1(self.name),
-            html.P('Not implemented yet'),
         ])
+    
+    def register_callbacks(self):
+        pass
 
 
 class Index:
@@ -57,7 +78,8 @@ class AdminIndexPage(AdminPage):
         return urljoin(API_URL, self.path)
 
     def generate_link(self, row):
-        return f'[{row["id"]}](/{self.name}/{row["id"]})'
+        link = os.path.join(self.path, row['id'])
+        return f'[{row["id"]}]({link})'
 
     def layout(self):
         response = requests.get(self.api_url)
@@ -84,6 +106,12 @@ class AdminIndexPage(AdminPage):
                 ],
                 data=df.to_dict('records'),
                 style_as_list_view=True,
+                style_header={
+                    'textAlign': 'left',
+                },
+                markdown_options={
+                    'link_target': '_self',
+                },
             ),
         ]
 
@@ -94,39 +122,70 @@ class AdminIndexPage(AdminPage):
 
 
 class AdminEntityPage(AdminPage):
-    
-    def layout(self):
-        api_path = urljoin(API_URL, self.path_template.format(id=123))
+
+    def fetch(self, pathname):
+        api_path = urljoin(API_URL, pathname)
         response = requests.get(api_path)
         if response.status_code == 200:
             data = response.json()
-            print('data', data)
             details = data['details']
             results = data['results']
+            print('fetch', data, details, results)
+            return data, json.dumps(details), json.dumps(results)
         else:
             raise Exception(f'Error getting entity: {response.status_code}')
-        
-        if len(results) > 0:
-            index = Index(results)
-        else:
-            index = html.Div([
-                html.P('No results found.'),
-            ])
+    
+    def register_callbacks(self):
+        @self.app.callback(
+            Output('data-store', 'data'),
+            Output('details', 'children'),
+            Output('results', 'children'),
+            Input('fetch-interval', 'n_intervals'),
+            Input('url', 'pathname'),
+        )
+        def fetch_data(n_intervals, pathname):
+            print('fetch_data', n_intervals, pathname)
+            if n_intervals is not None and n_intervals > 0:
+                return self.fetch(pathname)
+            else:
+                return no_update
 
+    def layout(self, **kwargs):
+        content = self.render(**kwargs)
         return html.Div(children=[
-            html.H1(details['name']),
-            dbc.Button('Run', id='run-prompt', n_clicks=0, name=id, color='primary'),
-            dcc.Store(id='api-call-result', storage_type='session'),
-            html.Div(id, id='result-id', style={'display': 'none'}),
-            html.H2('Results'),
-            index,
+            dcc.Location(id='url', refresh=False), 
+            dcc.Loading(id='loading', type='default', children=[
+                dcc.Store(id='data-store'),
+                content,
+            ]),
+            
+            dcc.Interval(
+                id='fetch-interval',
+                interval=1,  # Set an interval that triggers once
+                max_intervals=1  # Only trigger once
+            ),
         ])
+    
+    def render(self, id=None):
+        return html.Div([
+            html.Div(id='details'),
+            html.Div(id='results'),
+        ])
+        #return html.Div(children=[
+        #    html.H1(details['name']),
+        #    dbc.Button('Run', id='run-prompt', n_clicks=0, name=id, color='primary'),
+        #    dcc.Store(id='api-call-result', storage_type='session'),
+        #    html.Div(id, id='result-id', style={'display': 'none'}),
+        #    html.H2('Results'),
+        #    index,
+        #])
 
 
 class TemplateIndex(AdminIndexPage):
 
-    def __init__(self, **kwargs):
+    def __init__(self, app, **kwargs):
         super().__init__(
+            app,
             name="Templates",
             path="/templates",
             **kwargs,
@@ -135,8 +194,9 @@ class TemplateIndex(AdminIndexPage):
 
 class CollectionIndex(AdminIndexPage):
 
-    def __init__(self, **kwargs):
+    def __init__(self, app, **kwargs):
         super().__init__(
+            app,
             name="Collections",
             path="/collections",
             **kwargs,
@@ -145,8 +205,9 @@ class CollectionIndex(AdminIndexPage):
 
 class SystemIndex(AdminIndexPage):
 
-    def __init__(self, **kwargs):
+    def __init__(self, app, **kwargs):
         super().__init__(
+            app,
             name="Systems",
             path="/systems",
             **kwargs,
@@ -155,8 +216,9 @@ class SystemIndex(AdminIndexPage):
 
 class NotebookIndex(AdminIndexPage):
 
-    def __init__(self, **kwargs):
+    def __init__(self, app, **kwargs):
         super().__init__(
+            app,
             name="Notebooks",
             path="/notebooks",
             **kwargs,
@@ -165,8 +227,9 @@ class NotebookIndex(AdminIndexPage):
 
 class ConversationIndex(AdminIndexPage):
 
-    def __init__(self, **kwargs):
+    def __init__(self, app, **kwargs):
         super().__init__(
+            app,
             name="Conversations",
             path="/conversations",
             **kwargs,
@@ -176,8 +239,9 @@ class ConversationIndex(AdminIndexPage):
 class Inbox(AdminIndexPage):
     menu: bool = False
 
-    def __init__(self, **kwargs):
+    def __init__(self, app, **kwargs):
         super().__init__(
+            app,
             name="Inbox",
             path="/inbox",
             **kwargs,
@@ -186,8 +250,9 @@ class Inbox(AdminIndexPage):
 
 class History(AdminIndexPage):
 
-    def __init__(self, **kwargs):
+    def __init__(self, app, **kwargs):
         super().__init__(
+            app,
             name="History",
             path="/history",
             **kwargs,
@@ -196,10 +261,11 @@ class History(AdminIndexPage):
 
 class TemplatePage(AdminEntityPage):
 
-    def __init__(self, **kwargs):
+    def __init__(self, app, **kwargs):
         super().__init__(
+            app,
             name="Template",
-            path_template="/templates/{id}",
+            path_template="/templates/<id>",
             **kwargs,
         )
 
@@ -218,13 +284,15 @@ class Admin:
         )
 
         pages = [
-            Inbox(menu=True),
-            ConversationIndex(menu=True),
-            TemplateIndex(menu=True),
-            CollectionIndex(menu=True),
-            NotebookIndex(menu=True),
-            SystemIndex(menu=True),
-            History(menu=True),
+            Inbox(self.app, menu=True),
+            ConversationIndex(self.app, menu=True),
+            TemplateIndex(self.app, menu=True),
+            CollectionIndex(self.app, menu=True),
+            NotebookIndex(self.app, menu=True),
+            SystemIndex(self.app, menu=True),
+            History(self.app, menu=True),
+
+            TemplatePage(self.app),
         ]
 
         for page in pages:

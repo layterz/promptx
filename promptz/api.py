@@ -20,8 +20,9 @@ class API:
         self.logger = logger or world.logger.getChild('api')
         self.fastapi_app = FastAPI()
 
-        @self.fastapi_app.post("/prompts")
+        @self.fastapi_app.post("/prompt")
         async def run_prompt(details: TemplateDetails):
+            print('running prompt', details)
             session = self.world.create_session()
             template = Template(**details.dict())
             response = session.prompt(**{**dict(template), 'input': {}})
