@@ -1,43 +1,30 @@
-import os
 import random
 import json
 import inspect
 from enum import Enum
-import base64
 import uuid
 import textwrap
-from typing import Any, Dict, List, Tuple, Type, Union, get_origin, get_args
-from abc import abstractmethod
+from typing import Any, Dict, List, Tuple, Type, get_origin, get_args
 from pydantic import BaseModel, ValidationError
-from IPython.display import display, Image
-import openai
 from openai.error import RateLimitError
-from torch import nn
-from jinja2 import Template
+from jinja2 import Template as JinjaTemplate
 
 from .collection import Collection, Entity
 from .logging import *
-from .models import ChatLog, Response, LLM, MockLLM
+from .models import ChatLog, LLM, MockLLM
 from .tool import Tool, ToolList
 
 
-class PromptDetails(BaseModel):
+class TemplateDetails(BaseModel):
     name: str
     instructions: str = None
-
-
-class ImageResponse(Response):
-    
-    def __repr__(self) -> str:
-        image_bytes = base64.b64decode(self.raw)
-        display(Image(data=image_bytes))
 
 
 class MaxRetriesExceeded(Exception):
     pass
 
 
-class Prompt(nn.Module):
+class Template:
     '''
     Follow the pattern shown in the examples below and
     generate a new output using the same format.
@@ -110,30 +97,23 @@ class Prompt(nn.Module):
         self.id = id or str(uuid.uuid4())
         self.name = name
         self.logger = logger
-        self.name = self.__class__.__name__
         self.llm = llm or self.llm
         self.context = context or self.context
         self.history = history or self.history
         self.output = output or self.output
-        instructions = instructions or self.__doc__
-        if instructions is None:
-            for base in inspect.getmro(self.__class__):
-                if base.__doc__ is not None and issubclass(base, Prompt):
-                    instructions = base.__doc__
-                    break
         self.instructions = textwrap.dedent(instructions) if instructions is not None else None
 
         self.num_examples = num_examples or self.num_examples
         self.examples = examples or self.examples
-        self.input_template = Template(self.input_template)
-        self.output_template = Template(self.output_template)
-        self.example_template = Template(self.example_template)
-        self.format_template = Template(self.format_template)
+        self.input_template = JinjaTemplate(self.input_template)
+        self.output_template = JinjaTemplate(self.output_template)
+        self.example_template = JinjaTemplate(self.example_template)
+        self.format_template = JinjaTemplate(self.format_template)
         self.tools = [Tool.parse(t) for t in tools] if tools is not None else []
 
         template = template or self.template
         if template is not None:
-            self.template = Template(template)
+            self.template = JinjaTemplate(template)
     
     def parse(self, x):
         if isinstance(x, BaseModel):
@@ -255,12 +235,20 @@ class Prompt(nn.Module):
         else:
             return output
     
-    def dict(self):
+    def __dict__(self):
         return {
             'id': self.id,
+            'type': 'template',
             'name': self.name,
             'instructions': self.instructions,
         }
+
+    def __iter__(self):
+        for key, value in self.__dict__().items():
+            yield key, value
+    
+    def __call__(self, x, **kwargs):
+        return self.forward(x, **kwargs)
     
     def forward(self, x, retries=3, dryrun=False, **kwargs):
         if retries and retries <= 0:
@@ -313,7 +301,7 @@ class Prompt(nn.Module):
             return response
 
 
-class ChatPrompt(Prompt):
+class ChatPrompt(Template):
     '''
     You are a helpful assistant.
     '''

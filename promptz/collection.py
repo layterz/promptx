@@ -121,6 +121,7 @@ class Collection(pd.DataFrame):
         scores = {}
         if len(texts) == 0:
             results = self.collection.get(ids=ids, where=where, **kwargs)
+            print('results', results)
             for id, m in zip(results['ids'], results['metadatas']):
                 if m.get('item') != 1:
                     id = m.get('item_id')
@@ -140,11 +141,15 @@ class Collection(pd.DataFrame):
                         scores[id] += 1 - d
         
         try:
-            df = self.copy()
+            print('scores', scores)
+            print('self', self)
+            df = self
             df['score'] = df['id'].map(scores)
+            print('AAA', df)
             df = df[df['score'].notna()]
             df = df.sort_values('score', ascending=False)
             df = df.drop(columns=['score'])
+            print('BBB', df)
             return df
         except KeyError as e:
             return None
@@ -169,30 +174,18 @@ class Collection(pd.DataFrame):
     
     def embed(self, *items, **kwargs):
         records = []
-        new_items = []
-        unique_columns = {}
         for item in items:
-            new_item = False
-            try:
-                id = item.id
-            except AttributeError:
-                id = str(uuid.uuid4())
-                new_item = True
-
+            id = item['id']
             now = datetime.now().isoformat()
 
-            for name, field in item.__fields__.items():
-                try:
-                    if field.field_info.default[0].extra.get('unique'):
-                        unique_columns[name] = True
-                except Exception as e:
-                    pass
+            for name, field in item.items():
+                if name in ['id', 'type']:
+                    continue
 
-                f = { name: getattr(item, name) }
                 # TODO: Handle nested fields
                 field_record = {
                     'id': f'{id}_{name}',
-                    'document': json.dumps(f),
+                    'document': json.dumps({name: field}),
                     'metadata': {
                         'field': name,
                         'collection': self.name,
@@ -202,31 +195,28 @@ class Collection(pd.DataFrame):
                     },
                 }
                 records.append(field_record)
-                if new_item: 
-                    new_items.append(field_record)
 
-            type_ = getattr(item, 'type', item.__class__.__name__.lower())
             doc_record = {
                 'id': id,
-                'document': item.json(),
+                'document': json.dumps(item),
                 'metadata': {
                     'collection': self.name,
-                    'type': type_,
+                    'type': item['type'],
                     'item': 1,
                     'created_at': now,
                 },
             }
 
             records.append(doc_record)
-            if new_item:
-                new_items.append(doc_record)
             
+        ids = [r['id'] for r in records]
         self.collection.upsert(
-            ids=[r['id'] for r in records],
+            ids=ids,
             documents=[r['document'] for r in records],
             metadatas=[r['metadata'] for r in records],
         )
 
+        new_items = [r for r in records if r['id'] not in self['id'].values]
         docs = [{'id': r['id'], **json.loads(r['document'])} for r in new_items]
         df = pd.concat([self, Collection(docs)], ignore_index=True)
         self.drop(self.index, inplace=True)

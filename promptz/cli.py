@@ -51,6 +51,7 @@ def create_project(project_name, template='default'):
     template_dir = os.path.join(current_dir, f'templates/{template}')
     create_project_structure(template_dir, project_name, {'project_name': project_name})
 
+
 @cli.group()
 def prompts():
     pass
@@ -61,27 +62,32 @@ def prompt(input: str):
     _prompt(input)
 
 def _prompt(input: str):
-    return requests.post(f'{API_ENDPOINT}/prompt', data=input)
+    return requests.post(f'{API_ENDPOINT}/prompts', data=input)
 
-@prompts.command(name="list")
-def list_prompts():
-    r = requests.get(f'{API_ENDPOINT}/prompts')
+
+@cli.group()
+def templates():
+    pass
+
+@templates.command(name="list")
+def list_templates():
+    r = requests.get(f'{API_ENDPOINT}/templates')
     pprint.pprint(r.json()['response'])
 
-@prompts.command(name="run")
+@templates.command(name="run")
 @click.argument('name')
 @click.argument('input')
-def run_prompt(name, input):
-    _run_prompt(name, input)
+def run_template(name, input):
+    _run_template(name, input)
 
-def _run_prompt(name, input):
-    return requests.post(f'{API_ENDPOINT}/prompts/{name}/run', data=input)
+def _run_template(name, input):
+    return requests.post(f'{API_ENDPOINT}/templates/{name}/run', data=input)
 
-@prompts.command(name="create")
+@templates.command(name="create")
 @click.argument('name')
 @click.argument('instructions')
-def create_prompt(name, instructions):
-    return requests.post(f'{API_ENDPOINT}/prompts', 
+def create_template(name, instructions):
+    return requests.post(f'{API_ENDPOINT}/templates', 
                          json={'name': name, 'instructions': instructions})
 
 @cli.command(name='query')

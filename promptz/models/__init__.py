@@ -6,7 +6,7 @@ from IPython.display import display, Image
 
 
 class ChatLog(BaseModel):
-    prompt: str = None
+    template: str = None
     input: str = None
     output: str = None
 

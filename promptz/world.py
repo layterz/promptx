@@ -7,17 +7,20 @@ from typing import Any, Dict, List, Callable
 from chromadb.utils import embedding_functions
 
 from .collection import Collection, Query, ChromaVectorDB
-from .prompts import Prompt, PromptDetails, ChatLog, MaxRetriesExceeded, MockLLM
+from .template import Template, TemplateDetails, MaxRetriesExceeded, MockLLM
+from .models import ChatLog
 from .logging import JSONLogFormatter, NotebookFormatter
 
 
 Processor = Callable[[Collection], Collection]
 
 class System:
+    name: str
     query: Query
     processor: Processor
 
-    def __init__(self, query=None, processor=None, **kwargs):
+    def __init__(self, name=None, query=None, processor=None, **kwargs):
+        self.name = name or self.__class__.__name__
         self.query = query or self.query
         self.processor = processor 
     
@@ -29,6 +32,15 @@ class System:
 
     def __call__(self, *args: Any, **kwds: Any) -> Any:
         return self.process(*args, **kwds)
+    
+    def __dict__(self):
+        return {
+            'name': self.name,
+        }
+
+    def __iter__(self):
+        for key, value in self.__dict__().items():
+            yield key, value
 
 
 class Session:
@@ -72,7 +84,7 @@ class Session:
         logger.setLevel(level)
 
         if prompt is None:
-            p = Prompt(
+            p = Template(
                 id=id,
                 output=output,
                 instructions=instructions,
@@ -143,13 +155,13 @@ class Session:
         input = None
         cc = self.collection(f'chain.{uuid.uuid4()}')
         for step in steps:
-            if isinstance(step, Prompt):
+            if isinstance(step, Template):
                 p = step
                 p.llm = llm
                 input = self._run_prompt(p, input, **kwargs)
                 self.store(*input, collection=cc.name)
             if isinstance(step, str):
-                p = Prompt(step, llm=llm)
+                p = Template(step, llm=llm)
                 input = self._run_prompt(p, input, **kwargs)
                 if isinstance(input, list):
                     if isinstance(input[0], BaseModel):
@@ -208,10 +220,8 @@ class World:
     name: str
     sessions: List[Session]
     collections: Dict[str, Collection]
-    systems: Dict[str, System]
-    notebooks: Dict[str, str]
 
-    def __init__(self, name, systems=None, llm=None, ef=None, logger=None, db=None, prompts=None, notebooks=None):
+    def __init__(self, name, systems=None, llm=None, ef=None, logger=None, db=None, templates=None, notebooks=None):
         self.name = name
         self.sessions = []
         self.collections = {}
@@ -219,15 +229,20 @@ class World:
         self.ef = ef or (lambda x: [0] * len(x))
         self.db = db or ChromaVectorDB(path=os.environ.get('PROMPTZ_PATH'))
         self.logger = logger or logging.getLogger(self.name)
-        self.systems = systems or {}
-        self.notebooks = notebooks or {}
+        
+        self.create_collection('history')
 
-        self.create_collection('prompts')
-        for p in prompts:
-            self.create_prompt(p)
-
-        history = self.db.get_or_create_collection('history', metadata={"hnsw:space": "cosine"})
-        self.collections['history'] = history
+        self.create_collection('templates')
+        for _, template in templates.items():
+            self.create_template(template)
+        
+        self.create_collection('systems')
+        for name, system in self.systems.items():
+            self.create_system(name, system)
+        
+        self.create_collection('notebooks')
+        for name, notebook in self.notebooks.items():
+            self.create_notebook(name, notebook)
     
     def create_session(self, name=None, db=None, llm=None, ef=None, logger=None, silent=False, debug=False, log_format='notebook'):
         llm = llm or self.llm
@@ -254,13 +269,34 @@ class World:
         self.collections[name] = Collection.load(collection)
         return collection
 
-    def create_prompt(self, details: PromptDetails):
-        c = self.prompts.embed(details)
+    def create_template(self, details: TemplateDetails):
+        t = Template(**dict(details))
+        self.templates.embed(dict(t))
+        return t
+    
+    def create_system(self, name, system):
+        c = self.systems.embed(system)
+        return c
+    
+    def create_notebook(self, name, notebook):
+        c = self.notebooks.embed(notebook)
         return c
 
     @property
-    def prompts(self):
-        return self.collections['prompts']
+    def templates(self):
+        return self.collections['templates']
+    
+    @property
+    def systems(self):
+        return self.collections['systems']
+    
+    @property
+    def notebooks(self):
+        return self.collections['notebooks']
+    
+    @property
+    def history(self):
+        return self.collections['history']
 
     def __call__(self, session, *args: Any, **kwds: Any) -> Any:
         for system in self.systems.values():

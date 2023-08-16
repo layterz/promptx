@@ -1,10 +1,11 @@
 from typing import Any
+
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
 from .world import World 
 from .collection import Collection, Query
-from .prompts import PromptDetails
+from .template import TemplateDetails, Template
 
 
 class PromptInput(BaseModel):
@@ -18,50 +19,80 @@ class API:
         self.world = world
         self.logger = logger or world.logger.getChild('api')
         self.fastapi_app = FastAPI()
+
+        @self.fastapi_app.post("/prompts")
+        async def run_prompt(details: TemplateDetails):
+            session = self.world.create_session()
+            template = Template(**details.dict())
+            response = session.prompt(**{**dict(template), 'input': {}})
+            return {"response": response}
         
-        @self.fastapi_app.get("/prompts")
-        async def get_prompts():
-            r = self.world.prompts()
+        @self.fastapi_app.get("/templates")
+        async def get_templates():
+            r = self.world.templates()
             if r is None:
-                prompts = []
+                templates = []
             else:
-                prompts = r.objects
+                templates = r.objects
 
-            return {"response": prompts}
+            return {"response": templates}
 
-        @self.fastapi_app.get("/prompts/{id}")
-        async def get_prompt(id: str):
-            history = self.world.collections['history']
-            c = Collection.load(history)()
-            if c is None or c.empty:
+        @self.fastapi_app.get("/templates/{id}")
+        async def get_template(id: str):
+            history = self.world.history()
+            if history is None or history.empty:
                 results = []
             else:
-                results = c[c['prompt'] == id].to_dict('records')
-            prompt = self.world.prompts(ids=[id]).first
-            return {'prompt': prompt, 'results': results}
+                results = history[history['template'] == id].to_dict('records')
+            template = self.world.templates(ids=[id]).first
+            if template is None:
+                raise HTTPException(status_code=404, detail="Template not found")
+            return {'details': template, 'results': results}
         
-        @self.fastapi_app.post("/prompts")
-        async def create_prompt(details: PromptDetails):
-            p = self.world.create_prompt(details)
-            return p.first.id
+        @self.fastapi_app.post("/templates")
+        async def create_template(details: TemplateDetails):
+            t = self.world.create_template(details)
+            return t.id
 
-        @self.fastapi_app.post("/prompts/{id}/run")
-        async def run_prompt(id: str, input: PromptInput = None):
+        @self.fastapi_app.post("/templates/{id}/run")
+        async def run_template(id: str, input: PromptInput = None):
             session = self.world.create_session()
-            prompt_config = self.world.prompts(ids=[id]).first
-            if prompt_config is None:
-                self.logger.info(f'prompts: {self.world.prompts()}')
-                raise HTTPException(status_code=404, detail="Prompt not found")
-            response = session.prompt(**{**dict(prompt_config), 'input': input})
+            template = self.world.templates(ids=[id]).first
+            if template is None:
+                raise HTTPException(status_code=404, detail="Template not found")
+            response = session.prompt(**{**dict(template), 'input': input})
             return {"response": response}
         
         @self.fastapi_app.get("/history")
         async def get_history():
-            history = Collection.load(self.world.collections['history'])
-            if history.empty:
+            if self.world.history.empty:
                 return {'response': []}
             else:
-                return {'response': history().objects}
+                return {'response': self.world.history().objects}
+
+        @self.fastapi_app.get("/inbox")
+        async def get_collections():
+            return {"response": []}
+
+        @self.fastapi_app.get("/conversations")
+        async def get_collections():
+            return {"response": []}
+
+        @self.fastapi_app.get("/collections")
+        async def get_collections():
+            return {"response": []}
+
+        @self.fastapi_app.get("/collections/{name}")
+        async def get_collection(name: str):
+            try:
+                c = self.world.collections[name]
+                r = Collection.load(c)()
+                if r is None:
+                    return {"response": []}
+                else:
+                    return {"response": r.objects}
+            except KeyError:
+                raise HTTPException(status_code=404, detail="Collection not found")
 
         @self.fastapi_app.get("/systems")
         async def get_systems():

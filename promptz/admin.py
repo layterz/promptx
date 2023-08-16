@@ -1,3 +1,4 @@
+from urllib.parse import urljoin
 import requests
 import pandas as pd
 from pydantic import BaseModel
@@ -5,7 +6,7 @@ from dash import Dash, html, dcc, dash_table, page_container, page_registry, reg
 from dash.exceptions import PreventUpdate
 import dash_bootstrap_components as dbc
 
-from . import World
+from . import World, Collection
 
 API_URL = 'http://localhost:8000'
 
@@ -14,12 +15,193 @@ class AdminPage(BaseModel):
     name: str
     path: str = None
     path_template: str = None
+    menu: bool = False
+    api_path: str = None
+
+    def __init__(self, name, path=None, path_template=None, menu=False):
+        super().__init__(
+            name=name,
+            path=path,
+            path_template=path_template,
+            menu=menu,
+        )
 
     def layout(self, **kwargs):
         return html.Div(children=[
             html.H1(self.name),
             html.P('Not implemented yet'),
         ])
+
+
+class Index:
+
+    def generate_link(self, row):
+        return f'[{row["name"]}](/{self.name}/{row["id"]})'
+
+    def layout(self):
+        df['name'] = df.apply(self.generate_link, axis=1)
+        content = [
+            dash_table.DataTable(
+                id='prompts-table',
+                columns=[{"name": i, "id": i, 'presentation': 'markdown'} for i in df.columns],
+                data=df.to_dict('records'),
+                style_as_list_view=True,
+            ),
+        ]
+
+
+class AdminIndexPage(AdminPage):
+
+    @property
+    def api_url(self):
+        return urljoin(API_URL, self.path)
+
+    def generate_link(self, row):
+        return f'[{row["id"]}](/{self.name}/{row["id"]})'
+
+    def layout(self):
+        response = requests.get(self.api_url)
+        if response.status_code == 200:
+            index = response.json()['response']
+        else:
+            raise Exception(f'Error getting index {self.name}: {response.status_code}')
+        
+        if len(index) == 0:
+            return html.Div(children=[
+                html.H1(self.name),
+                html.P('Nothing to see here.'),
+            ])
+        
+        df = pd.DataFrame(index)
+        
+        df['id'] = df.apply(self.generate_link, axis=1)
+        content = [
+            dash_table.DataTable(
+                id='prompts-table',
+                columns=[
+                    {"name": i, "id": i, 'presentation': 'markdown'} 
+                    for i in df.columns
+                ],
+                data=df.to_dict('records'),
+                style_as_list_view=True,
+            ),
+        ]
+
+        return html.Div([
+            html.H1(self.name),
+            *content,
+        ])
+
+
+class AdminEntityPage(AdminPage):
+    
+    def layout(self):
+        api_path = urljoin(API_URL, self.path_template.format(id=123))
+        response = requests.get(api_path)
+        if response.status_code == 200:
+            data = response.json()
+            print('data', data)
+            details = data['details']
+            results = data['results']
+        else:
+            raise Exception(f'Error getting entity: {response.status_code}')
+        
+        if len(results) > 0:
+            index = Index(results)
+        else:
+            index = html.Div([
+                html.P('No results found.'),
+            ])
+
+        return html.Div(children=[
+            html.H1(details['name']),
+            dbc.Button('Run', id='run-prompt', n_clicks=0, name=id, color='primary'),
+            dcc.Store(id='api-call-result', storage_type='session'),
+            html.Div(id, id='result-id', style={'display': 'none'}),
+            html.H2('Results'),
+            index,
+        ])
+
+
+class TemplateIndex(AdminIndexPage):
+
+    def __init__(self, **kwargs):
+        super().__init__(
+            name="Templates",
+            path="/templates",
+            **kwargs,
+        )
+
+
+class CollectionIndex(AdminIndexPage):
+
+    def __init__(self, **kwargs):
+        super().__init__(
+            name="Collections",
+            path="/collections",
+            **kwargs,
+        )
+
+
+class SystemIndex(AdminIndexPage):
+
+    def __init__(self, **kwargs):
+        super().__init__(
+            name="Systems",
+            path="/systems",
+            **kwargs,
+        )
+
+
+class NotebookIndex(AdminIndexPage):
+
+    def __init__(self, **kwargs):
+        super().__init__(
+            name="Notebooks",
+            path="/notebooks",
+            **kwargs,
+        )
+
+
+class ConversationIndex(AdminIndexPage):
+
+    def __init__(self, **kwargs):
+        super().__init__(
+            name="Conversations",
+            path="/conversations",
+            **kwargs,
+        )
+
+
+class Inbox(AdminIndexPage):
+    menu: bool = False
+
+    def __init__(self, **kwargs):
+        super().__init__(
+            name="Inbox",
+            path="/inbox",
+            **kwargs,
+        )
+
+
+class History(AdminIndexPage):
+
+    def __init__(self, **kwargs):
+        super().__init__(
+            name="History",
+            path="/history",
+            **kwargs,
+        )
+
+
+class TemplatePage(AdminEntityPage):
+
+    def __init__(self, **kwargs):
+        super().__init__(
+            name="Template",
+            path_template="/templates/{id}",
+            **kwargs,
+        )
 
 
 class Admin:
@@ -35,219 +217,20 @@ class Admin:
             external_stylesheets=[dbc.themes.ZEPHYR],
         )
 
-        def prompts_list_layout():
-            response = requests.get(f'{API_URL}/prompts')
-            if response.status_code == 200:
-                prompts = response.json()
-            else:
-                raise Exception(f'Error getting prompts: {response.status_code}')
-            
-            if len(prompts['response']) == 0:
-                content = [
-                    html.Div([
-                        html.P('No prompts found.'),
-                    ])
-                ]
-            else:
-                df = pd.DataFrame(prompts['response'])
-
-                def generate_open_link(row):
-                    return f'[{row["name"]}](/prompts/{row["id"]})'
-                
-                df['name'] = df.apply(lambda row: generate_open_link(row), axis=1)
-                df = df[
-                    ['name', 'instructions']
-                ]
-                content = [
-                    dash_table.DataTable(
-                        id='prompts-table',
-                        columns=[{"name": i, "id": i, 'presentation': 'markdown'} for i in df.columns],
-                        data=df.to_dict('records'),
-                    ),
-                ]
-
-            return html.Div([
-                html.H1('Prompts'),
-                *content,
-            ])
-
-        register_page(
-            'Prompts',
-            layout=prompts_list_layout,
-            path='/prompts',
-        )
-
-        def prompt_layout(id: str = None):
-            response = requests.get(f'{API_URL}/prompts/{id}')
-            if response.status_code == 200:
-                data = response.json()
-                prompt = data['prompt']
-                results = data['results']
-            else:
-                raise Exception(f'Error getting prompt: {response.status_code}')
-            
-            if len(results) > 0:
-                df = pd.DataFrame(results)
-
-                def generate_prompt_link(id):
-                    return f'[{id}](/prompts/{id})'
-                
-                df['prompt'] = df['prompt'].apply(lambda id: generate_prompt_link(id))
-                df = df[
-                    ['prompt', 'input', 'output']
-                ]
-
-                results_table = dash_table.DataTable(
-                    id='results-table',
-                    columns=[{"name": i, "id": i, 'presentation': 'markdown'} for i in df.columns],
-                    data=df.to_dict('records'),
-                )
-            else:
-                results_table = html.Div([
-                    html.P('No results found.'),
-                ])
-
-            return html.Div(children=[
-                html.H1(prompt['name']),
-                html.P(prompt['instructions']),
-                dbc.Button('Run', id='run-prompt', n_clicks=0, name=id, color='primary'),
-                dcc.Store(id='api-call-result', storage_type='session'),
-                html.Div(id, id='prompt-id', style={'display': 'none'}),
-                html.H2('Results'),
-                results_table,
-            ])
-
-        register_page('Prompt', layout=prompt_layout, path_template='/prompts/<id>')
-
-        @self.app.callback(
-            Output('api-call-result', 'data'),
-            [Input('run-prompt', 'n_clicks')],
-            [State('api-call-result', 'data'),
-             State('prompt-id', 'children')],
-        )
-        def run_prompt(n_clicks, current_data, id):
-            if n_clicks is None or n_clicks == 0:
-                raise PreventUpdate
-            else:
-                requests.post(f'{API_URL}/prompts/{id}/run')
-
-        def history_layout():
-            response = requests.get(f'{API_URL}/history')
-            if response.status_code == 200:
-                history = response.json()['response']
-            else:
-                raise Exception(f'Error getting prompts: {response.status_code}')
-            
-            if len(history) == 0:
-                return html.Div(children=[
-                    html.H1(children='History'),
-                    html.P('No history yet'),
-                ])
-            
-            df = pd.DataFrame(history)
-
-            def generate_prompt_link(id):
-                return f'[{id}](/prompts/{id})'
-            
-            df['prompt'] = df['prompt'].apply(lambda id: generate_prompt_link(id))
-            df = df[
-                ['prompt', 'input', 'output']
-            ]
-
-            return html.Div(children=[
-                html.H1(children='History'),
-                dash_table.DataTable(
-                    id='history-table',
-                    columns=[{"name": i, "id": i, 'presentation': 'markdown'} for i in df.columns],
-                    data=df.to_dict('records'),
-                ),
-            ])
-
-        register_page(
-            'History',
-            layout=history_layout,
-            path='/history',
-        )
-
-        def noop_layout(name: str):
-            def f():
-                return html.Div(children=[
-                    html.H1(name),
-                    html.P('Not implemented yet'),
-                ])
-            return f
-
-        register_page(
-            'Inbox',
-            layout=noop_layout('Inbox'),
-            path='/inbox',
-        )
-
-        register_page(
-            'Chats',
-            layout=noop_layout('Chats'),
-            path='/chats',
-        )
-
-        register_page(
-            'Collections',
-            layout=noop_layout('Collections'),
-            path='/collections',
-        )
-
-        def notebook_list_layout():
-            response = requests.get(f'{API_URL}/notebooks')
-            if response.status_code == 200:
-                notebooks = response.json()['response']
-            else:
-                raise Exception(f'Error getting notebooks: {response.status_code}')
-            
-            if len(notebooks) == 0:
-                return html.Div(children=[
-                    html.H1(children='Notebooks'),
-                    html.P('No notebooks yet'),
-                ])
-            
-            df = pd.DataFrame(notebooks)
-
-            def generate_notebook_link(id):
-                return f'[{id}](/notebooks/{id})'
-            
-            #df['name'] = df['id'].apply(lambda id: generate_notebook_link(id))
-            df = df[
-                ['name', 'description']
-            ]
-
-            return html.Div(children=[
-                html.H1(children='Notebooks'),
-                dash_table.DataTable(
-                    id='notebooks-table',
-                    columns=[{"name": i, "id": i, 'presentation': 'markdown'} for i in df.columns],
-                    data=df.to_dict('records'),
-                ),
-            ])
-        
-        register_page(
-            'Notebooks',
-            layout=notebook_list_layout,
-            path='/notebooks',
-        )
-
-        register_page(
-            'Systems',
-            layout=noop_layout('Systems'),
-            path='/systems',
-        )
-
-        menu = [
-            'Inbox',
-            'Prompts',
-            'Chats',
-            'Collections',
-            'Notebooks',
-            'Systems',
-            'History',
+        pages = [
+            Inbox(menu=True),
+            ConversationIndex(menu=True),
+            TemplateIndex(menu=True),
+            CollectionIndex(menu=True),
+            NotebookIndex(menu=True),
+            SystemIndex(menu=True),
+            History(menu=True),
         ]
+
+        for page in pages:
+            register_page(page.name, layout=page.layout, path=page.path, path_template=page.path_template)
+        
+        menu = [page.name for page in pages if page.menu]
 
         self.app.layout = dbc.Container(
             dbc.Row(
@@ -282,48 +265,3 @@ class Admin:
             ),
             fluid=True,
         )
-
-
-class PromptListPage(AdminPage):
-
-    def __init__(self):
-        super().__init__(
-            name="Prompts",
-            path="/prompts",
-        )
-
-    def layout(self):
-        response = requests.get(f'{API_URL}/prompts')
-        if response.status_code == 200:
-            prompts = response.json()
-        else:
-            raise Exception(f'Error getting prompts: {response.status_code}')
-        
-        if len(prompts['response']) == 0:
-            content = [
-                html.Div([
-                    html.P('No prompts found.'),
-                ])
-            ]
-        else:
-            df = pd.DataFrame(prompts['response'])
-
-            def generate_open_link(row):
-                return f'[{row["name"]}](/prompts/{row["id"]})'
-            
-            df['name'] = df.apply(lambda row: generate_open_link(row), axis=1)
-            df = df[
-                ['name', 'instructions']
-            ]
-            content = [
-                dash_table.DataTable(
-                    id='prompts-table',
-                    columns=[{"name": i, "id": i, 'presentation': 'markdown'} for i in df.columns],
-                    data=df.to_dict('records'),
-                ),
-            ]
-
-        return html.Div([
-            html.H1('Prompts'),
-            *content,
-        ])
