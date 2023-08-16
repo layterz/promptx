@@ -81,7 +81,7 @@ class API:
 
         @self.fastapi_app.get("/collections")
         async def get_collections():
-            return {"response": []}
+            return {"response": [c for c in self.world.collections().objects]}
 
         @self.fastapi_app.get("/collections/{name}")
         async def get_collection(name: str):

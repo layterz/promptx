@@ -98,7 +98,9 @@ class Collection(pd.DataFrame):
 
     @property
     def _constructor(self, *args, **kwargs):
-        return Collection
+        class C(Collection):
+            name = 'test'
+        return C
     
     @property
     def _constructor_sliced(self):
@@ -211,7 +213,10 @@ class Collection(pd.DataFrame):
             metadatas=[r['metadata'] for r in records],
         )
 
-        new_items = [r for r in records if r['id'] not in self['id'].values]
+        if self.empty:
+            new_items = records
+        else:
+            new_items = [r for r in records if r['id'] not in self['id'].values]
         docs = [{'id': r['id'], **json.loads(r['document'])} for r in new_items]
         df = pd.concat([self, Collection(docs)], ignore_index=True)
         self.drop(self.index, inplace=True)

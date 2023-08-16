@@ -78,6 +78,7 @@ class AdminIndexPage(AdminPage):
         return urljoin(API_URL, self.path)
 
     def generate_link(self, row):
+        print('link', row)
         link = os.path.join(self.path, row['id'])
         return f'[{row["id"]}]({link})'
 

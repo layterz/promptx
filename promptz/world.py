@@ -184,10 +184,11 @@ class Session:
         return cc
         
     def collection(self, name=None):
+        print('collection', name)
         if name is None:
             name = self._collection
         try:
-            collection = self.world.collections[name]
+            collection = self.world._collections[name]
             return collection
         except KeyError:
             return None
@@ -217,17 +218,19 @@ class Session:
 class World:
     name: str
     sessions: List[Session]
-    collections: Dict[str, Collection]
+    _collections: Dict[str, Collection]
 
     def __init__(self, name, systems=None, llm=None, ef=None, logger=None, db=None, templates=None, notebooks=None):
         self.name = name
         self.sessions = []
-        self.collections = {}
+        self._collections = {}
         self.llm = llm or MockLLM()
         self.ef = ef or (lambda x: [0] * len(x))
         self.db = db or ChromaVectorDB(path=os.environ.get('PROMPTZ_PATH'))
         self.logger = logger or logging.getLogger(self.name)
         
+        collection = self.db.get_or_create_collection('collections')
+        self.collections = Collection.load(collection)
         self.create_collection('history')
 
         self.create_collection('templates')
@@ -235,12 +238,14 @@ class World:
             self.create_template(template)
         
         self.create_collection('systems')
-        for name, system in self.systems.items():
-            self.create_system(name, system)
+        for system in self.systems.objects:
+            #self.create_system(name, system)
+            pass
         
         self.create_collection('notebooks')
-        for name, notebook in self.notebooks.items():
-            self.create_notebook(name, notebook)
+        for notebook in self.notebooks.objects:
+            #self.create_notebook(name, notebook)
+            pass
     
     def create_session(self, name=None, db=None, llm=None, ef=None, logger=None, silent=False, debug=False, log_format='notebook'):
         llm = llm or self.llm
@@ -264,11 +269,12 @@ class World:
         if metadata is None:
             metadata = {"hnsw:space": "cosine"}
         collection = self.db.get_or_create_collection(name, metadata=metadata)
-        self.collections[name] = Collection.load(collection)
-        return collection
+        self._collections[name] = Collection.load(collection)
+        self.collections.embed({'name': name, 'id': name, 'type': 'collection'})
 
     def create_template(self, details: TemplateDetails):
         t = Template(**dict(details))
+        print('t', dict(t))
         self.templates.embed(dict(t))
         return t
     
@@ -282,19 +288,19 @@ class World:
 
     @property
     def templates(self):
-        return self.collections['templates']
+        return self._collections['templates']
     
     @property
     def systems(self):
-        return self.collections['systems']
+        return self._collections['systems']
     
     @property
     def notebooks(self):
-        return self.collections['notebooks']
+        return self._collections['notebooks']
     
     @property
     def history(self):
-        return self.collections['history']
+        return self._collections['history']
 
     def __call__(self, session, *args: Any, **kwds: Any) -> Any:
         for system in self.systems.values():
