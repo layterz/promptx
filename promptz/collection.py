@@ -53,6 +53,11 @@ class Entity(BaseModel):
         arbitrary_types_allowed = True
     
     def __init__(self, **data):
+        for field, value in data.items():
+            # if value is NaN, set it to None
+            if isinstance(value, float) and pd.isna(value):
+                data[field] = None
+
         super().__init__(**data)
     
     def __repr__(self):
@@ -98,9 +103,7 @@ class Collection(pd.DataFrame):
 
     @property
     def _constructor(self, *args, **kwargs):
-        class C(Collection):
-            name = 'test'
-        return C
+        return Collection
     
     @property
     def _constructor_sliced(self):

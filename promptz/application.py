@@ -10,7 +10,7 @@ from nbconvert import HTMLExporter
 from .world import World, System
 from .api import API
 from .admin import Admin
-from .template import TemplateDetails
+from .template import Template
 
 
 class App:
@@ -41,7 +41,10 @@ class App:
         return r
     
     def _load_templates(self):
-        return self._load(self.templates_dir, TemplateDetails)
+        return self._load(self.templates_dir, Template)
+    
+    def _load_systems(self):
+        return self._load(self.systems_dir, System)
     
     def _load_notebooks(self):
         html_notebooks = {}
@@ -54,9 +57,6 @@ class App:
                     body, resources = html_exporter.from_notebook_node(notebook_node)
                     html_notebooks[file_name] = body
         return html_notebooks
-    
-    def _load_systems(self):
-        return self._load(self.systems_dir, System)
     
     def _serve_api(self, host='0.0.0.0', port=8000):
         import uvicorn

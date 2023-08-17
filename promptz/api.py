@@ -22,7 +22,6 @@ class API:
 
         @self.fastapi_app.post("/prompt")
         async def run_prompt(details: TemplateDetails):
-            print('running prompt', details)
             session = self.world.create_session()
             template = Template(**details.dict())
             response = session.prompt(**{**dict(template), 'input': {}})
@@ -35,8 +34,8 @@ class API:
                 templates = []
             else:
                 templates = r.objects
-
-            return {"response": templates}
+            
+            return {"list": templates}
 
         @self.fastapi_app.get("/templates/{id}")
         async def get_template(id: str):
@@ -67,37 +66,46 @@ class API:
         @self.fastapi_app.get("/history")
         async def get_history():
             if self.world.history.empty:
-                return {'response': []}
+                return {'list': []}
             else:
-                return {'response': self.world.history().objects}
+                return {'list': self.world.history().objects}
 
         @self.fastapi_app.get("/inbox")
         async def get_collections():
-            return {"response": []}
+            return {"list": []}
 
         @self.fastapi_app.get("/conversations")
         async def get_collections():
-            return {"response": []}
+            return {"list": []}
 
         @self.fastapi_app.get("/collections")
         async def get_collections():
-            return {"response": [c for c in self.world.collections().objects]}
+            return {"list": [c for c in self.world.collections().objects]}
 
         @self.fastapi_app.get("/collections/{name}")
         async def get_collection(name: str):
             try:
-                c = self.world.collections[name]
-                r = Collection.load(c)()
+                c = self.world.collections()
+                r = c[c['name'] == name].first
+                cc = self.world._collections[name]
+                print('r', r)
+                print(cc.objects)
                 if r is None:
-                    return {"response": []}
+                    return {"response": None}
                 else:
-                    return {"response": r.objects}
+                    return {"details": dict(r), "list": cc.objects}
             except KeyError:
                 raise HTTPException(status_code=404, detail="Collection not found")
 
         @self.fastapi_app.get("/systems")
         async def get_systems():
-            return {"response": self.world.systems.keys()}
+            r = self.world.systems()
+            if r is None:
+                systems = []
+            else:
+                systems = r.objects
+            
+            return {"list": systems}
         
         @self.fastapi_app.get("/systems/{name}")
         async def get_system(name: str):
@@ -116,12 +124,9 @@ class API:
         
         @self.fastapi_app.get("/notebooks")
         async def get_notebooks():
-            return {"response": self.world.notebooks}
+            return {"list": self.world.notebooks}
         
         @self.fastapi_app.get("/notebooks/{name}")
         async def get_notebook(name: str):
             return {"response": self.world.notebooks[name]}
         
-        @self.fastapi_app.get("/chats")
-        async def get_chats():
-            return {"response": {}}

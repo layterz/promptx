@@ -88,20 +88,22 @@ class Template:
     history: List[ChatLog] = []
     examples: List[Tuple[(str|BaseModel), (str|BaseModel)]] = []
     num_examples: int = 1
+    input: Type[BaseModel] = None
     output: Type[BaseModel] = None
     llm: LLM = MockLLM()
 
-    def __init__(self, instructions=None, output=None, context=None, template=None, examples=None, id=None, num_examples=None, history=None, llm=None, logger=None, debug=False, silent=False, tools: ToolList = None, name=None):
+    def __init__(self, instructions=None, output=None, context=None, template=None, examples=None, input=None, id=None, num_examples=None, history=None, llm=None, logger=None, debug=False, silent=False, tools: ToolList = None, name=None):
         super().__init__()
 
-        self.id = id or str(uuid.uuid4())
-        self.name = name
+        self.id = id or self.id or str(uuid.uuid4())
+        self.name = name or self.name
         self.logger = logger
         self.llm = llm or self.llm
         self.context = context or self.context
         self.history = history or self.history
+        self.input = input or self.input
         self.output = output or self.output
-        self.instructions = textwrap.dedent(instructions) if instructions is not None else None
+        self.instructions = textwrap.dedent(instructions or self.instructions or '')
 
         self.num_examples = num_examples or self.num_examples
         self.examples = examples or self.examples
@@ -239,8 +241,10 @@ class Template:
         return {
             'id': self.id,
             'type': 'template',
-            'name': self.name,
+            'name': self.name or None,
             'instructions': self.instructions,
+            'input': self.input.__name__ if self.input is not None else 'None',
+            'output': self.output.__name__ if self.output is not None else 'None',
         }
 
     def __iter__(self):

@@ -45,7 +45,7 @@ class AdminPage(BaseModel):
             content,
         ])
     
-    def render(self):
+    def render(self, **kwargs):
         return html.Div(children=[
             html.H1(self.name),
         ])
@@ -78,47 +78,71 @@ class AdminIndexPage(AdminPage):
         return urljoin(API_URL, self.path)
 
     def generate_link(self, row):
-        print('link', row)
-        link = os.path.join(self.path, row['id'])
+        if self.path_template:
+            p = self.path_template.replace('<id>', row['id'])
+        else:
+            p = self.path
+        link = os.path.join(p, row['id'])
         return f'[{row["id"]}]({link})'
-
-    def layout(self):
-        response = requests.get(self.api_url)
+    
+    def register_callbacks(self):
+        @self.app.callback(
+            Output(f'{self.name}-details', 'children'),
+            Output(f'{self.name}-table', 'children'),
+            Input('fetch-interval', 'n_intervals'),
+            Input('url', 'pathname'),
+        )
+        def fetch_data(n_intervals, pathname):
+            if n_intervals is not None and n_intervals > 0:
+                return self.fetch(pathname)
+            else:
+                return no_update
+    
+    def fetch(self, pathname):
+        api_path = urljoin(API_URL, pathname)
+        response = requests.get(api_path)
         if response.status_code == 200:
-            index = response.json()['response']
+            data = response.json()
+            details = data.get('details', {})
+            index = data.get('list', [])
         else:
             raise Exception(f'Error getting index {self.name}: {response.status_code}')
         
+        details = html.H1(details.get('name', self.name))
         if len(index) == 0:
-            return html.Div(children=[
-                html.H1(self.name),
-                html.P('Nothing to see here.'),
-            ])
-        
-        df = pd.DataFrame(index)
-        
-        df['id'] = df.apply(self.generate_link, axis=1)
-        content = [
-            dash_table.DataTable(
-                id='prompts-table',
-                columns=[
-                    {"name": i, "id": i, 'presentation': 'markdown'} 
-                    for i in df.columns
-                ],
-                data=df.to_dict('records'),
-                style_as_list_view=True,
-                style_header={
-                    'textAlign': 'left',
-                },
-                markdown_options={
-                    'link_target': '_self',
-                },
-            ),
-        ]
+            return details, html.P('Nothing to see here.'),
 
+        df = pd.DataFrame(index)
+        df['id'] = df.apply(self.generate_link, axis=1)
+        index_table = dash_table.DataTable(
+            id='prompts-table',
+            columns=[
+                {"name": i, "id": i, 'presentation': 'markdown'} 
+                for i in df.columns
+            ],
+            data=df.to_dict('records'),
+            style_as_list_view=True,
+            style_header={
+                'textAlign': 'left',
+            },
+            markdown_options={
+                'link_target': '_self',
+            },
+        )
+
+        return details, index_table
+
+    def layout(self):
         return html.Div([
-            html.H1(self.name),
-            *content,
+            html.Div(id=f'{self.name}-details'),
+            html.Div(id=f'{self.name}-table'),
+            
+            dcc.Location(id='url', refresh=False), 
+            dcc.Interval(
+                id=f'fetch-interval',
+                interval=1,  # Set an interval that triggers once
+                max_intervals=1  # Only trigger once
+            ),
         ])
 
 
@@ -129,57 +153,86 @@ class AdminEntityPage(AdminPage):
         response = requests.get(api_path)
         if response.status_code == 200:
             data = response.json()
-            details = data['details']
-            results = data['results']
-            print('fetch', data, details, results)
-            return data, json.dumps(details), json.dumps(results)
+            details_data = [
+                {'field': k, 'value': v}
+                for k, v in data['details'].items()
+            ]
+            details = dash_table.DataTable(
+                id='details-table',
+                columns=[{"name": i, "id": i} for i in ['field', 'value']],
+                data=details_data,
+                style_as_list_view=True,
+            )
+            if len(data['results']) > 0:
+                results = dash_table.DataTable(
+                    id='results-table',
+                    columns=[{"name": i, "id": i} for i in results[0].keys()],
+                    data=results,
+                    style_as_list_view=True,
+                )
+            else:
+                results = html.P('No results.')
+            return data, details, results
         else:
             raise Exception(f'Error getting entity: {response.status_code}')
     
     def register_callbacks(self):
         @self.app.callback(
-            Output('data-store', 'data'),
-            Output('details', 'children'),
-            Output('results', 'children'),
+            Output(f'{self.name}-data-store', 'data'),
+            Output(f'{self.name}-details', 'children'),
+            Output(f'{self.name}-results', 'children'),
             Input('fetch-interval', 'n_intervals'),
             Input('url', 'pathname'),
         )
         def fetch_data(n_intervals, pathname):
-            print('fetch_data', n_intervals, pathname)
             if n_intervals is not None and n_intervals > 0:
                 return self.fetch(pathname)
             else:
                 return no_update
 
+        @self.app.callback(
+            Output(f'{self.name}-actions', 'children'),
+            Input('url', 'pathname'),
+        )
+        def actions(pathname):
+            return self.actions(pathname)
+
     def layout(self, **kwargs):
-        content = self.render(**kwargs)
         return html.Div(children=[
             dcc.Location(id='url', refresh=False), 
             dcc.Loading(id='loading', type='default', children=[
-                dcc.Store(id='data-store'),
-                content,
+                dcc.Store(id=f'{self.name}-data-store'),
+                dbc.Row(
+                    id='header',
+                    children=[
+                            dbc.Col(
+                                [
+                                    html.H1(self.name),
+                                ],
+                                width=9,
+                                style={
+                                },
+                            ),
+                            dbc.Col(
+                                id=f'{self.name}-actions',
+                                width=3,
+                                children=[],
+                                style={
+                                },
+                            ),
+                    ],
+                ),
+                html.Div(id=f'{self.name}-details'),
+                html.H2('Results'),
+                html.Div(id=f'{self.name}-results'),
             ]),
             
             dcc.Interval(
-                id='fetch-interval',
+                id=f'fetch-interval',
                 interval=1,  # Set an interval that triggers once
                 max_intervals=1  # Only trigger once
             ),
         ])
-    
-    def render(self, id=None):
-        return html.Div([
-            html.Div(id='details'),
-            html.Div(id='results'),
-        ])
-        #return html.Div(children=[
-        #    html.H1(details['name']),
-        #    dbc.Button('Run', id='run-prompt', n_clicks=0, name=id, color='primary'),
-        #    dcc.Store(id='api-call-result', storage_type='session'),
-        #    html.Div(id, id='result-id', style={'display': 'none'}),
-        #    html.H2('Results'),
-        #    index,
-        #])
 
 
 class TemplateIndex(AdminIndexPage):
@@ -260,6 +313,20 @@ class History(AdminIndexPage):
         )
 
 
+class CollectionPage(AdminIndexPage):
+
+    def __init__(self, app, **kwargs):
+        super().__init__(
+            app,
+            name="Collection",
+            path_template="/collections/<id>",
+            **kwargs,
+        )
+    
+    def layout(self, id=None):
+        return super().layout()
+
+
 class TemplatePage(AdminEntityPage):
 
     def __init__(self, app, **kwargs):
@@ -267,6 +334,64 @@ class TemplatePage(AdminEntityPage):
             app,
             name="Template",
             path_template="/templates/<id>",
+            **kwargs,
+        )
+
+    def actions(self, pathname):
+        href = f'{pathname}/run'
+        return dbc.Button('Run', id='run-prompt', href=href, n_clicks=0, color='primary'),
+
+
+class TemplateRunPage(AdminPage):
+
+    def __init__(self, app, **kwargs):
+        super().__init__(
+            app,
+            name="Run template",
+            path_template="/templates/<id>/run",
+            **kwargs,
+        )
+    
+    def layout(self, **kwargs):
+        return html.Div([
+            dcc.Location(id='url', refresh=False), 
+            dcc.Store(id=f'{self.name}-data-store'),
+            dcc.Interval(
+                id=f'fetch-interval',
+                interval=1,  # Set an interval that triggers once
+                max_intervals=1  # Only trigger once
+            ),
+            
+            html.H1(self.name),
+            html.Div(id=f'{self.name}-form'),
+        ])
+
+    def register_callbacks(self):
+        @self.app.callback(
+            Output(f'{self.name}-form', 'children'),
+            Input('fetch-interval', 'n_intervals'),
+            Input('url', 'pathname'),
+        )
+        def generate_form(n_intervals, url):
+            form_elements = []
+            component = dcc.Input(
+                id='input', type='text', 
+                placeholder=f'E.g. What is the capital of France?',
+            )
+            form_elements.append(html.Label('Input'))
+            form_elements.append(component)
+            submit_button = dbc.Button('Submit', id='submit', n_clicks=0, color='primary')
+            form_elements.append(submit_button)
+            return form_elements
+
+
+class SystemPage(AdminEntityPage):
+
+    def __init__(self, app, **kwargs):
+        super().__init__(
+            app,
+            name="System",
+            path_template="/systems/<id>",
             **kwargs,
         )
 
@@ -294,6 +419,9 @@ class Admin:
             History(self.app, menu=True),
 
             TemplatePage(self.app),
+            TemplateRunPage(self.app),
+            SystemPage(self.app),
+            CollectionPage(self.app),
         ]
 
         for page in pages:

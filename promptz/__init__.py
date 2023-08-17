@@ -126,7 +126,6 @@ def load_config(filename="promptz.env"):
 
 def load(llm=None, ef=None, logger=None, log_format='notebook', **kwargs):
     path, config = load_config()
-    print('config', path, config)
     app = load_app(path)
     session = app.world.create_session()
     set_default_session(session)

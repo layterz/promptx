@@ -36,6 +36,8 @@ class System:
     def __dict__(self):
         return {
             'name': self.name,
+            'id': self.name,
+            'type': 'system',
         }
 
     def __iter__(self):
@@ -184,7 +186,6 @@ class Session:
         return cc
         
     def collection(self, name=None):
-        print('collection', name)
         if name is None:
             name = self._collection
         try:
@@ -238,9 +239,8 @@ class World:
             self.create_template(template)
         
         self.create_collection('systems')
-        for system in self.systems.objects:
-            #self.create_system(name, system)
-            pass
+        for _, system in systems.items():
+            self.create_system(system)
         
         self.create_collection('notebooks')
         for notebook in self.notebooks.objects:
@@ -272,13 +272,10 @@ class World:
         self._collections[name] = Collection.load(collection)
         self.collections.embed({'name': name, 'id': name, 'type': 'collection'})
 
-    def create_template(self, details: TemplateDetails):
-        t = Template(**dict(details))
-        print('t', dict(t))
-        self.templates.embed(dict(t))
-        return t
+    def create_template(self, template: Template):
+        return self.templates.embed(dict(template))
     
-    def create_system(self, name, system):
+    def create_system(self, system):
         c = self.systems.embed(system)
         return c
     
