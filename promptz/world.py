@@ -63,7 +63,7 @@ class Session:
         try:
             rendered = p.render({'input': p.parse(input)})
             r = p(input, dryrun=dryrun, retries=retries, **kwargs)
-            log = ChatLog(prompt=p.id, input=rendered, output=r.raw)
+            log = ChatLog(template=p.id, input=rendered, output=r.raw)
             self.store(log, collection='history')
             return r
         except MaxRetriesExceeded as e:

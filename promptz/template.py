@@ -243,8 +243,8 @@ class Template:
             'type': 'template',
             'name': self.name or None,
             'instructions': self.instructions,
-            'input': self.input.__name__ if self.input is not None else 'None',
-            'output': self.output.__name__ if self.output is not None else 'None',
+            'input': self.input.__name__ if self.input is not None else None,
+            'output': self.output.__name__ if self.output is not None else None,
         }
 
     def __iter__(self):

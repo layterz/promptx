@@ -153,6 +153,7 @@ class AdminEntityPage(AdminPage):
         response = requests.get(api_path)
         if response.status_code == 200:
             data = response.json()
+            print('data', data)
             details_data = [
                 {'field': k, 'value': v}
                 for k, v in data['details'].items()
@@ -163,23 +164,54 @@ class AdminEntityPage(AdminPage):
                 data=details_data,
                 style_as_list_view=True,
             )
-            if len(data['results']) > 0:
-                results = dash_table.DataTable(
+
+            form = dbc.Form(
+                [
+                    html.Div([
+                        dbc.Label('Input'),
+                        dbc.Input(
+                            id=f'{self.name}-input', type='text',
+                            placeholder='Enter prompt input',
+                        )
+                    ]),
+                    html.Div(
+                        dbc.Button('Submit', id=f'{self.name}-submit', n_clicks=0, color='primary')
+                    ),
+                    html.Div(id=f'{self.name}-form-output'),
+                ],
+                style={
+                    'padding': '10px',
+                    'background-color': 'lightgray',
+                }
+            )
+
+            df = pd.DataFrame(data['results'])
+
+            results = html.Div([
+                html.H2('Logs'),
+                dash_table.DataTable(
                     id='results-table',
-                    columns=[{"name": i, "id": i} for i in results[0].keys()],
-                    data=results,
+                    columns=[
+                        {"name": i, "id": i, 'presentation': 'markdown'} 
+                        for i in df.columns
+                    ],
+                    data=df.to_dict('records'),
                     style_as_list_view=True,
-                )
-            else:
-                results = html.P('No results.')
-            return data, details, results
+                ),
+            ])
+
+            return data, details, form, results
         else:
             raise Exception(f'Error getting entity: {response.status_code}')
+    
+    def actions(self, pathname):
+        pass
     
     def register_callbacks(self):
         @self.app.callback(
             Output(f'{self.name}-data-store', 'data'),
             Output(f'{self.name}-details', 'children'),
+            Output(f'{self.name}-form', 'children'),
             Output(f'{self.name}-results', 'children'),
             Input('fetch-interval', 'n_intervals'),
             Input('url', 'pathname'),
@@ -196,6 +228,26 @@ class AdminEntityPage(AdminPage):
         )
         def actions(pathname):
             return self.actions(pathname)
+        
+        @self.app.callback(
+            Output(f'{self.name}-form-output', 'children'),
+            [
+                Input(f'{self.name}-submit', 'n_clicks'),
+                Input('url', 'pathname'),
+            ],
+            [State(f'{self.name}-input', 'value')]
+        )
+        def submit_form(n_clicks, pathname, input):
+            if n_clicks is None or n_clicks == 0:
+                raise PreventUpdate
+            
+            api_path = urljoin(API_URL, pathname + '/run')
+            response = requests.post(api_path, json={'input': input})
+            if response.status_code == 200:
+                data = response.json()
+                return data['response'] 
+            else:
+                return f'Error: {response.status_code}'
 
     def layout(self, **kwargs):
         return html.Div(children=[
@@ -223,7 +275,7 @@ class AdminEntityPage(AdminPage):
                     ],
                 ),
                 html.Div(id=f'{self.name}-details'),
-                html.H2('Results'),
+                html.Div(id=f'{self.name}-form'),
                 html.Div(id=f'{self.name}-results'),
             ]),
             
@@ -337,10 +389,6 @@ class TemplatePage(AdminEntityPage):
             **kwargs,
         )
 
-    def actions(self, pathname):
-        href = f'{pathname}/run'
-        return dbc.Button('Run', id='run-prompt', href=href, n_clicks=0, color='primary'),
-
 
 class TemplateRunPage(AdminPage):
 
@@ -372,14 +420,26 @@ class TemplateRunPage(AdminPage):
             Input('fetch-interval', 'n_intervals'),
             Input('url', 'pathname'),
         )
-        def generate_form(n_intervals, url):
+        def generate_form(n_intervals, pathname):
+            if n_intervals is None or n_intervals == 0:
+                return no_update
+            api_path = urljoin(API_URL, pathname)
+            response = requests.get(api_path)
+            if response.status_code == 200:
+                data = response.json()
+                details = data.get('details', {})
+            else:
+                raise Exception(f'Error getting index {self.name}: {response.status_code}')
             form_elements = []
-            component = dcc.Input(
-                id='input', type='text', 
-                placeholder=f'E.g. What is the capital of France?',
-            )
-            form_elements.append(html.Label('Input'))
-            form_elements.append(component)
+            for name, field in details.items():
+                if name in ['id', 'type']:
+                    continue
+                component = dcc.Input(
+                    id=name, type='text', 
+                    placeholder=f'E.g. {field}',
+                )
+                form_elements.append(html.Label(name))
+                form_elements.append(component)
             submit_button = dbc.Button('Submit', id='submit', n_clicks=0, color='primary')
             form_elements.append(submit_button)
             return form_elements
@@ -419,7 +479,6 @@ class Admin:
             History(self.app, menu=True),
 
             TemplatePage(self.app),
-            TemplateRunPage(self.app),
             SystemPage(self.app),
             CollectionPage(self.app),
         ]
