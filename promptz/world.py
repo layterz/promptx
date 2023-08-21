@@ -235,11 +235,11 @@ class World:
         self.create_collection('history')
 
         self.create_collection('templates')
-        for _, template in templates.items():
+        for template in templates:
             self.create_template(template)
         
         self.create_collection('systems')
-        for _, system in systems.items():
+        for system in systems:
             self.create_system(system)
         
         self.create_collection('notebooks')

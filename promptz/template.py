@@ -1,11 +1,10 @@
 import random
 import json
-import inspect
 from enum import Enum
 import uuid
 import textwrap
-from typing import Any, Dict, List, Tuple, Type, get_origin, get_args
-from pydantic import BaseModel, ValidationError
+from typing import List, Tuple, Type, get_origin, get_args
+from pydantic import BaseModel, Field, ValidationError
 from openai.error import RateLimitError
 from jinja2 import Template as JinjaTemplate
 
@@ -70,7 +69,7 @@ class Template:
     Return the output as a valid JSON object with the fields described below. 
     {% endif %}
     {% for field in fields %}
-    - {{field.name}} (type: {{field.type_}}, required: {{field.required}}){% if field.instructions != None %}: {{field.instructions}}{% endif %}
+    - {{field.name}} (type: {{field.type_}}, required: {{field.required}}){% if field.description != None %}: {{field.description}}{% endif %}
     {% endfor %}
 
     Make sure to use double quotes and avoid trailing commas!
@@ -149,46 +148,56 @@ class Template:
         output = self.template.render(**vars)
         return output
     
-    def format_field(self, field):
-        instructions = field.field_info.description or ''
+    def format_field(self, name, field):
+        print('field', name, field)
+        description = field.get('description', '')
         options = ''
-        outer_type_ = field.outer_type_.__name__
-        if issubclass(field.type_, BaseModel):
-            return None
 
-        if get_origin(field.outer_type_) is list:
-            item_type = get_args(field.outer_type_)[0]
-            type_ = f'{item_type.__name__}[]'
+        if field.get('type') == 'array':
+            item_type = field.get('items', {}).get('type', None)
+            type_ = f'{item_type}[]'
             if isinstance(item_type, type(Enum)):
                 type_ = 'str[]'
                 options += f'''Select any relevant options from: {", ".join([
                     member.value for member in item_type
                 ])}'''
-        elif isinstance(field.type_, type(Enum)):
+        elif field.get('type') == 'enum':
             type_ = 'str'
             options += f'''Select only one option: {", ".join([
                 member.value for member in field.type_
             ])}'''
         else:
-            type_ = field.type_.__name__
+            type_ = field.get('type', 'str')
 
         if len(options) > 0:
             instructions += ' ' + options
 
         return {
-            'name': field.name,
+            'name': name,
+            'title': field.get('title', None),
             'type_': type_,
-            'required': field.required,
-            'default': field.default,
-            'instructions': instructions.strip(),
+            'default': field.get('default', None),
+            'description': description.strip(),
         }
     
     def render_format(self, x, **kwargs):
         if self.output is None:
             return ''
-        # check if self.output is a List
+        
         list_output = False
-        cls = self.output
+
+        fields = []
+        print('self.output', self.output)
+        for name, property in self.output.get('properties', {}).items():
+            f = self.format_field(name, property)
+            f['required'] = name in self.output.get('required', [])
+            fields += [f]
+        
+        list_output = False
+        return self.format_template.render({
+            'fields': [field for field in fields if field is not None], 
+            'list_output': list_output,
+        })
         if getattr(self.output, '__origin__', None) is list:
             # if so, get the type of the list
             list_output = True
@@ -229,10 +238,11 @@ class Template:
                 elif issubclass(cls, BaseModel):
                     rows += [{'type': type_, **cls(**d).dict()} for d in data]
             else:
+                cls = BaseModel.parse_raw(self.output)
                 type_ = self.output.__name__.lower()
                 d = json.loads(output)
                 d = {'type': type_, **d}
-                return self.output(**d)
+                return cls(**d)
             return Collection(rows)
         else:
             return output
@@ -280,6 +290,7 @@ class Template:
             if len(px): self.logger.log(INPUT, px)
             tools = [t.info for t in self.tools]
             self.logger.debug(f'FULL INPUT: {prompt_input}')
+            print(f'FULL INPUT: {prompt_input}')
             response = llm.generate(prompt_input, context=self.context, history=self.history, tools=tools)
             if response.callback is not None:
                 function_name = response.callback.name

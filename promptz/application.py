@@ -37,14 +37,24 @@ class App:
             module = importlib.import_module(f'{dir}.{file_name}')
             for name, obj in vars(module).items():
                 if isinstance(obj, type) and issubclass(obj, cls) and obj != cls:
-                    r[name] = dict(obj())
+                    r[name] = obj()
         return r
     
     def _load_templates(self):
-        return self._load(self.templates_dir, Template)
+        r = self._load(self.templates_dir, Template)
+        t = []
+        for name, o in r.items():
+            input = o.input.schema() if o.input else None
+            output = o.output.schema() if o.output else None
+            t.append(dict({**dict(o), 'input': input, 'output': output}))
+        return t
     
     def _load_systems(self):
-        return self._load(self.systems_dir, System)
+        r = self._load(self.systems_dir, System)
+        s = []
+        for name, o in r.items():
+            s.append(dict({**dict(o)}))
+        return s
     
     def _load_notebooks(self):
         html_notebooks = {}

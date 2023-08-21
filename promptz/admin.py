@@ -157,6 +157,12 @@ class AdminEntityPage(AdminPage):
             details_data = [
                 {'field': k, 'value': v}
                 for k, v in data['details'].items()
+                if type(v) in [str, int, float, bool]
+            ]
+            details_data += [
+                {'field': k, 'value': v.get('title')}
+                for k, v in data['details'].items()
+                if type(v) == dict
             ]
             details = dash_table.DataTable(
                 id='details-table',
@@ -165,15 +171,48 @@ class AdminEntityPage(AdminPage):
                 style_as_list_view=True,
             )
 
+            if data['details']['input'] is None:
+                inputs = [{
+                    'input': 'Input',
+                }]
+            else:
+                input_schema = {
+                    name: field
+                    for name, field in data['details']['input']['properties'].items()
+                }
+                inputs = []
+                for name, field in input_schema.items():
+                    input = {
+                        'id': str(len(inputs)),
+                        'label': field['title'],
+                    }
+                    if field['type'] == 'string':
+                        input['type'] = 'text'
+                    elif field['type'] == 'integer':
+                        input['type'] = 'number'
+                    elif field['type'] == 'boolean':
+                        input['type'] = 'checkbox'
+                    else:
+                        input['type'] = 'text'
+                    
+                    inputs.append(input)
+            
             form = dbc.Form(
                 [
-                    html.Div([
-                        dbc.Label('Input'),
-                        dbc.Input(
-                            id=f'{self.name}-input', type='text',
-                            placeholder='Enter prompt input',
-                        )
-                    ]),
+                    *[
+                        html.Div([
+                            dbc.Label(input['label']),
+                            dbc.Input(
+                                id=f'{self.name}-{input["id"]}', type=input['type'],
+                                placeholder=f'Enter {input["label"]}',
+                            )
+                        ])
+                        for input in inputs
+                    ],
+                    *[
+                        html.Div(id=f'{self.name}-{i}', style={ 'display': 'none'})
+                        for i in range(len(inputs), 100) 
+                    ],
                     html.Div(
                         dbc.Button('Submit', id=f'{self.name}-submit', n_clicks=0, color='primary')
                     ),
@@ -235,14 +274,18 @@ class AdminEntityPage(AdminPage):
                 Input(f'{self.name}-submit', 'n_clicks'),
                 Input('url', 'pathname'),
             ],
-            [State(f'{self.name}-input', 'value')]
+            [
+                State(f'{self.name}-{i}', 'value')
+                for i in range(100)
+            ],
         )
-        def submit_form(n_clicks, pathname, input):
+        def submit_form(n_clicks, pathname, *inputs):
             if n_clicks is None or n_clicks == 0:
                 raise PreventUpdate
             
             api_path = urljoin(API_URL, pathname + '/run')
-            response = requests.post(api_path, json={'input': input})
+            print('inputs', inputs)
+            response = requests.post(api_path, json={'input': inputs})
             if response.status_code == 200:
                 data = response.json()
                 return data['response'] 
