@@ -248,6 +248,7 @@ class Template:
                 return Collection(rows)
             else:
                 out = json.loads(output)
+                print('OUT', out, self.output)
                 jsonschema.validate(out, self.output)
                 fields = {
                     name: (JSON_TYPE_MAP[field_info["type"]], ... if "default" not in field_info else field_info["default"])

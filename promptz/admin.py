@@ -6,6 +6,7 @@ import pandas as pd
 from pydantic import BaseModel
 from dash import Dash, html, dcc, dash_table, no_update, page_container, page_registry, register_page, Output, Input, State
 from dash.exceptions import PreventUpdate
+from dash.dependencies import ALL
 import dash_bootstrap_components as dbc
 
 from . import World, Collection
@@ -182,7 +183,7 @@ class AdminEntityPage(AdminPage):
                 inputs = []
                 for name, field in input_schema.items():
                     input = {
-                        'id': str(len(inputs)),
+                        'id': name,
                         'label': field['title'],
                     }
                     if field['type'] == 'string':
@@ -202,7 +203,7 @@ class AdminEntityPage(AdminPage):
                         html.Div([
                             dbc.Label(input['label']),
                             dbc.Input(
-                                id=f'{self.name}-{input["id"]}', type=input['type'],
+                                id={'type': 'json_field', 'index': input['id']},
                                 name=input['label'],
                                 placeholder=f'Enter {input["label"]}',
                             )
@@ -274,17 +275,16 @@ class AdminEntityPage(AdminPage):
                 Input(f'{self.name}-submit', 'n_clicks'),
                 Input('url', 'pathname'),
             ],
-            [
-                State(f'{self.name}-{i}', 'value')
-                for i in range(100)
-            ],
+            State({'type': 'json_field', 'index': ALL}, 'value'),
+            State({'type': 'json_field', 'index': ALL}, 'id')
         )
-        def submit_form(n_clicks, pathname, *inputs):
+        def submit_form(n_clicks, pathname, values, ids):
             if n_clicks is None or n_clicks == 0:
                 raise PreventUpdate
             
+            form_data = {id_dict['index']: value for id_dict, value in zip(ids, values)}
             api_path = urljoin(API_URL, pathname + '/run')
-            response = requests.post(api_path, json={'input': inputs})
+            response = requests.post(api_path, json={'input': form_data})
             if response.status_code == 200:
                 data = response.json()
                 return data['response'] 
