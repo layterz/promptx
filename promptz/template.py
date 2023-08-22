@@ -196,12 +196,17 @@ class Template:
         list_output = False
 
         fields = []
-        for name, property in self.output.get('properties', {}).items():
+        if self.output.get('type', None) == 'array':
+            properties = self.output.get('items', {}).get('properties', {})
+            list_output = True
+        elif self.output.get('type', None) == 'object':
+            properties = self.output.get('properties', {})
+        
+        for name, property in properties.items():
             f = self.format_field(name, property)
             f['required'] = name in self.output.get('required', [])
             fields += [f]
         
-        list_output = False
         return self.format_template.render({
             'fields': [field for field in fields if field is not None], 
             'list_output': list_output,
@@ -235,30 +240,22 @@ class Template:
         ])
     
     def process(self, x, output, **kwargs):
-        if self.output is not None:
-            rows = []
-            if getattr(self.output, '__origin__', None) is list:
-                cls = self.output.__args__[0]
-                type_ = cls.__name__.lower()
-                data = json.loads(output)
-                if cls is str:
-                    rows += [{'type': type_, 'output': d} for d in data]
-                elif issubclass(cls, BaseModel):
-                    rows += [{'type': type_, **cls(**d).dict()} for d in data]
-                return Collection(rows)
-            else:
-                out = json.loads(output)
-                print('OUT', out, self.output)
-                jsonschema.validate(out, self.output)
-                fields = {
-                    name: (JSON_TYPE_MAP[field_info["type"]], ... if "default" not in field_info else field_info["default"])
-                    for name, field_info in self.output["properties"].items()
-                }
-                m = create_model(self.output.get('title', 'Entity'), **fields)
-                r = m(**out)
-                return r
-        else:
+        if self.output is None:
             return output
+        out = json.loads(output)
+        jsonschema.validate(out, self.output)
+        schema = self.output.get('items') if self.output.get('type') == 'array' else self.output
+        fields = {
+            name: (JSON_TYPE_MAP[field_info["type"]], ... if "default" not in field_info else field_info["default"])
+            for name, field_info in schema["properties"].items()
+        }
+        m = create_model(schema.get('title', 'Entity'), **fields)
+        if self.output.get('type') == 'array':
+            r = [m(**o) for o in out]
+            return Collection(r)
+        else:
+            r = m(**out)
+            return r
     
     def __dict__(self):
         return {

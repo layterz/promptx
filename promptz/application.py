@@ -46,17 +46,14 @@ class App:
         r = self._load(self.templates_dir, Template)
         t = []
         for name, o in r.items():
-            if getattr(o.output, '__origin__', None) == List:
-                list_input = create_model(o.input.__name__, items=(o.input[0], ...))
-                s = list_input.schema()
-                input = s['properties']['items']
-            else:
-                input = o.input.schema() if o.input else None
+            input = o.input.schema() if o.input else None
             
             if getattr(o.output, '_name', None) == 'List':
-                list_output = create_model(o.output.__name__, items=(o.output.__args__[0], ...))
-                s = list_output.schema()
-                output = s['properties']['items']
+                inner = o.output.__args__[0]
+                output = {
+                    'type': 'array',
+                    'items': inner.schema(),
+                }
             else:
                 output = o.output.schema() if o.output else None
 
