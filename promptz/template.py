@@ -30,6 +30,7 @@ JSON_TYPE_MAP: Dict[str, Type[Union[str, int, float, bool, Any]]] = {
     "number": float,
     "boolean": bool,
     "object": dict,
+    "array": list,
 }
 
 class Template:
