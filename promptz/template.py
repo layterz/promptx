@@ -3,8 +3,9 @@ import json
 from enum import Enum
 import uuid
 import textwrap
-from typing import List, Tuple, Type, get_origin, get_args
-from pydantic import BaseModel, Field, ValidationError
+from typing import Any, Dict, List, Tuple, Type, Union 
+import jsonschema
+from pydantic import BaseModel, Field, ValidationError, create_model
 from openai.error import RateLimitError
 from jinja2 import Template as JinjaTemplate
 
@@ -22,6 +23,14 @@ class TemplateDetails(BaseModel):
 class MaxRetriesExceeded(Exception):
     pass
 
+
+JSON_TYPE_MAP: Dict[str, Type[Union[str, int, float, bool, Any]]] = {
+    "string": str,
+    "integer": int,
+    "number": float,
+    "boolean": bool,
+    "object": dict,
+}
 
 class Template:
     '''
@@ -149,7 +158,6 @@ class Template:
         return output
     
     def format_field(self, name, field):
-        print('field', name, field)
         description = field.get('description', '')
         options = ''
 
@@ -187,7 +195,6 @@ class Template:
         list_output = False
 
         fields = []
-        print('self.output', self.output)
         for name, property in self.output.get('properties', {}).items():
             f = self.format_field(name, property)
             f['required'] = name in self.output.get('required', [])
@@ -237,13 +244,17 @@ class Template:
                     rows += [{'type': type_, 'output': d} for d in data]
                 elif issubclass(cls, BaseModel):
                     rows += [{'type': type_, **cls(**d).dict()} for d in data]
+                return Collection(rows)
             else:
-                cls = BaseModel.parse_raw(self.output)
-                type_ = self.output.__name__.lower()
-                d = json.loads(output)
-                d = {'type': type_, **d}
-                return cls(**d)
-            return Collection(rows)
+                out = json.loads(output)
+                jsonschema.validate(out, self.output)
+                fields = {
+                    name: (JSON_TYPE_MAP[field_info["type"]], ... if "default" not in field_info else field_info["default"])
+                    for name, field_info in self.output["properties"].items()
+                }
+                m = create_model(self.output.get('title', 'Entity'), **fields)
+                r = m(**out)
+                return r
         else:
             return output
     
@@ -303,8 +314,8 @@ class Template:
             try:
                 self.logger.log(OUTPUT, response.raw)
                 response.content = self.process(px, response.raw, **kwargs)
-            except ValidationError as e:
-                self.logger.warn(f'Output validation failed: {e} {response.content}')
+            except jsonschema.exceptions.ValidationError as e:
+                self.logger.warn(f'Output validation failedcls: {e} {response.content}')
                 return self.forward(x, retries=retries-1, **kwargs)
             except json.JSONDecodeError as e:
                 self.logger.warn(f'Failed to decode JSON from {response.content}: {e}')

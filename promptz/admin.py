@@ -153,7 +153,6 @@ class AdminEntityPage(AdminPage):
         response = requests.get(api_path)
         if response.status_code == 200:
             data = response.json()
-            print('data', data)
             details_data = [
                 {'field': k, 'value': v}
                 for k, v in data['details'].items()
@@ -204,6 +203,7 @@ class AdminEntityPage(AdminPage):
                             dbc.Label(input['label']),
                             dbc.Input(
                                 id=f'{self.name}-{input["id"]}', type=input['type'],
+                                name=input['label'],
                                 placeholder=f'Enter {input["label"]}',
                             )
                         ])
@@ -284,7 +284,6 @@ class AdminEntityPage(AdminPage):
                 raise PreventUpdate
             
             api_path = urljoin(API_URL, pathname + '/run')
-            print('inputs', inputs)
             response = requests.post(api_path, json={'input': inputs})
             if response.status_code == 200:
                 data = response.json()

@@ -88,8 +88,6 @@ class API:
                 c = self.world.collections()
                 r = c[c['name'] == name].first
                 cc = self.world._collections[name]
-                print('r', r)
-                print(cc.objects)
                 if r is None:
                     return {"response": None}
                 else:
