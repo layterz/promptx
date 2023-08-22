@@ -50,9 +50,11 @@ class App:
             
             if getattr(o.output, '_name', None) == 'List':
                 inner = o.output.__args__[0]
+                schema = inner.schema()
                 output = {
                     'type': 'array',
-                    'items': inner.schema(),
+                    'items': schema,
+                    'definitions': schema.get('definitions', {})
                 }
             else:
                 output = o.output.schema() if o.output else None

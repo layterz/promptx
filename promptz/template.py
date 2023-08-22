@@ -158,18 +158,25 @@ class Template:
         output = self.template.render(**vars)
         return output
     
-    def format_field(self, name, field):
+    def format_field(self, name, field, definitions):
         description = field.get('description', '')
         options = ''
 
         if field.get('type') == 'array':
             item_type = field.get('items', {}).get('type', None)
-            type_ = f'{item_type}[]'
-            if isinstance(item_type, type(Enum)):
-                type_ = 'str[]'
-                options += f'''Select any relevant options from: {", ".join([
-                    member.value for member in item_type
-                ])}'''
+            if item_type is None:
+                ref = field.get('items', {}).get('$ref', None)
+                ref = ref.split('/')[-1]
+                definition = definitions.get(ref, {})
+                type_ = f'{definition.get("title", ref)}[]'
+                type_ = 'string'
+
+                if 'enum' in definition:
+                    options += f'''
+                    Select any relevant options from: {", ".join(definition["enum"])}
+                    '''
+            else:
+                type_ = f'{item_type}[]'
         elif field.get('type') == 'enum':
             type_ = 'str'
             options += f'''Select only one option: {", ".join([
@@ -179,7 +186,7 @@ class Template:
             type_ = field.get('type', 'str')
 
         if len(options) > 0:
-            instructions += ' ' + options
+            description += ' ' + options
 
         return {
             'name': name,
@@ -198,28 +205,17 @@ class Template:
         fields = []
         if self.output.get('type', None) == 'array':
             properties = self.output.get('items', {}).get('properties', {})
+            definitions = self.output.get('items', {}).get('definitions', {})
             list_output = True
         elif self.output.get('type', None) == 'object':
             properties = self.output.get('properties', {})
+            definitions = self.output.get('definitions', {})
         
         for name, property in properties.items():
-            f = self.format_field(name, property)
+            f = self.format_field(name, property, definitions)
             f['required'] = name in self.output.get('required', [])
             fields += [f]
         
-        return self.format_template.render({
-            'fields': [field for field in fields if field is not None], 
-            'list_output': list_output,
-        })
-        if getattr(self.output, '__origin__', None) is list:
-            # if so, get the type of the list
-            list_output = True
-            item_type = self.output.__args__[0]
-            if item_type is str:
-                return 'Return an array of strings wrapped in double quotes.'
-            else:
-                cls = item_type
-        fields = [self.format_field(f) for f in cls.__fields__.values()]
         return self.format_template.render({
             'fields': [field for field in fields if field is not None], 
             'list_output': list_output,
@@ -243,6 +239,8 @@ class Template:
         if self.output is None:
             return output
         out = json.loads(output)
+        print('OUT', out)
+        print('SCHEMA', self.output)
         jsonschema.validate(out, self.output)
         schema = self.output.get('items') if self.output.get('type') == 'array' else self.output
         fields = {
