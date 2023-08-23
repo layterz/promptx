@@ -10,6 +10,7 @@ from .collection import Collection, Query, ChromaVectorDB
 from .template import Template, TemplateDetails, MaxRetriesExceeded, MockLLM
 from .models import ChatLog
 from .logging import JSONLogFormatter, NotebookFormatter
+from .utils import model_to_json_schema
 
 
 Processor = Callable[[Collection], Collection]
@@ -88,7 +89,7 @@ class Session:
         if prompt is None:
             p = Template(
                 id=id,
-                output=output,
+                output=model_to_json_schema(output) if output is not None else None,
                 instructions=instructions,
                 llm=llm or self.llm,
                 context=context,
@@ -235,6 +236,7 @@ class World:
         self.create_collection('history')
 
         self.create_collection('templates')
+        print('templates', templates)
         for template in templates:
             self.create_template(template)
         

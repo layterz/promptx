@@ -33,6 +33,7 @@ JSON_TYPE_MAP: Dict[str, Type[Union[str, int, float, bool, Any]]] = {
     "array": list,
 }
 
+
 class Template:
     '''
     Follow the pattern shown in the examples below and
@@ -90,7 +91,7 @@ class Template:
     END_FORMAT_INSTRUCTIONS
     """
 
-    id: str 
+    id: str = None
     name: str = None
     instructions: str = None
     context: str = None
@@ -102,8 +103,6 @@ class Template:
     llm: LLM = MockLLM()
 
     def __init__(self, instructions=None, output=None, context=None, template=None, examples=None, input=None, id=None, num_examples=None, history=None, llm=None, logger=None, debug=False, silent=False, tools: ToolList = None, name=None):
-        super().__init__()
-
         self.id = id or self.id or str(uuid.uuid4())
         self.name = name or self.name
         self.logger = logger
@@ -239,8 +238,6 @@ class Template:
         if self.output is None:
             return output
         out = json.loads(output)
-        print('OUT', out)
-        print('SCHEMA', self.output)
         jsonschema.validate(out, self.output)
         schema = self.output.get('items') if self.output.get('type') == 'array' else self.output
         fields = {
@@ -249,8 +246,9 @@ class Template:
         }
         m = create_model(schema.get('title', 'Entity'), **fields)
         if self.output.get('type') == 'array':
-            r = [m(**o) for o in out]
-            return Collection(r)
+            r = [dict(m(**o)) for o in out]
+            c = Collection(r)
+            return c
         else:
             r = m(**out)
             return r
@@ -298,7 +296,6 @@ class Template:
             if len(px): self.logger.log(INPUT, px)
             tools = [t.info for t in self.tools]
             self.logger.debug(f'FULL INPUT: {prompt_input}')
-            print(f'FULL INPUT: {prompt_input}')
             response = llm.generate(prompt_input, context=self.context, history=self.history, tools=tools)
             if response.callback is not None:
                 function_name = response.callback.name

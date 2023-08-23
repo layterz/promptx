@@ -5,22 +5,22 @@ import openai
 from . import LLM, ImageResponse, Response, Metrics, Callback, ChatLog
 
 
-class GPT(LLM):
-    model = 'text-davinci-003'
+class InstructGPT(LLM):
+    version = 'text-davinci-003'
 
-    def __init__(self, model=None):
-        self.model = model or self.model
+    def __init__(self, version=None):
+        self.version = version or self.version
 
     def generate(self, x, **kwargs) -> Response:
         output = openai.Completion.create(
-            model=self.model,
+            model=self.version,
             prompt=x
         )
         text = output.choices[0].text
         return Response(
             raw=text,
             metrics=Metrics(
-                model=f'{self.__class__.__name__}.{self.model}',
+                model=f'{self.__class__.__name__}.{self.version}',
                 input_tokens=len(x),
                 output_tokens=len(text),
             )
@@ -28,13 +28,13 @@ class GPT(LLM):
 
 
 class ChatGPT(LLM):
-    model = 'gpt-3.5-turbo'
+    version = 'gpt-3.5-turbo'
     context = '''
     You are a helpful chat assistant.
     '''
 
-    def __init__(self, model=None, context=None, api_key=None, org_id=None):
-        self.model = model or self.model
+    def __init__(self, version=None, context=None, api_key=None, org_id=None):
+        self.version = version or self.version
         openai.api_key = api_key or os.environ.get('OPENAI_API_KEY')
         openai.organization = org_id or os.environ.get('OPENAI_ORG_ID')
 
@@ -51,12 +51,12 @@ class ChatGPT(LLM):
         # an error if you set functions to an empty list or None.
         if tools is None or len(tools) == 0:
             output = openai.ChatCompletion.create(
-                model=self.model,
+                model=self.version,
                 messages=messages,
             )
         else:
             output = openai.ChatCompletion.create(
-                model=self.model,
+                model=self.version,
                 messages=messages,
                 functions=tools,
             )
@@ -73,7 +73,7 @@ class ChatGPT(LLM):
             raw=message.get('content'),
             callback=callback,
             metrics=Metrics(
-                model=f'{self.__class__.__name__}.{self.model}',
+                model=f'{self.__class__.__name__}.{self.version}',
                 input_tokens=output.usage.get('prompt_tokens'),
                 output_tokens=output.usage.get('completion_tokens')
             ),

@@ -3,7 +3,7 @@ import importlib
 import glob
 import threading
 import logging
-import json
+from functools import partial
 from typing import List
 import nbformat
 from nbconvert import HTMLExporter
@@ -13,6 +13,7 @@ from .world import World, System
 from .api import API
 from .admin import Admin
 from .template import Template
+from .models import openai
 
 
 class App:
@@ -31,6 +32,37 @@ class App:
         self.world = world or World(name, templates=templates, systems=systems, notebooks=notebooks, llm=llm, ef=ef, logger=logger, db=db)
         self.api = API(self.world)
         self.admin = Admin(self.world)
+    
+    @classmethod
+    def from_config(cls, config, **kwargs):
+        print('config', config)
+
+        def get_llm(org, model):
+            if org == 'openai':
+                auth = {
+                    'api_key': config.get('OPENAI_API_KEY'),
+                    'org_id': config.get('OPENAI_ORG_ID'),
+                }
+                if model == 'chatgpt':
+                    return partial(openai.ChatGPT, **auth)
+                elif model == 'instructgpt':
+                    return partial(openai.InstructGPT, **auth)
+            
+            raise Exception(f'Unknown LLM config: {org}:{cls}')
+
+        default_llm = config.get('DEFAULT_LLM')
+        llm_str = default_llm.split('ai://')[-1]
+        org, model, version = llm_str.split(':')
+        LLM = get_llm(org, model)
+
+        parsed_config = {
+            'llm': LLM(version=version),
+        }
+
+        return cls(
+            name='local',
+            **{**parsed_config, **{k: v for k, v in kwargs.items() if v is not None}}
+        )
     
     def _load(self, dir, cls):
         r = {}

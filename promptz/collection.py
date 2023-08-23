@@ -95,6 +95,7 @@ class EntitySeries(pd.Series):
     @property
     def object(self):
         d = self.to_dict()
+        print('D', d)
         return Entity(**d)
 
 

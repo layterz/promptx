@@ -3,6 +3,7 @@ from typing import Callable, List
 
 from .collection import Collection 
 from .world import World, Session
+from .application import App
 
 
 def prompt(instructions=None, input=None, output=None, prompt=None, context=None, template=None, llm=None, examples=None, num_examples=1, history=None, tools=None, dryrun=False, retries=3, debug=False, silent=False, **kwargs):
@@ -81,7 +82,7 @@ Embedding = List[float]
 EmbedFunction = Callable[[List[str]], List[Embedding]]
 
 
-def load_app(path):
+def load_app(path, config=None, **kwargs):
     import os
     import sys
     
@@ -91,11 +92,14 @@ def load_app(path):
         sys.path.append(module_path)
     
     os.environ['PROMPTZ_PATH'] = path
-    from app import create_app
-    return create_app()
+    try:
+        from app import create_app
+        return create_app()
+    except ModuleNotFoundError:
+        return App.from_config(config, **kwargs)
 
 
-def load_config(filename="promptz.env"):
+def load_config(filename=".pz.env"):
     home_dir = os.path.expanduser("~")
     current_dir = os.getcwd()
 
@@ -121,18 +125,19 @@ def load_config(filename="promptz.env"):
             }
             return (home_dir, config)
 
-    return None
+    return None, None
 
 
 def load(llm=None, ef=None, logger=None, log_format='notebook', **kwargs):
     path, config = load_config()
-    app = load_app(path)
-    session = app.world.create_session()
-    set_default_session(session)
-
-
-def init(llm=None, ef=None, logger=None, log_format='notebook', **kwargs):
-    w = World('test', llm=llm, ef=ef, logger=logger, **kwargs)
-    session = w.create_session(log_format=log_format)
-    set_default_world(w)
-    set_default_session(session)
+    if path is None:
+        w = World(
+            'local', llm=llm, ef=ef, logger=logger, 
+            templates=[], systems=[], notebooks={}, **kwargs)
+        session = w.create_session(log_format=log_format)
+        set_default_world(w)
+        set_default_session(session)
+    else:
+        app = load_app(path, config=config, llm=llm, ef=ef, logger=logger, **kwargs)
+        session = app.world.create_session()
+        set_default_session(session)
