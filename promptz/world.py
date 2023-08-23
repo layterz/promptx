@@ -59,12 +59,12 @@ class Session:
             self._collections = collections 
         self.logger = logger or self.world.logger.getChild(self.name)
     
-    def _run_prompt(self, p, input, dryrun=False, retries=3, **kwargs):
+    def _run_prompt(self, t, input, dryrun=False, retries=3, **kwargs):
         e = None
         try:
-            rendered = p.render({'input': p.parse(input)})
-            r = p(input, dryrun=dryrun, retries=retries, **kwargs)
-            log = ChatLog(template=p.id, input=rendered, output=r.raw)
+            rendered = t.render({'input': t.parse(input)})
+            r = t(input, dryrun=dryrun, retries=retries, **kwargs)
+            log = ChatLog(template=t.id, input=rendered, output=r.raw)
             self.store(log, collection='history')
             return r
         except MaxRetriesExceeded as e:
@@ -79,17 +79,17 @@ class Session:
                 o.append(r.content)
         return o
 
-    def prompt(self, instructions=None, input=None, output=None, id=None, prompt=None, context=None, template=None, llm=None, examples=None, num_examples=1, history=None, tools=None, dryrun=False, retries=3, debug=False, silent=False, **kwargs):
+    def prompt(self, instructions=None, input=None, output=None, id=None, context=None, template=None, llm=None, examples=None, num_examples=1, history=None, tools=None, dryrun=False, retries=3, debug=False, silent=False, **kwargs):
         logger = self.logger.getChild('prompt')
         level = logging.INFO
         if debug: level = logging.DEBUG
         elif silent: level = logging.ERROR
         logger.setLevel(level)
 
-        if prompt is None:
-            p = Template(
+        if template is None:
+            t = Template(
                 id=id,
-                output=model_to_json_schema(output) if output is not None else None,
+                output=output,
                 instructions=instructions,
                 llm=llm or self.llm,
                 context=context,
@@ -97,22 +97,21 @@ class Session:
                 num_examples=num_examples,
                 history=history,
                 tools=tools,
-                template=template,
                 debug=debug,
                 silent=silent,
                 logger=logger,
             )
         else:
-            p = prompt
-            p.llm = llm or self.llm
-            p.logger = self.logger
-            p.debug = debug
-            p.silent = silent
+            t = template
+            t.llm = llm or self.llm
+            t.logger = self.logger
+            t.debug = debug
+            t.silent = silent
 
         if isinstance(input, list):
-            o = self._run_batch(p, input, dryrun=dryrun, retries=retries, **kwargs)
+            o = self._run_batch(t, input, dryrun=dryrun, retries=retries, **kwargs)
         else:
-            r = self._run_prompt(p, input, dryrun=dryrun, retries=retries, **kwargs)
+            r = self._run_prompt(t, input, dryrun=dryrun, retries=retries, **kwargs)
             if r is None:
                 return None
             o = r.content
@@ -191,9 +190,10 @@ class Session:
             name = self._collection
         try:
             collection = self.world._collections[name]
-            return collection
         except KeyError:
-            return None
+            self.world.create_collection(name)
+            collection = self.world._collections[name]
+        return collection
     
     def evaluate(self, actual, expected, **kwargs):
         threshold = 0.69
@@ -233,10 +233,10 @@ class World:
         
         collection = self.db.get_or_create_collection('collections')
         self.collections = Collection.load(collection)
+        self.create_collection('default')
         self.create_collection('history')
 
         self.create_collection('templates')
-        print('templates', templates)
         for template in templates:
             self.create_template(template)
         

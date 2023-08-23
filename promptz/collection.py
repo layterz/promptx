@@ -21,7 +21,7 @@ class Query(BaseModel):
 class VectorDB:
 
     @abstractmethod
-    def query(self, texts, where=None, **kwargs):
+    def query(self, texts, where=None, ids=None, **kwargs):
         '''
         Query embeddings using a list of texts and optional where clause.
         '''
@@ -38,7 +38,7 @@ class ChromaVectorDB(VectorDB):
     def __init__(self, endpoint=None, api_key=None, path=None, **kwargs):
         self.client = chromadb.PersistentClient(path=f'{path}/.db' if path else "./.db")
 
-    def query(self, texts, where=None, **kwargs):
+    def query(self, texts, where=None, ids=None, **kwargs):
         return self.client.query(texts, where=where, **kwargs)
     
     def get_or_create_collection(self, name, **kwargs):
@@ -95,7 +95,6 @@ class EntitySeries(pd.Series):
     @property
     def object(self):
         d = self.to_dict()
-        print('D', d)
         return Entity(**d)
 
 
@@ -135,7 +134,7 @@ class Collection(pd.DataFrame):
                 else:
                     scores[id] += 1
         else:
-            results = self.collection.query(query_texts=texts, ids=ids, where=where, **kwargs)
+            results = self.collection.query(query_texts=texts, where=where, **kwargs)
             for i in range(len(results['ids'])):
                 for id, d, m in zip(results['ids'][i], results['distances'][i], results['metadatas'][i]):
                     if m.get('item') != 1:
@@ -175,8 +174,10 @@ class Collection(pd.DataFrame):
     
     def embed(self, *items, **kwargs):
         records = []
+        print('items', items)
         for item in items:
-            id = item['id']
+            id = item['id'] or str(uuid.uuid4())
+            print('id', id)
             now = datetime.now().isoformat()
 
             for name, field in item.items():
@@ -210,6 +211,7 @@ class Collection(pd.DataFrame):
 
             records.append(doc_record)
             
+        print('records', records)
         ids = [r['id'] for r in records]
         self.collection.upsert(
             ids=ids,

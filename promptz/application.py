@@ -35,8 +35,6 @@ class App:
     
     @classmethod
     def from_config(cls, config, **kwargs):
-        print('config', config)
-
         def get_llm(org, model):
             if org == 'openai':
                 auth = {

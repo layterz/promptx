@@ -13,6 +13,7 @@ from .collection import Collection, Entity
 from .logging import *
 from .models import ChatLog, LLM, MockLLM
 from .tool import Tool, ToolList
+from .utils import model_to_json_schema
 
 
 class TemplateDetails(BaseModel):
@@ -110,7 +111,7 @@ class Template:
         self.context = context or self.context
         self.history = history or self.history
         self.input = input or self.input
-        self.output = output or self.output
+        self.output = model_to_json_schema(output or self.output)
         self.instructions = textwrap.dedent(instructions or self.instructions or '')
 
         self.num_examples = num_examples or self.num_examples
@@ -127,11 +128,14 @@ class Template:
     
     def parse(self, x):
         if isinstance(x, BaseModel):
-            return x.dict()
+            return {k: v for k, v in x.dict().items() if k not in ['id', 'type']}
         elif isinstance(x, Entity):
-            return x.object.dict()
+            return {k: v for k, v in x.object.dict().items() if k not in ['id', 'type']}
         elif isinstance(x, Collection):
-            return [y.dict() for y in x.objects]
+            return [
+                {k: v for k, v in y.dict().items() if k not in ['id', 'type']}
+                for y in x.objects
+            ]
         elif isinstance(x, str):
             return x
         elif isinstance(x, dict):
@@ -244,12 +248,17 @@ class Template:
             name: (JSON_TYPE_MAP[field_info["type"]], ... if "default" not in field_info else field_info["default"])
             for name, field_info in schema["properties"].items()
         }
+        if 'type' not in fields:
+            fields['type'] = (str, ...)
         m = create_model(schema.get('title', 'Entity'), **fields)
         if self.output.get('type') == 'array':
-            r = [dict(m(**o)) for o in out]
+            type_ = self.output.get('items', {}).get('title', 'Entity').lower()
+            r = [dict(m(**{'id': str(uuid.uuid4()), 'type': type_, **o})) for o in out]
             c = Collection(r)
             return c
         else:
+            if 'type' not in out:
+                out['type'] = self.output.get('title', 'Entity').lower()
             r = m(**out)
             return r
     
@@ -296,6 +305,7 @@ class Template:
             if len(px): self.logger.log(INPUT, px)
             tools = [t.info for t in self.tools]
             self.logger.debug(f'FULL INPUT: {prompt_input}')
+            print(f'FULL INPUT: {prompt_input}')
             response = llm.generate(prompt_input, context=self.context, history=self.history, tools=tools)
             if response.callback is not None:
                 function_name = response.callback.name
