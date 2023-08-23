@@ -161,7 +161,7 @@ class Template:
         output = self.template.render(**vars)
         return output
     
-    def format_field(self, name, field, definitions):
+    def format_field(self, name, field, definitions, required):
         description = field.get('description', '')
         options = ''
 
@@ -197,6 +197,7 @@ class Template:
             'type_': type_,
             'default': field.get('default', None),
             'description': description.strip(),
+            'required': name in required,
         }
     
     def render_format(self, x, **kwargs):
@@ -209,14 +210,15 @@ class Template:
         if self.output.get('type', None) == 'array':
             properties = self.output.get('items', {}).get('properties', {})
             definitions = self.output.get('items', {}).get('definitions', {})
+            required = self.output.get('items', {}).get('required', [])
             list_output = True
         elif self.output.get('type', None) == 'object':
             properties = self.output.get('properties', {})
             definitions = self.output.get('definitions', {})
+            required = self.output.get('required', [])
         
         for name, property in properties.items():
-            f = self.format_field(name, property, definitions)
-            f['required'] = name in self.output.get('required', [])
+            f = self.format_field(name, property, definitions, required)
             fields += [f]
         
         return self.format_template.render({
@@ -305,7 +307,6 @@ class Template:
             if len(px): self.logger.log(INPUT, px)
             tools = [t.info for t in self.tools]
             self.logger.debug(f'FULL INPUT: {prompt_input}')
-            print(f'FULL INPUT: {prompt_input}')
             response = llm.generate(prompt_input, context=self.context, history=self.history, tools=tools)
             if response.callback is not None:
                 function_name = response.callback.name

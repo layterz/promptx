@@ -150,7 +150,7 @@ class Session:
         
         c = self.collection(collection)
         c.embed(*[dict(item) for item in items if item is not None])
-        return self.collection(collection)
+        return None
     
     def chain(self, *steps, llm=None, **kwargs):
         llm = llm or self.llm

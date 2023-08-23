@@ -120,7 +120,7 @@ class Collection(pd.DataFrame):
         c.collection = collection
         return c
     
-    def embedding_query(self, *texts, ids=None, where=None, threshold=0.69, **kwargs):
+    def embedding_query(self, *texts, ids=None, where=None, threshold=0.5, **kwargs):
         texts = [t for t in texts if t is not None]
         
         scores = {}
@@ -145,12 +145,10 @@ class Collection(pd.DataFrame):
                         scores[id] += 1 - d
         
         try:
-            df = self
-            df['score'] = df['id'].map(scores)
-            df = df[df['score'].notna()]
-            df = df.sort_values('score', ascending=False)
-            df = df.drop(columns=['score'])
-            return df
+            filtered_scores = {k: v for k, v in scores.items() if v >= threshold}
+            sorted_ids = sorted(filtered_scores, key=filtered_scores.get, reverse=True)
+            results = self[self['id'].isin(sorted_ids)].set_index('id').loc[sorted_ids].reset_index()
+            return results
         except KeyError as e:
             return None
     
@@ -174,10 +172,8 @@ class Collection(pd.DataFrame):
     
     def embed(self, *items, **kwargs):
         records = []
-        print('items', items)
         for item in items:
             id = item['id'] or str(uuid.uuid4())
-            print('id', id)
             now = datetime.now().isoformat()
 
             for name, field in item.items():
@@ -198,9 +194,10 @@ class Collection(pd.DataFrame):
                 }
                 records.append(field_record)
 
+            doc = { k: v for k, v in item.items() if k not in ['id'] }
             doc_record = {
                 'id': id,
-                'document': json.dumps(item),
+                'document': json.dumps(doc),
                 'metadata': {
                     'collection': self.name,
                     'type': item['type'],
@@ -208,10 +205,8 @@ class Collection(pd.DataFrame):
                     'created_at': now,
                 },
             }
-
             records.append(doc_record)
             
-        print('records', records)
         ids = [r['id'] for r in records]
         self.collection.upsert(
             ids=ids,
@@ -220,9 +215,13 @@ class Collection(pd.DataFrame):
         )
 
         if self.empty:
-            new_items = records
+            new_items = [r for r in records if r['metadata']['item'] == 1]
         else:
-            new_items = [r for r in records if r['id'] not in self['id'].values]
+            new_items = [
+                r for r in records 
+                if r['id'] not in self['id'].values
+                and r['metadata']['item'] == 1
+            ]
         docs = [{'id': r['id'], **json.loads(r['document'])} for r in new_items]
         df = pd.concat([self, Collection(docs)], ignore_index=True)
         self.drop(self.index, inplace=True)
