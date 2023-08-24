@@ -237,11 +237,11 @@ class World:
         self.create_collection('history')
 
         self.create_collection('templates')
-        for template in templates:
+        for template in (templates or []):
             self.create_template(template)
         
         self.create_collection('systems')
-        for system in systems:
+        for system in (systems or []):
             self.create_system(system)
         
         self.create_collection('notebooks')
@@ -278,8 +278,7 @@ class World:
         return self.templates.embed(dict(template))
     
     def create_system(self, system):
-        c = self.systems.embed(system)
-        return c
+        return self.systems.embed(dict(system))
     
     def create_notebook(self, name, notebook):
         c = self.notebooks.embed(notebook)
@@ -302,7 +301,8 @@ class World:
         return self._collections['history']
 
     def __call__(self, session, *args: Any, **kwds: Any) -> Any:
-        for system in self.systems.values():
-            items = session.query(system.query)
+        for system in self.systems.objects:
+            q = system.query
+            items = session.query(q)
             updates = system(items)
             session.store(updates)

@@ -110,7 +110,7 @@ class Template:
         self.llm = llm or self.llm
         self.context = context or self.context
         self.history = history or self.history
-        self.input = input or self.input
+        self.input = model_to_json_schema(input or self.input)
         self.output = model_to_json_schema(output or self.output)
         self.instructions = textwrap.dedent(instructions or self.instructions or '')
 
@@ -270,8 +270,8 @@ class Template:
             'type': 'template',
             'name': self.name or None,
             'instructions': self.instructions,
-            'input': self.input.__name__ if self.input is not None else None,
-            'output': self.output.__name__ if self.output is not None else None,
+            'input': self.input,
+            'output': self.output,
         }
 
     def __iter__(self):

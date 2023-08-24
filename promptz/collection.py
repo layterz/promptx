@@ -10,7 +10,7 @@ import chromadb
 
 
 class Query(BaseModel):
-    query: str
+    query: str = None
     where: Dict[str, Any] = None
     collection: str = None
 
@@ -179,6 +179,8 @@ class Collection(pd.DataFrame):
             for name, field in item.items():
                 if name in ['id', 'type']:
                     continue
+
+                print('field', name, field)
 
                 # TODO: Handle nested fields
                 field_record = {

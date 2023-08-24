@@ -74,12 +74,15 @@ class App:
     
     def _load_templates(self):
         r = self._load(self.templates_dir, Template)
-        t = []
+        t = r.values()
+        print('t', t)
+        return t
         for name, o in r.items():
             input = o.input.schema() if o.input else None
+            print('o', o.output)
             
             if getattr(o.output, '_name', None) == 'List':
-                inner = o.output.__args__[0]
+                inner = o.output.get('items')
                 schema = inner.schema()
                 output = {
                     'type': 'array',
@@ -89,7 +92,6 @@ class App:
             else:
                 output = o.output.schema() if o.output else None
 
-            t.append(dict({**dict(o), 'input': input, 'output': output}))
         return t
     
     def _load_systems(self):
