@@ -14,6 +14,7 @@ from .api import API
 from .admin import Admin
 from .template import Template
 from .models import openai
+from .utils import create_model_from_schema
 
 
 class App:
@@ -73,26 +74,8 @@ class App:
         return r
     
     def _load_templates(self):
-        r = self._load(self.templates_dir, Template)
-        t = r.values()
-        print('t', t)
-        return t
-        for name, o in r.items():
-            input = o.input.schema() if o.input else None
-            print('o', o.output)
-            
-            if getattr(o.output, '_name', None) == 'List':
-                inner = o.output.get('items')
-                schema = inner.schema()
-                output = {
-                    'type': 'array',
-                    'items': schema,
-                    'definitions': schema.get('definitions', {})
-                }
-            else:
-                output = o.output.schema() if o.output else None
-
-        return t
+        ts = self._load(self.templates_dir, Template)
+        return ts.values()
     
     def _load_systems(self):
         r = self._load(self.systems_dir, System)

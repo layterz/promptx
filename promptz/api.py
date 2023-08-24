@@ -60,7 +60,7 @@ class API:
             template = self.world.templates(ids=[id]).first
             if template is None:
                 raise HTTPException(status_code=404, detail="Template not found")
-            response = session.prompt(**{**dict(template), 'input': input})
+            response = session.prompt(**{**dict(template), 'input': input}, to_json=True)
             return {"response": response}
         
         @self.fastapi_app.get("/history")

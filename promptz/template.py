@@ -13,7 +13,7 @@ from .collection import Collection, Entity
 from .logging import *
 from .models import ChatLog, LLM, MockLLM
 from .tool import Tool, ToolList
-from .utils import model_to_json_schema
+from .utils import model_to_json_schema, create_entity_from_schema
 
 
 class TemplateDetails(BaseModel):
@@ -23,16 +23,6 @@ class TemplateDetails(BaseModel):
 
 class MaxRetriesExceeded(Exception):
     pass
-
-
-JSON_TYPE_MAP: Dict[str, Type[Union[str, int, float, bool, Any]]] = {
-    "string": str,
-    "integer": int,
-    "number": float,
-    "boolean": bool,
-    "object": dict,
-    "array": list,
-}
 
 
 class Template:
@@ -244,25 +234,8 @@ class Template:
         if self.output is None:
             return output
         out = json.loads(output)
-        jsonschema.validate(out, self.output)
-        schema = self.output.get('items') if self.output.get('type') == 'array' else self.output
-        fields = {
-            name: (JSON_TYPE_MAP[field_info["type"]], ... if "default" not in field_info else field_info["default"])
-            for name, field_info in schema["properties"].items()
-        }
-        if 'type' not in fields:
-            fields['type'] = (str, ...)
-        m = create_model(schema.get('title', 'Entity'), **fields)
-        if self.output.get('type') == 'array':
-            type_ = self.output.get('items', {}).get('title', 'Entity').lower()
-            r = [dict(m(**{'id': str(uuid.uuid4()), 'type': type_, **o})) for o in out]
-            c = Collection(r)
-            return c
-        else:
-            if 'type' not in out:
-                out['type'] = self.output.get('title', 'Entity').lower()
-            r = m(**out)
-            return r
+        entities = create_entity_from_schema(self.output, out)
+        return entities
     
     def __dict__(self):
         return {

@@ -10,7 +10,6 @@ from .collection import Collection, Query, ChromaVectorDB
 from .template import Template, TemplateDetails, MaxRetriesExceeded, MockLLM
 from .models import ChatLog
 from .logging import JSONLogFormatter, NotebookFormatter
-from .utils import model_to_json_schema
 
 
 Processor = Callable[[Collection], Collection]
@@ -59,27 +58,37 @@ class Session:
             self._collections = collections 
         self.logger = logger or self.world.logger.getChild(self.name)
     
-    def _run_prompt(self, t, input, dryrun=False, retries=3, **kwargs):
+    def _run_prompt(self, t, input, dryrun=False, retries=3, to_json=False, **kwargs):
         e = None
         try:
             rendered = t.render({'input': t.parse(input)})
             r = t(input, dryrun=dryrun, retries=retries, **kwargs)
             log = ChatLog(template=t.id, input=rendered, output=r.raw)
             self.store(log, collection='history')
-            return r
+            if isinstance(r.content, list):
+                es = [dict(e) for e in r.content]
+                if to_json:
+                    return es
+                else:
+                    return Collection(es)
+            else:
+                if to_json:
+                    return dict(r.content)
+                else:
+                    return r.content
         except MaxRetriesExceeded as e:
             self.logger.error(f'Max retries exceeded: {e}')
             return None
     
-    def _run_batch(self, p, inputs, dryrun=False, retries=3, **kwargs):
+    def _run_batch(self, p, inputs, dryrun=False, retries=3, to_json=False, **kwargs):
         o = []
         for input in inputs:
-            r = self._run_prompt(p, input, dryrun=dryrun, retries=retries, **kwargs)
+            r = self._run_prompt(p, input, dryrun=dryrun, retries=retries, to_json=to_json, **kwargs)
             if r is not None:
                 o.append(r.content)
         return o
 
-    def prompt(self, instructions=None, input=None, output=None, id=None, context=None, template=None, llm=None, examples=None, num_examples=1, history=None, tools=None, dryrun=False, retries=3, debug=False, silent=False, **kwargs):
+    def prompt(self, instructions=None, input=None, output=None, id=None, context=None, template=None, llm=None, examples=None, num_examples=1, history=None, tools=None, dryrun=False, retries=3, debug=False, silent=False, to_json=False, **kwargs):
         logger = self.logger.getChild('prompt')
         level = logging.INFO
         if debug: level = logging.DEBUG
@@ -109,13 +118,9 @@ class Session:
             t.silent = silent
 
         if isinstance(input, list):
-            o = self._run_batch(t, input, dryrun=dryrun, retries=retries, **kwargs)
+            return self._run_batch(t, input, dryrun=dryrun, retries=retries, to_json=to_json, **kwargs)
         else:
-            r = self._run_prompt(t, input, dryrun=dryrun, retries=retries, **kwargs)
-            if r is None:
-                return None
-            o = r.content
-        return o
+            return self._run_prompt(t, input, dryrun=dryrun, retries=retries, to_json=to_json, **kwargs)
     
     def embed(self, item, field=None):
         if isinstance(item, str):

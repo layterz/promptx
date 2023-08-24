@@ -173,14 +173,14 @@ class Collection(pd.DataFrame):
     def embed(self, *items, **kwargs):
         records = []
         for item in items:
-            id = item['id'] or str(uuid.uuid4())
+            if 'id' not in item or item['id'] is None:
+                item['id'] = str(uuid.uuid4())
+            id = item['id']
             now = datetime.now().isoformat()
 
             for name, field in item.items():
                 if name in ['id', 'type']:
                     continue
-
-                print('field', name, field)
 
                 # TODO: Handle nested fields
                 field_record = {
