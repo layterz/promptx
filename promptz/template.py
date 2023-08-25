@@ -1,19 +1,17 @@
 import random
 import json
-from enum import Enum
 import uuid
 import textwrap
-from typing import Any, Dict, List, Tuple, Type, Union 
+from typing import List, Tuple, Type
 import jsonschema
-from pydantic import BaseModel, Field, ValidationError, create_model
+from pydantic import BaseModel
 from openai.error import RateLimitError
 from jinja2 import Template as JinjaTemplate
-
-from .collection import Collection, Entity
+from .collection import Collection
 from .logging import *
 from .models import ChatLog, LLM, MockLLM
 from .tool import Tool, ToolList
-from .utils import model_to_json_schema, create_entity_from_schema
+from .utils import Entity, model_to_json_schema, create_entity_from_schema
 
 
 class TemplateDetails(BaseModel):

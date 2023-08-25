@@ -5,11 +5,14 @@ from abc import abstractmethod
 from typing import Any, Dict
 import pandas as pd
 from pydantic import BaseModel 
-from IPython.display import display, HTML
 import chromadb
 
 
+from .utils import Entity, create_entity_from_schema
+
+
 class Query(BaseModel):
+    type='query'
     query: str = None
     where: Dict[str, Any] = None
     collection: str = None
@@ -45,43 +48,6 @@ class ChromaVectorDB(VectorDB):
         return self.client.get_or_create_collection(name, **kwargs)
 
 
-class Entity(BaseModel):
-    id: str = None
-
-    class Config:
-        extra = 'allow'
-        arbitrary_types_allowed = True
-    
-    def __init__(self, **data):
-        for field, value in data.items():
-            # if value is NaN, set it to None
-            if isinstance(value, float) and pd.isna(value):
-                data[field] = None
-
-        super().__init__(**data)
-    
-    def __repr__(self):
-        return self.json()
-    
-    def display(self):
-        # Check if we're in an IPython environment
-        try:
-            get_ipython
-        except NameError:
-            # If we're not in an IPython environment, fall back to json
-            return self.json()
-
-        # Convert the dictionary to a HTML table
-        html = '<table>'
-        for field, value in self.dict().items():
-            html += f'<tr><td>{field}</td><td>{value}</td></tr>'
-        html += '</table>'
-
-        # Display the table
-        display(HTML(html))
-        return self.json()
-
-
 class EntitySeries(pd.Series):
 
     @property
@@ -99,7 +65,7 @@ class EntitySeries(pd.Series):
 
 
 class Collection(pd.DataFrame):
-    _metadata = ['collection']
+    _metadata = ['collection', 'schema']
 
     @property
     def _constructor(self, *args, **kwargs):
@@ -110,14 +76,21 @@ class Collection(pd.DataFrame):
         return EntitySeries
     
     @classmethod
-    def load(cls, collection):
+    def load(cls, collection, schema=None):
         records = collection.get(where={'item': 1})
         docs = [
-            {'id': id, **json.loads(r)} 
-            for id, r in zip(records['ids'], records['documents'])
+            {
+                'id': id, 
+                **json.loads(r), 
+                '__schema__': m['schema'],
+                '__created_at__': m['created_at'],
+            } 
+            for id, r, m in zip(records['ids'], records['documents'], records['metadatas'])
         ]
+        print('docs', collection.name, docs)
         c = Collection(docs)
         c.collection = collection
+        c.schema = schema
         return c
     
     def embedding_query(self, *texts, ids=None, where=None, threshold=0.5, **kwargs):
@@ -161,7 +134,13 @@ class Collection(pd.DataFrame):
     
     @property
     def objects(self):
-        return [r.object for _, r in self.iterrows()]
+        return [
+            create_entity_from_schema(
+                json.loads(r['__schema__']) if '__schema__' in r else self.schema,
+                {k: v for k, v in r.items() if k not in ['__schema__', '__created_at__']}
+            ) 
+            for r in self.to_dict('records')
+        ]
     
     @property
     def first(self):
@@ -173,43 +152,42 @@ class Collection(pd.DataFrame):
     def embed(self, *items, **kwargs):
         records = []
         for item in items:
-            if 'id' not in item or item['id'] is None:
-                item['id'] = str(uuid.uuid4())
-            id = item['id']
             now = datetime.now().isoformat()
 
-            for name, field in item.items():
+            for name, field in item.dict().items():
                 if name in ['id', 'type']:
                     continue
 
                 # TODO: Handle nested fields
                 field_record = {
-                    'id': f'{id}_{name}',
+                    'id': f'{item.id}_{name}',
                     'document': json.dumps({name: field}),
                     'metadata': {
                         'field': name,
                         'collection': self.name,
                         'item': 0,
-                        'item_id': id,
+                        'item_id': item.id,
                         'created_at': now,
                     },
                 }
                 records.append(field_record)
 
-            doc = { k: v for k, v in item.items() if k not in ['id'] }
+            doc = { k: v for k, v in item.dict().items() if k not in ['id'] }
             doc_record = {
-                'id': id,
+                'id': item.id,
                 'document': json.dumps(doc),
                 'metadata': {
                     'collection': self.name,
-                    'type': item['type'],
+                    'type': item.type,
                     'item': 1,
+                    'schema': json.dumps(item.__class__.schema()),
                     'created_at': now,
                 },
             }
             records.append(doc_record)
             
         ids = [r['id'] for r in records]
+        print('upsert', self.name, ids)
         self.collection.upsert(
             ids=ids,
             documents=[r['document'] for r in records],
@@ -230,3 +208,9 @@ class Collection(pd.DataFrame):
         for column in df.columns:
             self[column] = df[column]
         return self
+
+
+class CollectionRecord(Entity):
+    type: str = 'collection_record'
+    metadata: Dict[str, Any] = None
+    collection: str = None

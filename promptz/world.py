@@ -1,4 +1,5 @@
 import os
+import inspect
 import uuid
 import logging
 import numpy as np
@@ -6,43 +7,41 @@ from pydantic import BaseModel
 from typing import Any, Dict, List, Callable
 from chromadb.utils import embedding_functions
 
-from .collection import Collection, Query, ChromaVectorDB
+from .collection import Collection, CollectionRecord, Query, ChromaVectorDB
 from .template import Template, TemplateDetails, MaxRetriesExceeded, MockLLM
 from .models import ChatLog
 from .logging import JSONLogFormatter, NotebookFormatter
+from .utils import Entity 
 
 
 Processor = Callable[[Collection], Collection]
 
-class System:
+class System(Entity):
     name: str
+    type: str = 'system'
     query: Query
     processor: Processor
 
-    def __init__(self, name=None, query=None, processor=None, **kwargs):
-        self.name = name or self.__class__.__name__
-        self.query = query or self.query
-        self.processor = processor 
+    def __init__(self, **kwargs):
+        if 'processor' not in kwargs:
+            kwargs['processor'] = self.process
+        if 'name' not in kwargs:
+            kwargs['name'] = self.__class__.__name__
+        if 'id' not in kwargs:
+            kwargs['id'] = kwargs['name']
+        super().__init__(**kwargs)
     
     def process(self, items, **kwargs):
         if self.processor is not None:
             return self.processor(items, **kwargs)
         else:
             raise NotImplementedError
-
-    def __call__(self, *args: Any, **kwds: Any) -> Any:
-        return self.process(*args, **kwds)
     
-    def __dict__(self):
-        return {
-            'name': self.name,
-            'id': self.name,
-            'type': 'system',
-        }
-
-    def __iter__(self):
-        for key, value in self.__dict__().items():
-            yield key, value
+    def dict(self, *args, **kwargs):
+        d = super().dict(*args, **kwargs)
+        d['processor'] = inspect.getsource(self.processor)
+        d['query'] = self.query.dict()
+        return d
 
 
 class Session:
@@ -70,7 +69,11 @@ class Session:
                 if to_json:
                     return es
                 else:
-                    return Collection(es)
+                    c = Collection(es)
+                    if len(es) > 0:
+                        schema = r.content[0].schema()
+                        c.schema = schema
+                    return c
             else:
                 if to_json:
                     return dict(r.content)
@@ -148,13 +151,15 @@ class Session:
                 )
             ]
         
+        print('pre', items)
         items = flatten([
             item.objects if isinstance(item, Collection) else item 
             for item in items
         ])
         
         c = self.collection(collection)
-        c.embed(*[dict(item) for item in items if item is not None])
+        print('items', items)
+        c.embed(*[item for item in items if item is not None])
         return None
     
     def chain(self, *steps, llm=None, **kwargs):
@@ -237,22 +242,17 @@ class World:
         self.logger = logger or logging.getLogger(self.name)
         
         collection = self.db.get_or_create_collection('collections')
-        self.collections = Collection.load(collection)
+        self.collections = Collection.load(collection, schema=CollectionRecord.schema())
         self.create_collection('default')
-        self.create_collection('history')
+        self.create_collection('history', schema=ChatLog.schema())
 
-        self.create_collection('templates')
+        self.create_collection('templates', schema=None)
         for template in (templates or []):
             self.create_template(template)
         
-        self.create_collection('systems')
+        self.create_collection('systems', schema=System.schema())
         for system in (systems or []):
             self.create_system(system)
-        
-        self.create_collection('notebooks')
-        for notebook in self.notebooks.objects:
-            #self.create_notebook(name, notebook)
-            pass
     
     def create_session(self, name=None, db=None, llm=None, ef=None, logger=None, silent=False, debug=False, log_format='notebook'):
         llm = llm or self.llm
@@ -272,18 +272,20 @@ class World:
         self.sessions.append(session)
         return session
     
-    def create_collection(self, name, metadata=None):
+    def create_collection(self, name, metadata=None, schema=None):
         if metadata is None:
             metadata = {"hnsw:space": "cosine"}
         collection = self.db.get_or_create_collection(name, metadata=metadata)
-        self._collections[name] = Collection.load(collection)
-        self.collections.embed({'name': name, 'id': name, 'type': 'collection'})
+        c = Collection.load(collection, schema=schema)
+        self._collections[name] = c
+        r = CollectionRecord(id=name, collection=name)
+        self.collections.embed(r)
 
     def create_template(self, template: Template):
-        return self.templates.embed(dict(template))
+        return self.templates.embed(template)
     
     def create_system(self, system):
-        return self.systems.embed(dict(system))
+        return self.systems.embed(system)
     
     def create_notebook(self, name, notebook):
         c = self.notebooks.embed(notebook)
@@ -306,8 +308,19 @@ class World:
         return self._collections['history']
 
     def __call__(self, session, *args: Any, **kwds: Any) -> Any:
-        for system in self.systems.objects:
+        for system in self.systems().objects:
             q = system.query
-            items = session.query(q)
-            updates = system(items)
-            session.store(updates)
+            items = session.query(q.query, where=q.where)
+            func_string = ['def __process(items, **kwargs):']
+            func_string += system.processor.split('\n')[1:]
+            func_string = '\n'.join(func_string)
+            try:
+                namespace = {}
+                exec(func_string, namespace)
+                updates = namespace['__process'](items)
+                print('updates')
+                print(updates)
+                if updates is not None:
+                    session.store(updates)
+            except Exception as e:
+                raise e
