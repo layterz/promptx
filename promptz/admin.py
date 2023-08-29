@@ -362,17 +362,6 @@ class SystemIndex(AdminIndexPage):
         )
 
 
-class NotebookIndex(AdminIndexPage):
-
-    def __init__(self, app, **kwargs):
-        super().__init__(
-            app,
-            name="Notebooks",
-            path="/notebooks",
-            **kwargs,
-        )
-
-
 class ConversationIndex(AdminIndexPage):
 
     def __init__(self, app, **kwargs):
@@ -516,7 +505,6 @@ class Admin:
             ConversationIndex(self.app, menu=True),
             TemplateIndex(self.app, menu=True),
             CollectionIndex(self.app, menu=True),
-            NotebookIndex(self.app, menu=True),
             SystemIndex(self.app, menu=True),
             History(self.app, menu=True),
 

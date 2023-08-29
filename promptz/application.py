@@ -22,15 +22,13 @@ class App:
     world: World
     templates_dir: str = 'templates'
     systems_dir: str = 'systems'
-    notebooks_dirs: str = ['notebooks']
 
     def __init__(self, name, world=None, llm=None, ef=None, logger=None, db=None):
         self.name = name
         self.logger = logger or logging.getLogger(self.name)
         templates = self._load_templates()
         systems = self._load_systems()
-        notebooks = self._load_notebooks()
-        self.world = world or World(name, templates=templates, systems=systems, notebooks=notebooks, llm=llm, ef=ef, logger=logger, db=db)
+        self.world = world or World(name, templates=templates, systems=systems, llm=llm, ef=ef, logger=logger, db=db)
         self.api = API(self.world)
         self.admin = Admin(self.world)
     
@@ -79,22 +77,7 @@ class App:
     
     def _load_systems(self):
         r = self._load(self.systems_dir, System)
-        s = []
-        for name, o in r.items():
-            s.append(dict({**dict(o)}))
-        return s
-    
-    def _load_notebooks(self):
-        html_notebooks = {}
-        for dir in self.notebooks_dirs:
-            for file in glob.glob(os.path.join(dir, '*.ipynb')):
-                with open(file, 'r') as f:
-                    file_name = os.path.splitext(os.path.basename(file))[0]
-                    html_exporter = HTMLExporter()
-                    notebook_node = nbformat.read(f, as_version=4)
-                    body, resources = html_exporter.from_notebook_node(notebook_node)
-                    html_notebooks[file_name] = body
-        return html_notebooks
+        return r.values()
     
     def _serve_api(self, host='0.0.0.0', port=8000):
         import uvicorn

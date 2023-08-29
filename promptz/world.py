@@ -8,7 +8,7 @@ from typing import Any, Dict, List, Callable
 from chromadb.utils import embedding_functions
 
 from .collection import Collection, CollectionRecord, Query, ChromaVectorDB
-from .template import Template, TemplateDetails, MaxRetriesExceeded, MockLLM
+from .template import Template, TemplateRunner, MaxRetriesExceeded, MockLLM
 from .models import ChatLog
 from .logging import JSONLogFormatter, NotebookFormatter
 from .utils import Entity 
@@ -20,11 +20,8 @@ class System(Entity):
     name: str
     type: str = 'system'
     query: Query
-    processor: Processor
 
     def __init__(self, **kwargs):
-        if 'processor' not in kwargs:
-            kwargs['processor'] = self.process
         if 'name' not in kwargs:
             kwargs['name'] = self.__class__.__name__
         if 'id' not in kwargs:
@@ -39,7 +36,6 @@ class System(Entity):
     
     def dict(self, *args, **kwargs):
         d = super().dict(*args, **kwargs)
-        d['processor'] = inspect.getsource(self.processor)
         d['query'] = self.query.dict()
         return d
 
@@ -60,8 +56,9 @@ class Session:
     def _run_prompt(self, t, input, dryrun=False, retries=3, to_json=False, **kwargs):
         e = None
         try:
-            rendered = t.render({'input': t.parse(input)})
-            r = t(input, dryrun=dryrun, retries=retries, **kwargs)
+            s = self.world.template_system
+            rendered = s.render(t, {'input': s.parse(input)})
+            r = s(t, input, dryrun=dryrun, retries=retries, **kwargs)
             log = ChatLog(template=t.id, input=rendered, output=r.raw)
             self.store(log, collection='history')
             if isinstance(r.content, list):
@@ -151,14 +148,12 @@ class Session:
                 )
             ]
         
-        print('pre', items)
         items = flatten([
             item.objects if isinstance(item, Collection) else item 
             for item in items
         ])
         
         c = self.collection(collection)
-        print('items', items)
         c.embed(*[item for item in items if item is not None])
         return None
     
@@ -227,12 +222,17 @@ class Session:
         return self.collection('history')
 
 
+class TemplateSystem(System):
+    def process(self, x, **kwargs):
+        pass
+
+
 class World:
     name: str
     sessions: List[Session]
     _collections: Dict[str, Collection]
 
-    def __init__(self, name, systems=None, llm=None, ef=None, logger=None, db=None, templates=None, notebooks=None):
+    def __init__(self, name, systems=None, llm=None, ef=None, logger=None, db=None, templates=None):
         self.name = name
         self.sessions = []
         self._collections = {}
@@ -253,6 +253,9 @@ class World:
         self.create_collection('systems', schema=System.schema())
         for system in (systems or []):
             self.create_system(system)
+        
+        # TODO: hack, should register as normal system
+        self.template_system = TemplateRunner(llm=self.llm, logger=self.logger.getChild('template_system'))
     
     def create_session(self, name=None, db=None, llm=None, ef=None, logger=None, silent=False, debug=False, log_format='notebook'):
         llm = llm or self.llm
@@ -287,10 +290,6 @@ class World:
     def create_system(self, system):
         return self.systems.embed(system)
     
-    def create_notebook(self, name, notebook):
-        c = self.notebooks.embed(notebook)
-        return c
-
     @property
     def templates(self):
         return self._collections['templates']
@@ -298,10 +297,6 @@ class World:
     @property
     def systems(self):
         return self._collections['systems']
-    
-    @property
-    def notebooks(self):
-        return self._collections['notebooks']
     
     @property
     def history(self):
@@ -318,8 +313,6 @@ class World:
                 namespace = {}
                 exec(func_string, namespace)
                 updates = namespace['__process'](items)
-                print('updates')
-                print(updates)
                 if updates is not None:
                     session.store(updates)
             except Exception as e:

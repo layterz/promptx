@@ -1,8 +1,28 @@
 import uuid
-from typing import Any, Dict, Type, Union
+from typing import Any, Dict, List, Type, Union, get_origin, get_args
 import jsonschema
 from pydantic import BaseModel, create_model
 from IPython.display import display, HTML
+
+
+JSON_TYPE_MAP: Dict[str, Type[Union[str, int, float, bool, Any]]] = {
+    "string": str,
+    "integer": int,
+    "number": float,
+    "boolean": bool,
+    "object": dict,
+    "array": list,
+}
+
+PYTYPE_TO_JSONTYPE: Dict[Type, str] = {
+    str: "string",
+    int: "integer",
+    float: "number",
+    bool: "boolean",
+    dict: "object",
+    list: "array",
+}
+
 
 class Entity(BaseModel):
     id: str = None
@@ -11,13 +31,62 @@ class Entity(BaseModel):
         extra = 'allow'
         arbitrary_types_allowed = True
     
-    def __init__(self, **data):
-        for field, value in data.items():
-            # if value is NaN, set it to None
-            if isinstance(value, float) and pd.isna(value):
-                data[field] = None
+    @classmethod
+    def generate_schema_for_field(cls, field_type: Any):
+        definitions = {}
+        # Handle basic types
+        if issubclass(field_type, (int, float, str, bool)):
+            return {"type": PYTYPE_TO_JSONTYPE[field_type]}, definitions
+        
+        # Handle case for List[Type]
+        elif get_origin(field_type) is List:
+            type_inside = get_args(field_type)[0]
+            return {
+                "type": "array",
+                "items": cls.generate_schema_for_field(type_inside)
+            }, definitions
 
-        super().__init__(**data)
+        # Handle Pydantic model types (reference schema)
+        elif issubclass(field_type, BaseModel):
+            # If the schema for this model hasn't been generated before
+            if field_type.__name__ not in definitions:
+                definitions[field_type.__name__] = {
+                    "type": "object",
+                    "properties": {name: cls.generate_schema_for_field(info.type_) for name, info in field_type.__fields__.items()}
+                }
+            return {"$ref": f"#/definitions/{field_type.__name__}"}, definitions
+        
+        # Default case (for unhandled types)
+        return {}, definitions
+    
+    @classmethod
+    def schema(cls, by_alias: bool = True):
+        properties = {}
+        required = []
+        definitions = {}
+
+        for field_name, field_info in cls.__fields__.items():
+            try:
+                properties[field_name], defs = cls.generate_schema_for_field(field_info.type_)
+                definitions = {**definitions, **defs}
+            except Exception as e:
+                print('schema field failed', field_name, e)
+            
+            # Check if the field is required
+            if field_info.default == ...:
+                required.append(field_name)
+
+        # Construct the base schema
+        base_schema = {
+            "type": "object",
+            "properties": properties,
+            "definitions": definitions  # Include definitions for references
+        }
+
+        if required:
+            base_schema["required"] = required
+
+        return base_schema
     
     def __repr__(self):
         return self.json()
@@ -42,32 +111,24 @@ class Entity(BaseModel):
 
 
 def model_to_json_schema(model):
-    if model is None:
-        return None
-    if isinstance(model, dict):
-        return model
-    if getattr(model, '_name', None) == 'List':
-        inner = model.__args__[0]
+    output = None
+    if isinstance(model, list):
+        inner = model[0]
         schema = inner.schema()
         output = {
             'type': 'array',
             'items': schema,
             'definitions': schema.get('definitions', {})
         }
-    else:
+    elif isinstance(model, dict):
+        output = model
+    elif isinstance(model, BaseModel):
+        output = model.schema()
+    elif issubclass(model, BaseModel):
         output = model.schema()
     
     return output
 
-
-JSON_TYPE_MAP: Dict[str, Type[Union[str, int, float, bool, Any]]] = {
-    "string": str,
-    "integer": int,
-    "number": float,
-    "boolean": bool,
-    "object": dict,
-    "array": list,
-}
 
 
 def _is_list(schema):
@@ -86,7 +147,6 @@ def _get_properties(schema):
 def _get_field_type(field_info, definitions):
     field_type = field_info.get('type')
     if field_type is None:
-        print('field_info', field_info)
         ref = field_info.get('allOf', [{}])[0].get('$ref')
         ref_name = ref.split('/')[-1]
         field_type = ref_name
@@ -108,8 +168,6 @@ def _create_field(field_info, definitions):
 def create_model_from_schema(schema):
     properties = _get_properties(schema)
     definitions = schema.get('definitions', {})
-    print('create_model_from_schema', properties, schema)
-    # TODO handle nested objects - should look up def and recurse
     fields = {
         name: _create_field(field_info, definitions)
         for name, field_info in properties.items()
@@ -121,7 +179,6 @@ def create_model_from_schema(schema):
 
 
 def create_entity_from_schema(schema, data):
-    print('create_entity_from_schema', schema, data)
     if _is_list(schema):
         data = [
             {**o, 'id': str(uuid.uuid4()) if o.get('id') is None else o['id']}
@@ -142,6 +199,5 @@ def create_entity_from_schema(schema, data):
 
 
 def create_entity_from_data(data):
-    print('create_entity_from_data', data)
     schema = ''
     return create_entity_from_schema(schema, data)

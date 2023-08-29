@@ -4,8 +4,8 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
 from .world import World 
-from .collection import Collection, Query
-from .template import TemplateDetails, Template
+from .collection import Query
+from .template import Template
 
 
 class PromptInput(BaseModel):
@@ -21,7 +21,7 @@ class API:
         self.fastapi_app = FastAPI()
 
         @self.fastapi_app.post("/prompt")
-        async def run_prompt(details: TemplateDetails):
+        async def run_prompt(details: Template):
             session = self.world.create_session()
             template = Template(**details.dict())
             response = session.prompt(**{**dict(template), 'input': {}})
@@ -50,7 +50,7 @@ class API:
             return {'details': template, 'results': results}
         
         @self.fastapi_app.post("/templates")
-        async def create_template(details: TemplateDetails):
+        async def create_template(details: Template):
             t = self.world.create_template(details)
             return t.id
 

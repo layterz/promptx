@@ -87,7 +87,6 @@ class Collection(pd.DataFrame):
             } 
             for id, r, m in zip(records['ids'], records['documents'], records['metadatas'])
         ]
-        print('docs', collection.name, docs)
         c = Collection(docs)
         c.collection = collection
         c.schema = schema
@@ -187,7 +186,6 @@ class Collection(pd.DataFrame):
             records.append(doc_record)
             
         ids = [r['id'] for r in records]
-        print('upsert', self.name, ids)
         self.collection.upsert(
             ids=ids,
             documents=[r['document'] for r in records],
@@ -212,5 +210,4 @@ class Collection(pd.DataFrame):
 
 class CollectionRecord(Entity):
     type: str = 'collection_record'
-    metadata: Dict[str, Any] = None
     collection: str = None

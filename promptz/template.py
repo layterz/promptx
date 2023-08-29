@@ -2,33 +2,25 @@ import random
 import json
 import uuid
 import textwrap
-from typing import List, Tuple, Type
+from typing import * 
 import jsonschema
 from pydantic import BaseModel
 from openai.error import RateLimitError
 from jinja2 import Template as JinjaTemplate
+
 from .collection import Collection
 from .logging import *
 from .models import ChatLog, LLM, MockLLM
-from .tool import Tool, ToolList
 from .utils import Entity, model_to_json_schema, create_entity_from_schema
-
-
-class TemplateDetails(BaseModel):
-    name: str
-    instructions: str = None
 
 
 class MaxRetriesExceeded(Exception):
     pass
 
 
-class Template:
-    '''
-    Follow the pattern shown in the examples below and
-    generate a new output using the same format.
-    '''
+E = TypeVar('E', bound=BaseModel)
 
+class Template(Entity):
     template = """
     INSTRUCTIONS
     ---
@@ -80,39 +72,33 @@ class Template:
     END_FORMAT_INSTRUCTIONS
     """
 
-    id: str = None
+    type: str = 'template'
     name: str = None
     instructions: str = None
     context: str = None
-    history: List[ChatLog] = []
-    examples: List[Tuple[(str|BaseModel), (str|BaseModel)]] = []
+    history: List[ChatLog]|None = []
+    examples: List[Tuple[(str|BaseModel), (str|BaseModel)]]|None = []
     num_examples: int = 1
-    input: Type[BaseModel] = None
-    output: Type[BaseModel] = None
+    input: Union[Type[E], List[Type[E]], None] = None
+    output: Union[Type[E], List[Type[E]], None] = None
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.instructions = textwrap.dedent(self.instructions or '')
+    
+    @classmethod
+    def schema(cls, by_alias: bool = True):
+        schema = super().schema(by_alias)
+        return schema
+
+
+class TemplateRunner:
+    template: Template
     llm: LLM = MockLLM()
 
-    def __init__(self, instructions=None, output=None, context=None, template=None, examples=None, input=None, id=None, num_examples=None, history=None, llm=None, logger=None, debug=False, silent=False, tools: ToolList = None, name=None):
-        self.id = id or self.id or str(uuid.uuid4())
-        self.name = name or self.name
+    def __init__(self, llm=None, logger=None, debug=False, silent=False, name=None):
         self.logger = logger
         self.llm = llm or self.llm
-        self.context = context or self.context
-        self.history = history or self.history
-        self.input = model_to_json_schema(input or self.input)
-        self.output = model_to_json_schema(output or self.output)
-        self.instructions = textwrap.dedent(instructions or self.instructions or '')
-
-        self.num_examples = num_examples or self.num_examples
-        self.examples = examples or self.examples
-        self.input_template = JinjaTemplate(self.input_template)
-        self.output_template = JinjaTemplate(self.output_template)
-        self.example_template = JinjaTemplate(self.example_template)
-        self.format_template = JinjaTemplate(self.format_template)
-        self.tools = [Tool.parse(t) for t in tools] if tools is not None else []
-
-        template = template or self.template
-        if template is not None:
-            self.template = JinjaTemplate(template)
     
     def parse(self, x):
         if isinstance(x, BaseModel):
@@ -135,18 +121,21 @@ class Template:
         else:
             return x
     
-    def render(self, x, **kwargs):
-        input = self.input_template.render(**x) if len(x) > 0 else ''
-        output = self.output_template.render(**x) if len(x) > 0 else ''
+    def render(self, t, x, **kwargs):
+        input_template = JinjaTemplate(t.input_template)
+        input = input_template.render(**x) if len(x) > 0 else ''
+        output_template = JinjaTemplate(t.output_template)
+        output = output_template.render(**x) if len(x) > 0 else ''
         vars = {
             **x,
-            'instructions': self.instructions,
-            'examples': self.render_examples(),
-            'format': self.render_format(x),
+            'instructions': t.instructions,
+            'examples': self.render_examples(t),
+            'format': self.render_format(t, x),
             'input': input,
             'output': output,
         }
-        output = self.template.render(**vars)
+        template = JinjaTemplate(t.template)
+        output = template.render(**vars)
         return output
     
     def format_field(self, name, field, definitions, required):
@@ -188,54 +177,58 @@ class Template:
             'required': name in required,
         }
     
-    def render_format(self, x, **kwargs):
-        if self.output is None:
+    def render_format(self, t, x, **kwargs):
+        if t.output is None:
             return ''
         
         list_output = False
 
+        output = model_to_json_schema(t.output)
         fields = []
-        if self.output.get('type', None) == 'array':
-            properties = self.output.get('items', {}).get('properties', {})
-            definitions = self.output.get('items', {}).get('definitions', {})
-            required = self.output.get('items', {}).get('required', [])
+        if output.get('type', None) == 'array':
+            properties = output.get('items', {}).get('properties', {})
+            definitions = output.get('items', {}).get('definitions', {})
+            required = output.get('items', {}).get('required', [])
             list_output = True
-        elif self.output.get('type', None) == 'object':
-            properties = self.output.get('properties', {})
-            definitions = self.output.get('definitions', {})
-            required = self.output.get('required', [])
+        elif output.get('type', None) == 'object':
+            properties = output.get('properties', {})
+            definitions = output.get('definitions', {})
+            required = output.get('required', [])
         
         for name, property in properties.items():
             f = self.format_field(name, property, definitions, required)
             fields += [f]
         
-        return self.format_template.render({
+        format_template = JinjaTemplate(t.format_template)
+        return format_template.render({
             'fields': [field for field in fields if field is not None], 
             'list_output': list_output,
         })
     
-    def render_examples(self, **kwargs):
-        if len(self.examples) == 0:
+    def render_examples(self, t, **kwargs):
+        if t.examples is None or len(t.examples) == 0:
             return ''
         examples = [
             {
                 'input': json.dumps(self.parse(i)),
                 'output': json.dumps(self.parse(o)),
             }
-            for i, o in random.sample(self.examples, self.num_examples)
+            for i, o in random.sample(t.examples, t.num_examples)
         ]
+        example_template = JinjaTemplate(t.example_template)
         return '\n'.join([
-            self.example_template.render(**e) for e in examples
+            example_template.render(**e) for e in examples
         ])
     
-    def process(self, x, output, **kwargs):
-        if self.output is None:
+    def process(self, t, x, output, **kwargs):
+        if t.output is None:
             return output
         out = json.loads(output)
-        entities = create_entity_from_schema(self.output, out)
+        schema = model_to_json_schema(t.output)
+        entities = create_entity_from_schema(schema, out)
         return entities
     
-    def __dict__(self):
+    def dict(self):
         return {
             'id': self.id,
             'type': 'template',
@@ -244,63 +237,51 @@ class Template:
             'input': self.input,
             'output': self.output,
         }
-
-    def __iter__(self):
-        for key, value in self.__dict__().items():
-            yield key, value
     
-    def __call__(self, x, **kwargs):
-        return self.forward(x, **kwargs)
+    def __call__(self, t, x, **kwargs):
+        return self.forward(t, x, **kwargs)
     
-    def forward(self, x, retries=3, dryrun=False, **kwargs):
+    def forward(self, t, x, retries=3, dryrun=False, **kwargs):
         if retries and retries <= 0:
             e = MaxRetriesExceeded(f'{self.name} failed to forward {x}')
             self.logger.error(e)
             raise e
         
         if dryrun:
-            self.logger.debug(f'Dryrun: {self.output}')
-            llm = MockLLM(output=self.output)
+            self.logger.debug(f'Dryrun: {t.output}')
+            llm = MockLLM(output=t.output)
         else:
             llm = self.llm
         
         px = self.parse(x)
             
-        if self.template is not None and self.template != '':
-            prompt_input = self.render({'input': px})
-            if self.context: self.logger.context(self.context)
+        prompt_input = self.render(t, {'input': px})
+        if t.context: self.logger.context(t.context)
+        if t.history:
             self.logger.log(HISTORY, '\n\n\n'.join([f'''
             {log.input}
             {log.output}
-            ''' for log in self.history]))
-            self.logger.log(INSTRUCTIONS, self.instructions)
-            if len(self.examples): self.logger.log(EXAMPLES, self.render_examples())
-            if len(px): self.logger.log(INPUT, px)
-            tools = [t.info for t in self.tools]
-            self.logger.debug(f'FULL INPUT: {prompt_input}')
-            response = llm.generate(prompt_input, context=self.context, history=self.history, tools=tools)
-            if response.callback is not None:
-                function_name = response.callback.name
-                tool = next(t for t in self.tools if t.name == function_name)
-                params = {p['name']: response.callback.params.get(p['name']) 
-                          for p in tool.parameters}
-                rsp = tool(**params)
-                return None
-            if self.output: self.logger.log(FORMAT_INSTRUCTIONS, self.render_format(px))
-            try:
-                self.logger.log(OUTPUT, response.raw)
-                response.content = self.process(px, response.raw, **kwargs)
-            except jsonschema.exceptions.ValidationError as e:
-                self.logger.warn(f'Output validation failedcls: {e} {response.content}')
-                return self.forward(x, retries=retries-1, **kwargs)
-            except json.JSONDecodeError as e:
-                self.logger.warn(f'Failed to decode JSON from {response.content}: {e}')
-                return self.forward(x, retries=retries-1, **kwargs)
-            except RateLimitError as e:
-                self.logger.warn(f'Hit rate limit for {self}: {e}')
-                return self.forward(x, retries=retries-1, **kwargs)
-            self.logger.log(METRICS, response.metrics)
-            return response
+            ''' for log in t.history]))
+        self.logger.log(INSTRUCTIONS, t.instructions)
+        if t.examples: self.logger.log(EXAMPLES, self.render_examples(t))
+        if len(px): self.logger.log(INPUT, px)
+        self.logger.debug(f'FULL INPUT: {prompt_input}')
+        response = llm.generate(prompt_input, context=t.context, history=t.history)
+        if t.output: self.logger.log(FORMAT_INSTRUCTIONS, self.render_format(t, px))
+        try:
+            self.logger.log(OUTPUT, response.raw)
+            response.content = self.process(t, px, response.raw, **kwargs)
+        except jsonschema.exceptions.ValidationError as e:
+            self.logger.warn(f'Output validation failedcls: {e} {response.content}')
+            return self.forward(t, x, retries=retries-1, **kwargs)
+        except json.JSONDecodeError as e:
+            self.logger.warn(f'Failed to decode JSON from {response.content}: {e}')
+            return self.forward(t, x, retries=retries-1, **kwargs)
+        except RateLimitError as e:
+            self.logger.warn(f'Hit rate limit for {self}: {e}')
+            return self.forward(t, x, retries=retries-1, **kwargs)
+        self.logger.log(METRICS, response.metrics)
+        return response
 
 
 class ChatPrompt(Template):
