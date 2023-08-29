@@ -35,7 +35,8 @@ class Entity(BaseModel):
     def generate_schema_for_field(cls, field_type: Any):
         definitions = {}
         # Handle basic types
-        if issubclass(field_type, (int, float, str, bool)):
+        print('field_type', field_type)
+        if isinstance(field_type, type) and issubclass(field_type, (int, float, str, bool)):
             return {"type": PYTYPE_TO_JSONTYPE[field_type]}, definitions
         
         # Handle case for List[Type]
@@ -47,7 +48,7 @@ class Entity(BaseModel):
             }, definitions
 
         # Handle Pydantic model types (reference schema)
-        elif issubclass(field_type, BaseModel):
+        elif isinstance(field_type, type) and issubclass(field_type, BaseModel):
             # If the schema for this model hasn't been generated before
             if field_type.__name__ not in definitions:
                 definitions[field_type.__name__] = {
@@ -67,6 +68,7 @@ class Entity(BaseModel):
 
         for field_name, field_info in cls.__fields__.items():
             try:
+                print('field', field_name)
                 properties[field_name], defs = cls.generate_schema_for_field(field_info.type_)
                 definitions = {**definitions, **defs}
             except Exception as e:
@@ -124,11 +126,11 @@ def model_to_json_schema(model):
         output = model
     elif isinstance(model, BaseModel):
         output = model.schema()
-    elif issubclass(model, BaseModel):
-        output = model.schema()
+    elif isinstance(model, type):
+        if issubclass(model, BaseModel):
+            output = model.schema()
     
     return output
-
 
 
 def _is_list(schema):

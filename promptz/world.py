@@ -251,7 +251,7 @@ class World:
         self.create_collection('default')
         self.create_collection('history', schema=ChatLog.schema())
 
-        self.create_collection('templates', schema=None)
+        self.create_collection('templates', schema=Template.schema())
         for template in (templates or []):
             self.create_template(template)
         

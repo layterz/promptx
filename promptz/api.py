@@ -85,14 +85,14 @@ class API:
         @self.fastapi_app.get("/collections/{name}")
         async def get_collection(name: str):
             try:
-                c = self.world.collections()
-                r = c[c['name'] == name].first
+                c = self.world.collections(ids=[name])
                 cc = self.world._collections[name]
-                if r is None:
+                if c is None:
                     return {"response": None}
                 else:
-                    return {"details": dict(r), "list": cc.objects}
-            except KeyError:
+                    return {"details": dict(c), "list": cc.objects}
+            except KeyError as e:
+                print('collection not found', e)
                 raise HTTPException(status_code=404, detail="Collection not found")
 
         @self.fastapi_app.get("/systems")
@@ -107,7 +107,10 @@ class API:
         
         @self.fastapi_app.get("/systems/{name}")
         async def get_system(name: str):
-            return {"response": self.world.systems[name]}
+            print('get system', name)
+            print('systems', self.world.systems)
+            system = self.world.systems(ids=[name]).first
+            return {"details": system, "results": []}
         
         @self.fastapi_app.post("/systems/run")
         async def run_systems():
@@ -119,12 +122,3 @@ class API:
             session = self.world.create_session()
             response = session.query(query.query, where=query.where, collection=query.collection)
             return {"response": response}
-        
-        @self.fastapi_app.get("/notebooks")
-        async def get_notebooks():
-            return {"list": self.world.notebooks}
-        
-        @self.fastapi_app.get("/notebooks/{name}")
-        async def get_notebook(name: str):
-            return {"response": self.world.notebooks[name]}
-        

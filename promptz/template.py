@@ -75,9 +75,7 @@ class Template(Entity):
     type: str = 'template'
     name: str = None
     instructions: str = None
-    context: str = None
-    history: List[ChatLog]|None = []
-    examples: List[Tuple[(str|BaseModel), (str|BaseModel)]]|None = []
+    examples: Union[List[Tuple[(str|BaseModel)]], (str|BaseModel)] = []
     num_examples: int = 1
     input: Union[Type[E], List[Type[E]], None] = None
     output: Union[Type[E], List[Type[E]], None] = None
@@ -256,17 +254,11 @@ class TemplateRunner:
         px = self.parse(x)
             
         prompt_input = self.render(t, {'input': px})
-        if t.context: self.logger.context(t.context)
-        if t.history:
-            self.logger.log(HISTORY, '\n\n\n'.join([f'''
-            {log.input}
-            {log.output}
-            ''' for log in t.history]))
         self.logger.log(INSTRUCTIONS, t.instructions)
         if t.examples: self.logger.log(EXAMPLES, self.render_examples(t))
         if len(px): self.logger.log(INPUT, px)
         self.logger.debug(f'FULL INPUT: {prompt_input}')
-        response = llm.generate(prompt_input, context=t.context, history=t.history)
+        response = llm.generate(prompt_input)
         if t.output: self.logger.log(FORMAT_INSTRUCTIONS, self.render_format(t, px))
         try:
             self.logger.log(OUTPUT, response.raw)
