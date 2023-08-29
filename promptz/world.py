@@ -38,6 +38,9 @@ class System(Entity):
         d = super().dict(*args, **kwargs)
         d['query'] = self.query.dict()
         return d
+    
+    def __call__(self, items, *args, **kwargs):
+        return self.process(items, *args, **kwargs)
 
 
 class Session:
@@ -231,11 +234,13 @@ class World:
     name: str
     sessions: List[Session]
     _collections: Dict[str, Collection]
+    _systems: Dict[str, System]
 
     def __init__(self, name, systems=None, llm=None, ef=None, logger=None, db=None, templates=None):
         self.name = name
         self.sessions = []
         self._collections = {}
+        self._systems = {}
         self.llm = llm or MockLLM()
         self.ef = ef or (lambda x: [0] * len(x))
         self.db = db or ChromaVectorDB(path=os.environ.get('PROMPTZ_PATH'))
@@ -288,6 +293,7 @@ class World:
         return self.templates.embed(template)
     
     def create_system(self, system):
+        self._systems[system.name] = system
         return self.systems.embed(system)
     
     @property
@@ -304,15 +310,11 @@ class World:
 
     def __call__(self, session, *args: Any, **kwds: Any) -> Any:
         for system in self.systems().objects:
-            q = system.query
-            items = session.query(q.query, where=q.where)
-            func_string = ['def __process(items, **kwargs):']
-            func_string += system.processor.split('\n')[1:]
-            func_string = '\n'.join(func_string)
+            q = Query(**system.query)
+            items = session.query(q.query, where=q.where, collection=q.collection)
             try:
-                namespace = {}
-                exec(func_string, namespace)
-                updates = namespace['__process'](items)
+                _system = self._systems[system.name]
+                updates = _system(items)
                 if updates is not None:
                     session.store(updates)
             except Exception as e:
