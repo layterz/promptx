@@ -65,7 +65,7 @@ class EntitySeries(pd.Series):
 
 
 class Collection(pd.DataFrame):
-    _metadata = ['collection', 'schema']
+    _metadata = ['collection']
 
     @property
     def _constructor(self, *args, **kwargs):
@@ -76,20 +76,17 @@ class Collection(pd.DataFrame):
         return EntitySeries
     
     @classmethod
-    def load(cls, collection, schema=None):
+    def load(cls, collection):
         records = collection.get(where={'item': 1})
         docs = [
             {
                 'id': id, 
                 **json.loads(r), 
-                '__schema__': m['schema'],
-                '__created_at__': m['created_at'],
             } 
             for id, r, m in zip(records['ids'], records['documents'], records['metadatas'])
         ]
         c = Collection(docs)
         c.collection = collection
-        c.schema = schema
         return c
     
     def embedding_query(self, *texts, ids=None, where=None, threshold=0.5, **kwargs):
@@ -133,20 +130,30 @@ class Collection(pd.DataFrame):
     
     @property
     def objects(self):
+        ids = self['id'].values.tolist()
+        d = self.collection.get(ids=ids)
+        m = {id: metadata for id, metadata in zip(d['ids'], d['metadatas'])}
+        schemas = {
+            id: json.loads(metadata['schema']) for id, metadata in m.items()
+                if 'schema' in metadata and metadata['schema'] is not None
+        }
         return [
             create_entity_from_schema(
-                json.loads(r['__schema__']) if '__schema__' in r else self.schema,
-                {k: v for k, v in r.items() if k not in ['__schema__', '__created_at__']}
+                schemas.get(r['id']),
+                {
+                    k: v for k, v in r.items() if v is not None
+                }
             ) 
             for r in self.to_dict('records')
         ]
     
     @property
     def first(self):
-        if len(self.objects) == 0:
+        objects = self.objects
+        if len(objects) == 0:
             return None
         else:
-            return self.objects[0]
+            return objects[0]
     
     def embed(self, *items, **kwargs):
         records = []
@@ -179,7 +186,7 @@ class Collection(pd.DataFrame):
                     'collection': self.name,
                     'type': item.type,
                     'item': 1,
-                    'schema': json.dumps(item.__class__.schema()),
+                    'schema': json.dumps(item.schema()),
                     'created_at': now,
                 },
             }

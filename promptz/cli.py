@@ -1,10 +1,14 @@
 import os
+import sys
 import shutil
 import click
 import requests
 import pprint
 from IPython import embed
 from jinja2 import Environment, FileSystemLoader, select_autoescape
+
+from . import load_config
+from promptz.application import App
 
 
 def create_project_structure(template_path, project_path, variables):
@@ -58,7 +62,6 @@ def prompt(input: str):
     _prompt(input)
 
 def _prompt(input: str):
-    print(f'Prompting: {input}')
     return requests.post(f'{API_ENDPOINT}/prompt', json={'name': 'n/a', 'instructions': input})
 
 
@@ -139,7 +142,11 @@ def serve():
     _serve()
 
 def _serve():
-    print(f'Serving')
+    path, config = load_config()
+    print(f'Loading config from {path}')
+    sys.path.append(path)
+    app = App.from_config(path, config)
+    app.serve()
 
 
 @cli.command()

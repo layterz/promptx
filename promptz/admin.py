@@ -171,8 +171,6 @@ class AdminEntityPage(AdminPage):
                 style_as_list_view=True,
             )
 
-            print('data', data)
-
             if data['details']['input'] is None:
                 inputs = [{
                     'id': 'input',

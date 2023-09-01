@@ -1,4 +1,5 @@
 import os
+import sys
 from typing import Callable, List
 
 from .collection import Collection 
@@ -41,8 +42,8 @@ def query(*texts, field=None, where=None, collection=None, **kwargs) -> Collecti
         *texts, field=field, where=where, collection=collection, **kwargs)
 
 
-def collection(name=None) -> Collection:
-    return DEFAULT_SESSION.collection(name)
+def chat(input, **kwargs):
+    return {}
 
 
 def evaluate(*testcases, **kwargs) -> Collection:
@@ -54,6 +55,10 @@ def history(query=None, **kwargs):
         return DEFAULT_SESSION.history(query, **kwargs)
     else:
         return DEFAULT_SESSION.history
+
+
+def templates(ids=None, **kwargs) -> Collection:
+    return DEFAULT_SESSION.world.templates(ids=ids, **kwargs)
 
 
 def session() -> Session:
@@ -130,14 +135,15 @@ def load_config(filename=".pz.env"):
 
 def load(llm=None, ef=None, logger=None, log_format='notebook', **kwargs):
     path, config = load_config()
+    sys.path.append(path)
     if path is None:
         w = World(
             'local', llm=llm, ef=ef, logger=logger, 
             templates=[], systems=[], notebooks={}, **kwargs)
-        session = w.create_session(log_format=log_format)
+        s = w.create_session(log_format=log_format)
         set_default_world(w)
-        set_default_session(session)
+        set_default_session(s)
     else:
-        app = load_app(path, config=config, llm=llm, ef=ef, logger=logger, **kwargs)
-        session = app.world.create_session()
-        set_default_session(session)
+        app = App.from_config(path, config, llm=llm, ef=ef, logger=logger, **kwargs)
+        s = app.world.create_session()
+        set_default_session(s)

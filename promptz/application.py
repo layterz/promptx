@@ -4,36 +4,30 @@ import glob
 import threading
 import logging
 from functools import partial
-from typing import List
-import nbformat
-from nbconvert import HTMLExporter
-from pydantic import create_model
 
 from .world import World, System
 from .api import API
 from .admin import Admin
 from .template import Template
 from .models import openai
-from .utils import create_model_from_schema
+from .collection import ChromaVectorDB
 
 
 class App:
     name: str
     world: World
-    templates_dir: str = 'templates'
-    systems_dir: str = 'systems'
 
-    def __init__(self, name, world=None, llm=None, ef=None, logger=None, db=None):
+    def __init__(self, name, world=None, llm=None, ef=None, logger=None, db=None, templates_dir=None, systems_dir=None):
         self.name = name
         self.logger = logger or logging.getLogger(self.name)
-        templates = self._load_templates()
-        systems = self._load_systems()
+        templates = self._load_templates(templates_dir)
+        systems = self._load_systems(systems_dir)
         self.world = world or World(name, templates=templates, systems=systems, llm=llm, ef=ef, logger=logger, db=db)
         self.api = API(self.world)
         self.admin = Admin(self.world)
     
     @classmethod
-    def from_config(cls, config, **kwargs):
+    def from_config(cls, path, config, **kwargs):
         def get_llm(org, model):
             if org == 'openai':
                 auth = {
@@ -47,17 +41,23 @@ class App:
             
             raise Exception(f'Unknown LLM config: {org}:{cls}')
 
-        default_llm = config.get('DEFAULT_LLM')
+        default_llm = config.get('DEFAULT_LLM', 'ai://openai:chatgpt:latest')
+        templates_dir = os.path.join(path, config.get('TEMPLATES_DIR', 'templates'))
+        systems_dir = os.path.join(path, config.get('SYSTEMS_DIR', 'systems'))
         llm_str = default_llm.split('ai://')[-1]
         org, model, version = llm_str.split(':')
         LLM = get_llm(org, model)
+        db = ChromaVectorDB(path=path)
 
         parsed_config = {
+            'name': config.get('NAME', 'local'),
             'llm': LLM(version=version),
+            'db': db,
+            'templates_dir': templates_dir,
+            'systems_dir': systems_dir,
         }
 
         return cls(
-            name='local',
             **{**parsed_config, **{k: v for k, v in kwargs.items() if v is not None}}
         )
     
@@ -65,18 +65,23 @@ class App:
         r = {}
         for file in glob.glob(os.path.join(dir, '*.py')):
             file_name = os.path.splitext(os.path.basename(file))[0]
-            module = importlib.import_module(f'{dir}.{file_name}')
+            package_name = dir.split('/')[-1]
+            module = importlib.import_module(f'{package_name}.{file_name}')
             for name, obj in vars(module).items():
                 if isinstance(obj, type) and issubclass(obj, cls) and obj != cls:
                     r[name] = obj()
         return r
     
-    def _load_templates(self):
-        ts = self._load(self.templates_dir, Template)
+    def _load_templates(self, templates_dir=None):
+        if templates_dir is None:
+            return []
+        ts = self._load(templates_dir, Template)
         return ts.values()
     
-    def _load_systems(self):
-        r = self._load(self.systems_dir, System)
+    def _load_systems(self, systems_dir=None):
+        if systems_dir is None:
+            return []
+        r = self._load(systems_dir, System)
         return r.values()
     
     def _serve_api(self, host='0.0.0.0', port=8000):

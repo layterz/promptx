@@ -7,7 +7,7 @@ from pydantic import BaseModel
 from typing import Any, Dict, List, Callable
 from chromadb.utils import embedding_functions
 
-from .collection import Collection, CollectionRecord, Query, ChromaVectorDB
+from .collection import Collection, CollectionRecord, Query, ChromaVectorDB, VectorDB
 from .template import Template, TemplateRunner, MaxRetriesExceeded, MockLLM
 from .models import ChatLog
 from .logging import JSONLogFormatter, NotebookFormatter
@@ -83,10 +83,10 @@ class Session:
             self.logger.error(f'Max retries exceeded: {e}')
             return None
     
-    def _run_batch(self, p, inputs, dryrun=False, retries=3, to_json=False, **kwargs):
+    def _run_batch(self, t, inputs, dryrun=False, retries=3, to_json=False, **kwargs):
         o = []
         for input in inputs:
-            r = self._run_prompt(p, input, dryrun=dryrun, retries=retries, to_json=to_json, **kwargs)
+            r = self._run_prompt(t, input, dryrun=dryrun, retries=retries, to_json=to_json, **kwargs)
             if r is not None:
                 o.append(r.content)
         return o
@@ -99,7 +99,7 @@ class Session:
         logger.setLevel(level)
 
         if template is None:
-            t = Template(
+            template = Template(
                 id=id,
                 output=output,
                 instructions=instructions,
@@ -113,17 +113,13 @@ class Session:
                 silent=silent,
                 logger=logger,
             )
-        else:
-            t = template
-            t.llm = llm or self.llm
-            t.logger = self.logger
-            t.debug = debug
-            t.silent = silent
+        elif isinstance(template, str):
+            template = self.world.templates(ids=[template]).first
 
         if isinstance(input, list):
-            return self._run_batch(t, input, dryrun=dryrun, retries=retries, to_json=to_json, **kwargs)
+            return self._run_batch(template, input, dryrun=dryrun, retries=retries, to_json=to_json, **kwargs)
         else:
-            return self._run_prompt(t, input, dryrun=dryrun, retries=retries, to_json=to_json, **kwargs)
+            return self._run_prompt(template, input, dryrun=dryrun, retries=retries, to_json=to_json, **kwargs)
     
     def embed(self, item, field=None):
         if isinstance(item, str):
@@ -229,35 +225,37 @@ class TemplateSystem(System):
     def process(self, x, **kwargs):
         pass
 
-
+ 
 class World:
     name: str
     sessions: List[Session]
     _collections: Dict[str, Collection]
     _systems: Dict[str, System]
+    db: VectorDB
 
-    def __init__(self, name, systems=None, llm=None, ef=None, logger=None, db=None, templates=None):
+    def __init__(self, name, db, systems=None, llm=None, ef=None, logger=None, templates=None):
         self.name = name
         self.sessions = []
         self._collections = {}
         self._systems = {}
         self.llm = llm or MockLLM()
         self.ef = ef or (lambda x: [0] * len(x))
-        self.db = db or ChromaVectorDB(path=os.environ.get('PROMPTZ_PATH'))
+        self.db = db
         self.logger = logger or logging.getLogger(self.name)
         
         collection = self.db.get_or_create_collection('collections')
-        self.collections = Collection.load(collection, schema=CollectionRecord.schema())
+        self.collections = Collection.load(collection)
         self.create_collection('default')
-        self.create_collection('history', schema=ChatLog.schema())
+        self.create_collection('history')
 
-        self.create_collection('templates', schema=Template.schema())
+        self.create_collection('templates')
         for template in (templates or []):
             self.create_template(template)
         
-        self.create_collection('systems', schema=System.schema())
+        self.create_collection('systems')
         for system in (systems or []):
-            self.create_system(system)
+            #self.create_system(system)
+            pass
         
         # TODO: hack, should register as normal system
         self.template_system = TemplateRunner(llm=self.llm, logger=self.logger.getChild('template_system'))
@@ -280,11 +278,11 @@ class World:
         self.sessions.append(session)
         return session
     
-    def create_collection(self, name, metadata=None, schema=None):
+    def create_collection(self, name, metadata=None):
         if metadata is None:
             metadata = {"hnsw:space": "cosine"}
         collection = self.db.get_or_create_collection(name, metadata=metadata)
-        c = Collection.load(collection, schema=schema)
+        c = Collection.load(collection)
         self._collections[name] = c
         r = CollectionRecord(id=name, collection=name)
         self.collections.embed(r)

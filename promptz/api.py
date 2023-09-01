@@ -92,7 +92,6 @@ class API:
                 else:
                     return {"details": dict(c), "list": cc.objects}
             except KeyError as e:
-                print('collection not found', e)
                 raise HTTPException(status_code=404, detail="Collection not found")
 
         @self.fastapi_app.get("/systems")
@@ -107,8 +106,6 @@ class API:
         
         @self.fastapi_app.get("/systems/{name}")
         async def get_system(name: str):
-            print('get system', name)
-            print('systems', self.world.systems)
             system = self.world.systems(ids=[name]).first
             return {"details": system, "results": []}
         

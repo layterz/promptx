@@ -21,6 +21,7 @@ class MaxRetriesExceeded(Exception):
 E = TypeVar('E', bound=BaseModel)
 
 class Template(Entity):
+    
     template = """
     INSTRUCTIONS
     ---
@@ -75,18 +76,25 @@ class Template(Entity):
     type: str = 'template'
     name: str = None
     instructions: str = None
-    examples: Union[List[Tuple[(str|BaseModel)]], (str|BaseModel)] = []
     num_examples: int = 1
-    input: Union[Type[E], List[Type[E]], None] = None
-    output: Union[Type[E], List[Type[E]], None] = None
+    examples: List = None
+    _input: str = None
+    _output: str = None
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.instructions = textwrap.dedent(self.instructions or '')
+        if hasattr(self, 'input') and self.input is not None:
+            self._input = json.dumps(self.input.schema())
+        if hasattr(self, 'output') and self.output is not None:
+            self._output = json.dumps(self.output.schema())
     
-    @classmethod
-    def schema(cls, by_alias: bool = True):
-        schema = super().schema(by_alias)
+    def schema(self, by_alias: bool = True):
+        schema = super().schema(by_alias=by_alias)
+        if self._input is not None:
+            schema['properties']['input'] = json.loads(self._input)
+        if self._output is not None:
+            schema['properties']['output'] = json.loads(self._output)
         return schema
 
 
