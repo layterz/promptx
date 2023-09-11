@@ -48,12 +48,18 @@ class Entity(BaseModel):
         # Handle Pydantic model types (reference schema)
         elif isinstance(field_type, type) and issubclass(field_type, BaseModel):
             # If the schema for this model hasn't been generated before
-            if field_type.__name__ not in definitions:
-                definitions[field_type.__name__] = {
-                    "type": "object",
-                    "properties": {name: self.generate_schema_for_field(name, info.type_, info.default) for name, info in field_type.__fields__.items()}
-                }
-            schema = {"$ref": f"#/definitions/{field_type.__name__}"}
+            for name, info in field_type.__fields__.items():
+                if name not in definitions:
+                    field, defs = self.generate_schema_for_field(name, info.type_, info.default)
+                    definitions[name] = {
+                        "type": "object",
+                        "properties": field,
+                    }
+                    definitions = {**definitions, **defs}
+            schema = {
+                "type": "object",
+                "$ref": f"#/definitions/{field_type.__name__}",
+            }
         
         # Handle default case by getting the cls field and calling schema
         else:

@@ -78,24 +78,8 @@ class Template(Entity):
     instructions: str = None
     num_examples: int = 1
     examples: List = None
-    _input: str = None
-    _output: str = None
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.instructions = textwrap.dedent(self.instructions or '')
-        if hasattr(self, 'input') and self.input is not None:
-            self._input = json.dumps(self.input.schema())
-        if hasattr(self, 'output') and self.output is not None:
-            self._output = json.dumps(self.output.schema())
-    
-    def schema(self, by_alias: bool = True):
-        schema = super().schema(by_alias=by_alias)
-        if self._input is not None:
-            schema['properties']['input'] = json.loads(self._input)
-        if self._output is not None:
-            schema['properties']['output'] = json.loads(self._output)
-        return schema
+    input: str = None
+    output: str = None
 
 
 class TemplateRunner:
@@ -155,7 +139,6 @@ class TemplateRunner:
                 ref = ref.split('/')[-1]
                 definition = definitions.get(ref, {})
                 type_ = f'{definition.get("title", ref)}[]'
-                type_ = 'string'
 
                 if 'enum' in definition:
                     options += f'''
@@ -189,8 +172,9 @@ class TemplateRunner:
         
         list_output = False
 
-        output = model_to_json_schema(t.output)
+        output = json.loads(t.output)
         fields = []
+        properties = {}
         if output.get('type', None) == 'array':
             properties = output.get('items', {}).get('properties', {})
             definitions = output.get('items', {}).get('definitions', {})
@@ -230,7 +214,7 @@ class TemplateRunner:
         if t.output is None:
             return output
         out = json.loads(output)
-        schema = model_to_json_schema(t.output)
+        schema = model_to_json_schema(json.loads(t.output))
         entities = create_entity_from_schema(schema, out)
         return entities
     
@@ -249,7 +233,7 @@ class TemplateRunner:
     
     def forward(self, t, x, retries=3, dryrun=False, **kwargs):
         if retries and retries <= 0:
-            e = MaxRetriesExceeded(f'{self.name} failed to forward {x}')
+            e = MaxRetriesExceeded(f'{t.name} failed to forward {x}')
             self.logger.error(e)
             raise e
         
@@ -265,7 +249,6 @@ class TemplateRunner:
         self.logger.log(INSTRUCTIONS, t.instructions)
         if t.examples: self.logger.log(EXAMPLES, self.render_examples(t))
         if len(px): self.logger.log(INPUT, px)
-        self.logger.debug(f'FULL INPUT: {prompt_input}')
         response = llm.generate(prompt_input)
         if t.output: self.logger.log(FORMAT_INSTRUCTIONS, self.render_format(t, px))
         try:

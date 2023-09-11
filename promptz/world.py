@@ -1,5 +1,4 @@
-import os
-import inspect
+import json
 import uuid
 import logging
 import numpy as np
@@ -11,7 +10,7 @@ from .collection import Collection, CollectionRecord, Query, ChromaVectorDB, Vec
 from .template import Template, TemplateRunner, MaxRetriesExceeded, MockLLM
 from .models import ChatLog
 from .logging import JSONLogFormatter, NotebookFormatter
-from .utils import Entity 
+from .utils import Entity, model_to_json_schema
 
 
 Processor = Callable[[Collection], Collection]
@@ -98,8 +97,12 @@ class Session:
         elif silent: level = logging.ERROR
         logger.setLevel(level)
 
+        if output is not None:
+            output = model_to_json_schema(output)
+            output = json.dumps(output)
+
         if template is None:
-            template = Template(
+           template = Template(
                 id=id,
                 output=output,
                 instructions=instructions,
