@@ -64,14 +64,14 @@ class Session:
             log = ChatLog(template=t.id, input=rendered, output=r.raw)
             self.store(log, collection='history')
             if isinstance(r.content, list):
-                es = [dict(e) for e in r.content]
+                if len(r.content) > 0 and isinstance(r.content[0], BaseModel):
+                    es = [dict(e) for e in r.content]
+                else:
+                    es = r.content
                 if to_json:
                     return es
                 else:
                     c = Collection(es)
-                    if len(es) > 0:
-                        schema = r.content[0].schema()
-                        c.schema = schema
                     return c
             else:
                 if to_json:
@@ -99,7 +99,8 @@ class Session:
 
         if output is not None:
             output = model_to_json_schema(output)
-            output = json.dumps(output)
+            if output is not None:
+                output = json.dumps(output)
 
         if template is None:
            template = Template(

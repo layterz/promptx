@@ -135,12 +135,20 @@ def model_to_json_schema(model):
     output = None
     if isinstance(model, list):
         inner = model[0]
-        schema = inner.schema()
-        output = {
-            'type': 'array',
-            'items': schema,
-            'definitions': schema.get('definitions', {})
-        }
+        if issubclass(inner, BaseModel):
+            schema = inner.schema()
+            output = {
+                'type': 'array',
+                'items': schema,
+                'definitions': schema.get('definitions', {})
+            }
+        else:
+            output = {
+                'type': 'array',
+                'items': {
+                    'type': PYTYPE_TO_JSONTYPE[inner]
+                }
+            }
     elif isinstance(model, dict):
         output = model
     elif isinstance(model, BaseModel):

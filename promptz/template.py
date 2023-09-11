@@ -56,7 +56,9 @@ class Template(Entity):
     format_template = """
     FORMAT INSTRUCTIONS
     ---
-    {% if list_output %}
+    {% if string_list_output %}
+    Return a JSON array of strings.
+    {% elif list_output %}
     Return a list of valid JSON objects with the fields described below.
     {% else %}
     Return the output as a valid JSON object with the fields described below. 
@@ -167,12 +169,17 @@ class TemplateRunner:
         }
     
     def render_format(self, t, x, **kwargs):
-        if t.output is None:
+        if t.output is None or t.output == str:
             return ''
         
-        list_output = False
-
         output = json.loads(t.output)
+        format_template = JinjaTemplate(t.format_template)
+        if output.get('type', None) == 'array' and output.get('items', {}).get('type', None) == 'string':
+            return format_template.render({
+                'string_list_output': True,
+            })
+
+        list_output = False
         fields = []
         properties = {}
         if output.get('type', None) == 'array':
@@ -189,7 +196,6 @@ class TemplateRunner:
             f = self.format_field(name, property, definitions, required)
             fields += [f]
         
-        format_template = JinjaTemplate(t.format_template)
         return format_template.render({
             'fields': [field for field in fields if field is not None], 
             'list_output': list_output,
@@ -215,6 +221,8 @@ class TemplateRunner:
             return output
         out = json.loads(output)
         schema = model_to_json_schema(json.loads(t.output))
+        if schema.get('type', None) == 'string' or (schema.get('type', None) == 'array' and schema.get('items', {}).get('type', None) == 'string'):
+            return out
         entities = create_entity_from_schema(schema, out)
         return entities
     
