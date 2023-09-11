@@ -136,14 +136,25 @@ def load_config(filename=".pz.env"):
 def load(llm=None, ef=None, logger=None, log_format='notebook', **kwargs):
     path, config = load_config()
     sys.path.append(path)
+    app = None
     if path is None:
-        w = World(
-            'local', llm=llm, ef=ef, logger=logger, 
-            templates=[], systems=[], notebooks={}, **kwargs)
-        s = w.create_session(log_format=log_format)
+        app = App(
+            'local', 
+            llm=llm, 
+            ef=ef, 
+            logger=logger, 
+            templates=[], 
+            systems=[], 
+            notebooks={}, 
+            **kwargs,
+        )
+
+        s = app.world.create_session(log_format=log_format)
         set_default_world(w)
         set_default_session(s)
     else:
         app = App.from_config(path, config, llm=llm, ef=ef, logger=logger, **kwargs)
         s = app.world.create_session()
         set_default_session(s)
+    
+    return app

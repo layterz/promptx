@@ -131,21 +131,31 @@ class Collection(pd.DataFrame):
     @property
     def objects(self):
         ids = self['id'].values.tolist()
-        d = self.collection.get(ids=ids)
-        m = {id: metadata for id, metadata in zip(d['ids'], d['metadatas'])}
-        schemas = {
-            id: json.loads(metadata['schema']) for id, metadata in m.items()
-                if 'schema' in metadata and metadata['schema'] is not None
-        }
-        return [
-            create_entity_from_schema(
-                schemas.get(r['id']),
-                {
-                    k: v for k, v in r.items() if v is not None
-                }
-            ) 
-            for r in self.to_dict('records')
-        ]
+        # TODO: this fails because self in this case isn't connected to
+        #       a collection.
+        #       To handle this it should check for collection == None
+        #       and instead use the values from the dataframe
+        if hasattr(self, 'collection'):
+            d = self.collection.get(ids=ids)
+            m = {id: metadata for id, metadata in zip(d['ids'], d['metadatas'])}
+            schemas = {
+                id: json.loads(metadata['schema']) for id, metadata in m.items()
+                    if 'schema' in metadata and metadata['schema'] is not None
+            }
+            return [
+                create_entity_from_schema(
+                    schemas.get(r['id']),
+                    {
+                        k: v for k, v in r.items() if v is not None
+                    }
+                ) 
+                for r in self.to_dict('records')
+            ]
+        else:
+            return [
+                Entity(**{k: v for k, v in r.items() if v is not None})
+                for r in self.to_dict('records')
+            ]
     
     @property
     def first(self):
@@ -192,6 +202,9 @@ class Collection(pd.DataFrame):
             }
             records.append(doc_record)
             
+        if len(records) == 0:
+            raise ValueError('No items to embed')
+
         ids = [r['id'] for r in records]
         self.collection.upsert(
             ids=ids,

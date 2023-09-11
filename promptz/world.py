@@ -230,6 +230,7 @@ class TemplateSystem(System):
         pass
 
  
+# TODO: rename World to Space
 class World:
     name: str
     sessions: List[Session]
