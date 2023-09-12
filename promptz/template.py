@@ -148,11 +148,12 @@ class TemplateRunner:
                     '''
             else:
                 type_ = f'{item_type}[]'
-        elif field.get('type') == 'enum':
-            type_ = 'str'
-            options += f'''Select only one option: {", ".join([
-                member.value for member in field.type_
-            ])}'''
+        elif len(field.get('allOf', [])) > 0:
+            ref = field.get('allOf')[0].get('$ref')
+            ref = ref.split('/')[-1]
+            definition = definitions.get(ref, {})
+            type_ = f'{definition.get("title", ref)}'
+            options += f'''Select only one option: {", ".join(definition['enum'])}'''
         else:
             type_ = field.get('type', 'str')
 

@@ -109,9 +109,6 @@ class Entity(BaseModel):
 
         return base_schema
     
-    def __repr__(self):
-        return self.json()
-    
     def display(self):
         # Check if we're in an IPython environment
         try:
@@ -189,6 +186,17 @@ def _get_field_type(field_info, definitions):
 
     if field_type == 'array':
         field_type = field_info.get('items', {}).get('type')
+        if field_type is None:
+            ref = field_info.get('$ref')
+            if ref is None:
+                ref = field_info.get('allOf', [{}])[0].get('$ref')
+            if ref is None:
+                return str
+            ref_name = ref.split('/')[-1]
+            field_type = ref_name
+            definition = definitions.get(ref_name)
+            m = create_model_from_schema(definition)
+            return m
     return JSON_TYPE_MAP[field_type]
 
 

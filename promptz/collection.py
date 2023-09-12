@@ -94,7 +94,7 @@ class Collection(pd.DataFrame):
         
         scores = {}
         if len(texts) == 0:
-            results = self.collection.get(ids=ids, where=where, **kwargs)
+            results = self.db.get(ids=ids, where=where, **kwargs)
             for id, m in zip(results['ids'], results['metadatas']):
                 if m.get('item') != 1:
                     id = m.get('item_id')
@@ -103,7 +103,7 @@ class Collection(pd.DataFrame):
                 else:
                     scores[id] += 1
         else:
-            results = self.collection.query(query_texts=texts, where=where, **kwargs)
+            results = self.db.query(query_texts=texts, where=where, **kwargs)
             for i in range(len(results['ids'])):
                 for id, d, m in zip(results['ids'][i], results['distances'][i], results['metadatas'][i]):
                     if m.get('item') != 1:
@@ -126,13 +126,13 @@ class Collection(pd.DataFrame):
     
     @property
     def name(self):
-        return self.collection.name
+        return self.db.name
     
     @property
     def objects(self):
         ids = self['id'].values.tolist()
-        if hasattr(self, 'collection'):
-            d = self.collection.get(ids=ids)
+        if hasattr(self, 'db'):
+            d = self.db.get(ids=ids)
             m = {id: metadata for id, metadata in zip(d['ids'], d['metadatas'])}
             schemas = {
                 id: json.loads(metadata['schema']) for id, metadata in m.items()
@@ -148,6 +148,7 @@ class Collection(pd.DataFrame):
                 for r in self.to_dict('records')
             ]
         else:
+            #TODO: handle schema somehow
             return [
                 Entity(**{k: v for k, v in r.items() if v is not None})
                 for r in self.to_dict('records')
