@@ -65,7 +65,7 @@ class EntitySeries(pd.Series):
 
 
 class Collection(pd.DataFrame):
-    _metadata = ['collection']
+    _metadata = ['db']
 
     @property
     def _constructor(self, *args, **kwargs):
@@ -76,8 +76,8 @@ class Collection(pd.DataFrame):
         return EntitySeries
     
     @classmethod
-    def load(cls, collection):
-        records = collection.get(where={'item': 1})
+    def load(cls, db):
+        records = db.get(where={'item': 1})
         docs = [
             {
                 'id': id, 
@@ -86,7 +86,7 @@ class Collection(pd.DataFrame):
             for id, r, m in zip(records['ids'], records['documents'], records['metadatas'])
         ]
         c = Collection(docs)
-        c.collection = collection
+        c.db = db
         return c
     
     def embedding_query(self, *texts, ids=None, where=None, threshold=0.5, **kwargs):
@@ -131,10 +131,6 @@ class Collection(pd.DataFrame):
     @property
     def objects(self):
         ids = self['id'].values.tolist()
-        # TODO: this fails because self in this case isn't connected to
-        #       a collection.
-        #       To handle this it should check for collection == None
-        #       and instead use the values from the dataframe
         if hasattr(self, 'collection'):
             d = self.collection.get(ids=ids)
             m = {id: metadata for id, metadata in zip(d['ids'], d['metadatas'])}
@@ -206,7 +202,7 @@ class Collection(pd.DataFrame):
             raise ValueError('No items to embed')
 
         ids = [r['id'] for r in records]
-        self.collection.upsert(
+        self.db.upsert(
             ids=ids,
             documents=[r['document'] for r in records],
             metadatas=[r['metadata'] for r in records],
