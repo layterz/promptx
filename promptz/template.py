@@ -272,6 +272,9 @@ class TemplateRunner:
         except RateLimitError as e:
             self.logger.warn(f'Hit rate limit for {self}: {e}')
             return self.forward(t, x, retries=retries-1, **kwargs)
+        except Exception as e:
+            self.logger.error(f'Failed to forward {x}: {e}')
+            return self.forward(t, x, retries=retries-1, **kwargs)
         self.logger.log(METRICS, response.metrics)
         return response
 

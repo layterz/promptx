@@ -1,4 +1,5 @@
 import uuid
+from enum import Enum
 from typing import Any, Dict, List, Type, Union, get_origin, get_args
 import jsonschema
 from pydantic import BaseModel, create_model
@@ -181,22 +182,18 @@ def _get_field_type(field_info, definitions):
         ref_name = ref.split('/')[-1]
         field_type = ref_name
         definition = definitions.get(ref_name)
-        m = create_model_from_schema(definition)
-        return m
+        # TODO: this should create enums separately from models
+        if 'enum' in definition:
+            members = {v: v for v in definition['enum']}
+            E = Enum(definition.get('title', ref_name), members)
+            return E
+        else:
+            M = create_model_from_schema(definition)
+            return M
 
     if field_type == 'array':
-        field_type = field_info.get('items', {}).get('type')
-        if field_type is None:
-            ref = field_info.get('$ref')
-            if ref is None:
-                ref = field_info.get('allOf', [{}])[0].get('$ref')
-            if ref is None:
-                return str
-            ref_name = ref.split('/')[-1]
-            field_type = ref_name
-            definition = definitions.get(ref_name)
-            m = create_model_from_schema(definition)
-            return m
+        info = field_info.get('items', {})
+        return List[_get_field_type(info, definitions)]
     return JSON_TYPE_MAP[field_type]
 
 
@@ -216,7 +213,6 @@ def create_model_from_schema(schema):
     }
     if 'type' not in fields:
         fields['type'] = (str, ...)
-    
     return create_model(schema.get('title', 'Entity'), **fields, __base__=Entity)
 
 
