@@ -1,5 +1,5 @@
 import json
-import uuid
+from enum import Enum
 from datetime import datetime
 from abc import abstractmethod
 from typing import Any, Dict
@@ -167,6 +167,11 @@ class Collection(pd.DataFrame):
         for item in items:
             now = datetime.now().isoformat()
 
+            def _serializer(obj):
+                if isinstance(obj, Enum):
+                    return obj.value
+                raise TypeError(f"Type {type(obj)} not serializable")
+
             for name, field in item.dict().items():
                 if name in ['id', 'type']:
                     continue
@@ -174,7 +179,7 @@ class Collection(pd.DataFrame):
                 # TODO: Handle nested fields
                 field_record = {
                     'id': f'{item.id}_{name}',
-                    'document': json.dumps({name: field}),
+                    'document': json.dumps({name: field}, default=_serializer),
                     'metadata': {
                         'field': name,
                         'collection': self.name,
@@ -188,7 +193,7 @@ class Collection(pd.DataFrame):
             doc = { k: v for k, v in item.dict().items() if k not in ['id'] }
             doc_record = {
                 'id': item.id,
-                'document': json.dumps(doc),
+                'document': json.dumps(doc, default=_serializer),
                 'metadata': {
                     'collection': self.name,
                     'type': item.type,
