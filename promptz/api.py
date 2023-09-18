@@ -6,6 +6,7 @@ from pydantic import BaseModel
 from .world import World 
 from .collection import Query
 from .template import Template
+from .auth import DefaultUser
 
 
 class PromptInput(BaseModel):
@@ -19,6 +20,17 @@ class API:
         self.world = world
         self.logger = logger or world.logger.getChild('api')
         self.fastapi_app = FastAPI()
+
+        @self.fastapi_app.get("/inbox")
+        async def get_inbox():
+            user = DefaultUser()
+            logs = self.world.logs(where={'assigned_to': user.id})
+            logs = self.world.logs()
+
+            if logs is not None:
+                return {"list": logs.objects}
+            else:
+                return {"list": []}
 
         @self.fastapi_app.post("/prompt")
         async def run_prompt(details: Template):
@@ -37,13 +49,33 @@ class API:
             
             return {"list": templates}
 
+        @self.fastapi_app.get("/{collection}")
+        async def get_index(collection: str):
+            if collection == 'collections':
+                c = self.world.collections
+            else:
+                c = self.world._collections[collection]
+            if c is None:
+                raise HTTPException(status_code=404, detail=f"{collection} collection not found")
+            r = c.objects
+            return {'list': r}
+
+        @self.fastapi_app.get("/{collection}/{id}")
+        async def get_entity(collection: str, id: str):
+            if collection == 'collections':
+                c = self.world.collections
+            else:
+                c = self.world._collections[collection]
+            r = c(ids=[id]).first
+            return {'details': r, 'results': []}
+
         @self.fastapi_app.get("/templates/{id}")
         async def get_template(id: str):
-            history = self.world.history()
-            if history is None or history.empty:
+            logs = self.world.logs()
+            if logs is None or logs.empty:
                 results = []
             else:
-                results = history[history['template'] == id].to_dict('records')
+                results = logs[logs['template'] == id].to_dict('records')
             template = self.world.templates(ids=[id]).first
             if template is None:
                 raise HTTPException(status_code=404, detail="Template not found")
@@ -63,16 +95,12 @@ class API:
             response = session.prompt(**{**dict(template), 'input': input}, to_json=True)
             return {"response": response}
         
-        @self.fastapi_app.get("/history")
-        async def get_history():
-            if self.world.history.empty:
+        @self.fastapi_app.get("/logs")
+        async def get_logs():
+            if self.world.logs.empty:
                 return {'list': []}
             else:
-                return {'list': self.world.history().objects}
-
-        @self.fastapi_app.get("/inbox")
-        async def get_collections():
-            return {"list": []}
+                return {'list': self.world.logs.objects}
 
         @self.fastapi_app.get("/conversations")
         async def get_collections():

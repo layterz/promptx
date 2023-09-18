@@ -1,15 +1,16 @@
 import os
-import json
 from urllib.parse import urljoin
 import requests
 import pandas as pd
 from pydantic import BaseModel
+from textblob import Word
 from dash import Dash, html, dcc, dash_table, no_update, page_container, page_registry, register_page, Output, Input, State
 from dash.exceptions import PreventUpdate
 from dash.dependencies import ALL
 import dash_bootstrap_components as dbc
 
-from . import World, Collection
+from promptz.world import World
+
 
 API_URL = 'http://localhost:8000'
 
@@ -55,36 +56,26 @@ class AdminPage(BaseModel):
         pass
 
 
-class Index:
-
-    def generate_link(self, row):
-        return f'[{row["name"]}](/{self.name}/{row["id"]})'
-
-    def layout(self):
-        df['name'] = df.apply(self.generate_link, axis=1)
-        content = [
-            dash_table.DataTable(
-                id='prompts-table',
-                columns=[{"name": i, "id": i, 'presentation': 'markdown'} for i in df.columns],
-                data=df.to_dict('records'),
-                style_as_list_view=True,
-            ),
-        ]
-
-
 class AdminIndexPage(AdminPage):
+    collection: str = None
+
+    def __init__(self, app, collection, **kwargs):
+        super().__init__(
+            app,
+            **kwargs,
+        )
+        self.collection = collection
 
     @property
     def api_url(self):
         return urljoin(API_URL, self.path)
 
     def generate_link(self, row):
-        if self.path_template:
-            p = self.path_template.replace('<id>', row['id'])
-        else:
-            p = self.path
-        link = os.path.join(p, row['id'])
-        return f'[{row["id"]}]({link})'
+        link = os.path.join(f'/{self.collection}', row['id'])
+        return f'[{row.get("name", row["id"])}]({link})'
+    
+    def get_columns(self, df):
+        return df.columns
     
     def register_callbacks(self):
         @self.app.callback(
@@ -115,11 +106,20 @@ class AdminIndexPage(AdminPage):
 
         df = pd.DataFrame(index)
         df['id'] = df.apply(self.generate_link, axis=1)
+
+        def format_fields(x):
+            if isinstance(x, str):
+                x = x.split('\n')[0]
+                return x[:64] + ' ...'
+            else:
+                return x
+        formatted = df.drop(columns=['id']).applymap(format_fields)
+        df = pd.concat([df['id'], formatted], axis=1)
         index_table = dash_table.DataTable(
             id='prompts-table',
             columns=[
                 {"name": i, "id": i, 'presentation': 'markdown'} 
-                for i in df.columns
+                for i in self.get_columns(df)
             ],
             data=df.to_dict('records'),
             style_as_list_view=True,
@@ -154,9 +154,10 @@ class AdminEntityPage(AdminPage):
         response = requests.get(api_path)
         if response.status_code == 200:
             data = response.json()
+            print('DATA', data)
             details_data = [
                 {'field': k, 'value': v}
-                for k, v in data['details'].items()
+                for k, v in data.get('details', {}).items()
                 if type(v) in [str, int, float, bool]
             ]
             details_data += [
@@ -171,7 +172,8 @@ class AdminEntityPage(AdminPage):
                 style_as_list_view=True,
             )
 
-            if data['details']['input'] is None:
+            # TODO: this isn't handling "null", which should be parsed into None
+            if data['details'].get('input') is None or data['details'].get('input') == 'null':
                 inputs = [{
                     'id': 'input',
                     'label': 'Input',
@@ -226,9 +228,23 @@ class AdminEntityPage(AdminPage):
                 }
             )
 
-            df = pd.DataFrame(data['results'])
+            if len(data['results']) == 0:
+                results = html.P('Nothing to see here.')
+            else:
+                df = pd.DataFrame(data['results'])
 
-            results = html.Div([
+                def format_fields(x):
+                    if isinstance(x, str):
+                        x = x.split('\n')[0]
+                        return x[:64] + ' ...'
+                    else:
+                        return x
+                
+                print('DF', df)
+                formatted = df.drop(columns=['id']).applymap(format_fields)
+                df = pd.concat([df['id'], formatted], axis=1)
+
+                results = html.Div([
                 html.H2('Logs'),
                 dash_table.DataTable(
                     id='results-table',
@@ -243,7 +259,7 @@ class AdminEntityPage(AdminPage):
 
             return data, details, form, results
         else:
-            raise Exception(f'Error getting entity: {response.status_code}')
+            raise Exception(f'Error getting entity ({api_path}): {response.status_code}')
     
     def actions(self, pathname):
         pass
@@ -335,6 +351,7 @@ class TemplateIndex(AdminIndexPage):
     def __init__(self, app, **kwargs):
         super().__init__(
             app,
+            'templates',
             name="Templates",
             path="/templates",
             **kwargs,
@@ -348,33 +365,12 @@ class CollectionIndex(AdminIndexPage):
             app,
             name="Collections",
             path="/collections",
+            collection='collections',
             **kwargs,
         )
 
 
-class SystemIndex(AdminIndexPage):
-
-    def __init__(self, app, **kwargs):
-        super().__init__(
-            app,
-            name="Systems",
-            path="/systems",
-            **kwargs,
-        )
-
-
-class ConversationIndex(AdminIndexPage):
-
-    def __init__(self, app, **kwargs):
-        super().__init__(
-            app,
-            name="Conversations",
-            path="/conversations",
-            **kwargs,
-        )
-
-
-class Inbox(AdminIndexPage):
+class Inbox(AdminPage):
     menu: bool = False
 
     def __init__(self, app, **kwargs):
@@ -386,13 +382,14 @@ class Inbox(AdminIndexPage):
         )
 
 
-class History(AdminIndexPage):
+class Logs(AdminIndexPage):
 
     def __init__(self, app, **kwargs):
         super().__init__(
             app,
-            name="History",
-            path="/history",
+            name="Logs",
+            path="/logs",
+            collection='logs',
             **kwargs,
         )
 
@@ -411,79 +408,13 @@ class CollectionPage(AdminIndexPage):
         return super().layout()
 
 
-class TemplatePage(AdminEntityPage):
+class DetailsPage(AdminEntityPage):
 
     def __init__(self, app, **kwargs):
         super().__init__(
             app,
-            name="Template",
-            path_template="/templates/<id>",
-            **kwargs,
-        )
-
-
-class TemplateRunPage(AdminPage):
-
-    def __init__(self, app, **kwargs):
-        super().__init__(
-            app,
-            name="Run template",
-            path_template="/templates/<id>/run",
-            **kwargs,
-        )
-    
-    def layout(self, **kwargs):
-        return html.Div([
-            dcc.Location(id='url', refresh=False), 
-            dcc.Store(id=f'{self.name}-data-store'),
-            dcc.Interval(
-                id=f'fetch-interval',
-                interval=1,  # Set an interval that triggers once
-                max_intervals=1  # Only trigger once
-            ),
-            
-            html.H1(self.name),
-            html.Div(id=f'{self.name}-form'),
-        ])
-
-    def register_callbacks(self):
-        @self.app.callback(
-            Output(f'{self.name}-form', 'children'),
-            Input('fetch-interval', 'n_intervals'),
-            Input('url', 'pathname'),
-        )
-        def generate_form(n_intervals, pathname):
-            if n_intervals is None or n_intervals == 0:
-                return no_update
-            api_path = urljoin(API_URL, pathname)
-            response = requests.get(api_path)
-            if response.status_code == 200:
-                data = response.json()
-                details = data.get('details', {})
-            else:
-                raise Exception(f'Error getting index {self.name}: {response.status_code}')
-            form_elements = []
-            for name, field in details.items():
-                if name in ['id', 'type']:
-                    continue
-                component = dcc.Input(
-                    id=name, type='text', 
-                    placeholder=f'E.g. {field}',
-                )
-                form_elements.append(html.Label(name))
-                form_elements.append(component)
-            submit_button = dbc.Button('Submit', id='submit', n_clicks=0, color='primary')
-            form_elements.append(submit_button)
-            return form_elements
-
-
-class SystemPage(AdminEntityPage):
-
-    def __init__(self, app, **kwargs):
-        super().__init__(
-            app,
-            name="System",
-            path_template="/systems/<id>",
+            name="Details",
+            path_template="/<collection>/<id>",
             **kwargs,
         )
 
@@ -502,16 +433,11 @@ class Admin:
         )
 
         pages = [
+            DetailsPage(self.app),
             Inbox(self.app, menu=True),
-            ConversationIndex(self.app, menu=True),
             TemplateIndex(self.app, menu=True),
             CollectionIndex(self.app, menu=True),
-            SystemIndex(self.app, menu=True),
-            History(self.app, menu=True),
-
-            TemplatePage(self.app),
-            SystemPage(self.app),
-            CollectionPage(self.app),
+            Logs(self.app, menu=True),
         ]
 
         for page in pages:

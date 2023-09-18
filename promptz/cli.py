@@ -7,7 +7,7 @@ import pprint
 from IPython import embed
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
-from . import load_config
+from . import load
 from promptz.application import App
 
 
@@ -116,36 +116,10 @@ def run_system(name):
     return requests.post(f'{API_ENDPOINT}/systems/run')
 
 
-@cli.command(name='repl')
-def repl():
-    _repl()
-
-def _repl():
-    from promptz import World
-    world = World('test')
-    session = world.create_session()
-    query = session.query
-    store = session.store
-    prompt = session.prompt
-    history = session.history
-    evaluate = session.evaluate
-    collection = session.collection
-    chain = session.chain
-    run = session.run
-    embed(
-        header='promptz',
-    )
-
-
 @cli.command(name='serve')
-def serve():
-    _serve()
-
-def _serve():
-    path, config = load_config()
-    print(f'Loading config from {path}')
-    sys.path.append(path)
-    app = App.from_config(path, config)
+@click.option('--path', default='local')
+def serve(path=None):
+    app = load(path)
     app.serve()
 
 

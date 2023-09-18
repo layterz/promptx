@@ -6,12 +6,15 @@ from pydantic import BaseModel
 from IPython.display import display, Image
 
 
-class ChatLog(BaseModel):
+class PromptLog(BaseModel):
     id: str
-    type: str = 'chatlog'
+    type: str = 'prompt'
     template: str = None
     input: str = None
+    raw_input: str = None
     output: str = None
+    raw_output: str = None
+    error: str = None
 
     def __init__(self, **data):
         super().__init__(

@@ -8,38 +8,9 @@ from chromadb.utils import embedding_functions
 
 from .collection import Collection, CollectionRecord, Query, ChromaVectorDB, VectorDB
 from .template import Template, TemplateRunner, MaxRetriesExceeded, MockLLM
-from .models import ChatLog
+from .models import PromptLog
 from .logging import JSONLogFormatter, NotebookFormatter
 from .utils import Entity, model_to_json_schema
-
-
-Processor = Callable[[Collection], Collection]
-
-class System(Entity):
-    name: str
-    type: str = 'system'
-    query: Query
-
-    def __init__(self, **kwargs):
-        if 'name' not in kwargs:
-            kwargs['name'] = self.__class__.__name__
-        if 'id' not in kwargs:
-            kwargs['id'] = kwargs['name']
-        super().__init__(**kwargs)
-    
-    def process(self, items, **kwargs):
-        if self.processor is not None:
-            return self.processor(items, **kwargs)
-        else:
-            raise NotImplementedError
-    
-    def dict(self, *args, **kwargs):
-        d = super().dict(*args, **kwargs)
-        d['query'] = self.query.dict()
-        return d
-    
-    def __call__(self, items, *args, **kwargs):
-        return self.process(items, *args, **kwargs)
 
 
 class Session:
@@ -57,12 +28,12 @@ class Session:
     
     def _run_prompt(self, t, input, dryrun=False, retries=3, to_json=False, **kwargs):
         e = None
+        s = self.world.template_system
+        rendered = s.render(t, {'input': s.parse(input)})
         try:
-            s = self.world.template_system
-            rendered = s.render(t, {'input': s.parse(input)})
             r = s(t, input, dryrun=dryrun, retries=retries, **kwargs)
-            log = ChatLog(template=t.id, input=rendered, output=r.raw)
-            self.store(log, collection='history')
+            log = PromptLog(template=t.id, input=json.dumps(input), raw_input=rendered, output=json.dumps(r.content), raw_output=r.raw)
+            self.store(log, collection='logs')
             if isinstance(r.content, list):
                 if len(r.content) > 0 and isinstance(r.content[0], BaseModel):
                     es = [dict(e) for e in r.content]
@@ -80,6 +51,8 @@ class Session:
                     return r.content
         except MaxRetriesExceeded as e:
             self.logger.error(f'Max retries exceeded: {e}')
+            log = PromptLog(template=t.id, input=json.dumps(input), raw_input=rendered, error=str(e))
+            self.store(log, collection='logs')
             return None
     
     def _run_batch(self, t, inputs, dryrun=False, retries=3, to_json=False, **kwargs):
@@ -90,7 +63,7 @@ class Session:
                 o.append(r.content)
         return o
 
-    def prompt(self, instructions=None, input=None, output=None, id=None, context=None, template=None, llm=None, examples=None, num_examples=1, history=None, tools=None, dryrun=False, retries=3, debug=False, silent=False, to_json=False, **kwargs):
+    def prompt(self, instructions=None, input=None, output=None, id=None, context=None, template=None, llm=None, examples=None, num_examples=1, logs=None, tools=None, dryrun=False, retries=3, debug=False, silent=False, to_json=False, **kwargs):
         logger = self.logger.getChild('prompt')
         level = logging.INFO
         if debug: level = logging.DEBUG
@@ -111,7 +84,7 @@ class Session:
                 context=context,
                 examples=examples,
                 num_examples=num_examples,
-                history=history,
+                logs=logs,
                 tools=tools,
                 debug=debug,
                 silent=silent,
@@ -133,14 +106,14 @@ class Session:
         elif isinstance(item, list):
             return [self.embed(i, field=field) for i in item]
     
-    def query(self, *texts, field=None, where=None, collection=None):
+    def query(self, *texts, field=None, ids=None, where=None, collection=None):
         c = self.collection(collection)
         if len(texts) == 0 and field is None and where is None:
             return c
         where = where or {}
         if field is not None:
             where['field'] = field
-        return c(*texts, where=where)
+        return c(*texts, ids=ids, where=where)
 
     def store(self, *items, collection=None):
         def flatten(lst):
@@ -221,28 +194,21 @@ class Session:
         return self.run(collection, *self._processors, **kwargs)
     
     @property
-    def history(self):
-        return self.collection('history')
+    def logs(self):
+        return self.collection('logs')
 
 
-class TemplateSystem(System):
-    def process(self, x, **kwargs):
-        pass
-
- 
 # TODO: rename World to Space
 class World:
     name: str
     sessions: List[Session]
     _collections: Dict[str, Collection]
-    _systems: Dict[str, System]
     db: VectorDB
 
-    def __init__(self, name, db, systems=None, llm=None, ef=None, logger=None, templates=None):
+    def __init__(self, name, db, llm=None, ef=None, logger=None, templates=None):
         self.name = name
         self.sessions = []
         self._collections = {}
-        self._systems = {}
         self.llm = llm or MockLLM()
         self.ef = ef or (lambda x: [0] * len(x))
         self.db = db
@@ -251,21 +217,16 @@ class World:
         collection = self.db.get_or_create_collection('collections')
         self.collections = Collection.load(collection)
         self.create_collection('default')
-        self.create_collection('history')
+        self.create_collection('logs')
 
         self.create_collection('templates')
         for template in (templates or []):
             self.create_template(template)
         
-        self.create_collection('systems')
-        for system in (systems or []):
-            #self.create_system(system)
-            pass
-        
         # TODO: hack, should register as normal system
         self.template_system = TemplateRunner(llm=self.llm, logger=self.logger.getChild('template_system'))
     
-    def create_session(self, name=None, db=None, llm=None, ef=None, logger=None, silent=False, debug=False, log_format='notebook'):
+    def create_session(self, user, name=None, db=None, llm=None, ef=None, logger=None, silent=False, debug=False, log_format='notebook'):
         llm = llm or self.llm
         ef = ef or self.ef
         db = db or self.db
@@ -289,27 +250,19 @@ class World:
         collection = self.db.get_or_create_collection(name, metadata=metadata)
         c = Collection.load(collection)
         self._collections[name] = c
-        r = CollectionRecord(id=name, collection=name)
+        r = CollectionRecord(collection=name)
         self.collections.embed(r)
 
     def create_template(self, template: Template):
         return self.templates.embed(template)
-    
-    def create_system(self, system):
-        self._systems[system.name] = system
-        return self.systems.embed(system)
     
     @property
     def templates(self):
         return self._collections['templates']
     
     @property
-    def systems(self):
-        return self._collections['systems']
-    
-    @property
-    def history(self):
-        return self._collections['history']
+    def logs(self):
+        return self._collections['logs']
 
     def __call__(self, session, *args: Any, **kwds: Any) -> Any:
         for system in self.systems().objects:

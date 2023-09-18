@@ -14,7 +14,7 @@ from .utils import Entity, create_entity_from_schema
 class Query(BaseModel):
     type='query'
     query: str = None
-    where: Dict[str, Any] = None
+    where: Dict[str, (int|str|bool)] = None
     collection: str = None
 
     def __init__(self, query, where=None, collection=None, **kwargs):
@@ -130,6 +130,8 @@ class Collection(pd.DataFrame):
     
     @property
     def objects(self):
+        if self.empty:
+            return []
         ids = self['id'].values.tolist()
         if hasattr(self, 'db'):
             d = self.db.get(ids=ids)
@@ -170,6 +172,8 @@ class Collection(pd.DataFrame):
             def _serializer(obj):
                 if isinstance(obj, Enum):
                     return obj.value
+                if isinstance(obj, BaseModel):
+                    return obj.schema()
                 raise TypeError(f"Type {type(obj)} not serializable")
 
             for name, field in item.dict().items():
@@ -198,7 +202,7 @@ class Collection(pd.DataFrame):
                     'collection': self.name,
                     'type': item.type,
                     'item': 1,
-                    'schema': json.dumps(item.schema()),
+                    'schema': json.dumps(item.schema(), default=_serializer),
                     'created_at': now,
                 },
             }

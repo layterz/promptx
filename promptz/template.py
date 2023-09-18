@@ -10,7 +10,7 @@ from jinja2 import Template as JinjaTemplate
 
 from .collection import Collection
 from .logging import *
-from .models import ChatLog, LLM, MockLLM
+from .models import LLM, MockLLM
 from .utils import Entity, model_to_json_schema, create_entity_from_schema
 
 

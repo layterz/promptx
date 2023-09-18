@@ -33,6 +33,9 @@ class Entity(BaseModel):
         extra = 'allow'
         arbitrary_types_allowed = True
     
+    def __init__(self, **data):
+        super().__init__(**{'id': str(uuid.uuid4()), **data})
+    
     def generate_schema_for_field(self, name, field_type: Any, default=False):
         return_list = False
         definitions = {}
@@ -182,7 +185,6 @@ def _get_field_type(field_info, definitions):
         ref_name = ref.split('/')[-1]
         field_type = ref_name
         definition = definitions.get(ref_name)
-        # TODO: this should create enums separately from models
         if 'enum' in definition:
             members = {v: v for v in definition['enum']}
             E = Enum(definition.get('title', ref_name), members)
@@ -225,6 +227,17 @@ def create_entity_from_schema(schema, data):
     else:
         if data.get('id') is None:
             data['id'] = str(uuid.uuid4())
+    
+    definitions = schema.get('definitions', {})
+    for name, field in schema.get('properties', {}).items():
+        _type = _get_field_type(field, definitions)
+        if issubclass(_type, Enum):
+            if data.get(name):
+                data[name] = data[name].lower()
+        elif getattr(_type, '__origin__', None) == list and issubclass(_type.__args__[0], Enum):
+            if data.get(name):
+                data[name] = [d.lower() for d in data[name]]
+    
     jsonschema.validate(data, schema)
     m = create_model_from_schema(schema)
     defaults = {

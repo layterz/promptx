@@ -3,8 +3,9 @@ import sys
 from typing import Callable, List
 
 from .collection import Collection 
-from .world import World, Session
+from .world import Session
 from .application import App
+from .auth import DefaultUser 
 
 
 def prompt(instructions=None, input=None, output=None, prompt=None, context=None, template=None, llm=None, examples=None, num_examples=1, history=None, tools=None, dryrun=False, retries=3, debug=False, silent=False, **kwargs):
@@ -61,6 +62,10 @@ def templates(ids=None, **kwargs) -> Collection:
     return DEFAULT_SESSION.world.templates(ids=ids, **kwargs)
 
 
+def systems(ids=None, **kwargs) -> Collection:
+    return DEFAULT_SESSION.world.systems(ids=ids, **kwargs)
+
+
 def session() -> Session:
     return DEFAULT_SESSION
 
@@ -87,26 +92,21 @@ Embedding = List[float]
 EmbedFunction = Callable[[List[str]], List[Embedding]]
 
 
-def load_app(path, config=None, **kwargs):
-    import os
-    import sys
-    
-    module_path = os.path.abspath(path)
-
-    if module_path not in sys.path:
-        sys.path.append(module_path)
-    
-    os.environ['PROMPTZ_PATH'] = path
-    try:
-        from app import create_app
-        return create_app()
-    except ModuleNotFoundError:
-        return App.from_config(config, **kwargs)
+def find_project_root(path=None, config_filename='.pz.env'):
+    home_dir = os.path.expanduser("~")
+    if path is None:
+        path = os.getcwd()
+    while path != home_dir:
+        if os.path.exists(os.path.join(path, config_filename)):
+            return path
+        path = os.path.dirname(path)
+    return None
 
 
-def load_config(filename=".pz.env"):
+def load_local_config(path=None, filename=".pz.env"):
     home_dir = os.path.expanduser("~")
     current_dir = os.getcwd()
+    path = path or current_dir
 
     while current_dir != home_dir:
         file_path = os.path.join(current_dir, filename)
@@ -117,7 +117,7 @@ def load_config(filename=".pz.env"):
                     line.split('=', 1)[0].strip(): line.split('=', 1)[1].strip()
                     for line in f if '=' in line
                 }
-                return (current_dir, config)
+                return (DefaultUser(), config)
 
         current_dir = os.path.dirname(current_dir)
 
@@ -128,33 +128,27 @@ def load_config(filename=".pz.env"):
                 line.split('=', 1)[0].strip(): line.split('=', 1)[1].strip()
                 for line in f if '=' in line
             }
-            return (home_dir, config)
+            return (DefaultUser(), config)
 
     return None, None
 
 
-def load(llm=None, ef=None, logger=None, log_format='notebook', **kwargs):
-    path, config = load_config()
-    sys.path.append(path)
-    app = None
-    if path is None:
-        app = App(
-            'local', 
-            llm=llm, 
-            ef=ef, 
-            logger=logger, 
-            templates=[], 
-            systems=[], 
-            notebooks={}, 
-            **kwargs,
-        )
-
-        s = app.world.create_session(log_format=log_format)
-        set_default_world(w)
-        set_default_session(s)
-    else:
-        app = App.from_config(path, config, llm=llm, ef=ef, logger=logger, **kwargs)
-        s = app.world.create_session()
-        set_default_session(s)
+def load(path='local', llm=None, ef=None, logger=None, **kwargs):
+    if path == 'local':
+        path = find_project_root()
     
+    if path is None:
+        raise ValueError('could not find project')
+
+    app = None
+    if path.startswith('http'):
+        print('loading remote app from', path)
+        raise NotImplementedError
+    else:
+        sys.path.append(path)
+        user, config = load_local_config(path)
+        app = App.from_config(path, config, llm=llm, ef=ef, logger=logger, **kwargs)
+    
+    s = app.world.create_session(user)
+    set_default_session(s)
     return app

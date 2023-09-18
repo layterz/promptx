@@ -5,7 +5,7 @@ import threading
 import logging
 from functools import partial
 
-from .world import World, System
+from .world import World
 from .api import API
 from .admin import Admin
 from .template import Template
@@ -17,12 +17,11 @@ class App:
     name: str
     world: World
 
-    def __init__(self, name, world=None, llm=None, ef=None, logger=None, db=None, templates_dir=None, systems_dir=None):
+    def __init__(self, name, world=None, llm=None, ef=None, logger=None, db=None, templates_dir=None):
         self.name = name
         self.logger = logger or logging.getLogger(self.name)
         templates = self._load_templates(templates_dir)
-        systems = self._load_systems(systems_dir)
-        self.world = world or World(name, templates=templates, systems=systems, llm=llm, ef=ef, logger=logger, db=db)
+        self.world = world or World(name, templates=templates, llm=llm, ef=ef, logger=logger, db=db)
         self.api = API(self.world)
         self.admin = Admin(self.world)
     
@@ -43,7 +42,6 @@ class App:
 
         default_llm = config.get('DEFAULT_LLM', 'ai://openai:chatgpt:latest')
         templates_dir = os.path.join(path, config.get('TEMPLATES_DIR', 'templates'))
-        systems_dir = os.path.join(path, config.get('SYSTEMS_DIR', 'systems'))
         llm_str = default_llm.split('ai://')[-1]
         org, model, version = llm_str.split(':')
         LLM = get_llm(org, model)
@@ -54,7 +52,6 @@ class App:
             'llm': LLM(version=version),
             'db': db,
             'templates_dir': templates_dir,
-            'systems_dir': systems_dir,
         }
 
         return cls(
@@ -77,12 +74,6 @@ class App:
             return []
         ts = self._load(templates_dir, Template)
         return ts.values()
-    
-    def _load_systems(self, systems_dir=None):
-        if systems_dir is None:
-            return []
-        r = self._load(systems_dir, System)
-        return r.values()
     
     def _serve_api(self, host='0.0.0.0', port=8000):
         import uvicorn

@@ -2,7 +2,7 @@ import os
 from typing import List
 import openai
 
-from . import LLM, ImageResponse, Response, Metrics, Callback, ChatLog
+from . import LLM, ImageResponse, Response, Metrics, Callback, PromptLog
 
 
 class InstructGPT(LLM):
@@ -38,7 +38,7 @@ class ChatGPT(LLM):
         openai.api_key = api_key or os.environ.get('OPENAI_API_KEY')
         openai.organization = org_id or os.environ.get('OPENAI_ORG_ID')
 
-    def generate(self, x, context=None, history: List[ChatLog]=None, tools=None, **kwargs):
+    def generate(self, x, context=None, history: List[PromptLog]=None, tools=None, **kwargs):
         context = { 'role': 'system', 'content': context or self.context}
         history = history or []
         messages = [context]
