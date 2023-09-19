@@ -15,6 +15,76 @@ from promptz.world import World
 API_URL = 'http://localhost:8000'
 
 
+class Index(BaseModel):
+    class Config:
+        arbitrary_types_allowed = True
+
+    df: pd.DataFrame
+    collection: str
+
+    def generate_link(self, row):
+        link = os.path.join(f'/{self.collection}', row['id'])
+        return f'[{row.get("name", row["id"])}]({link})'
+
+    def render(self, **kwargs):
+        df = self.df.copy()
+
+        def format_fields(x):
+            if isinstance(x, str):
+                x = x.split('\n')[0]
+                return x[:64] + ' ...'
+            else:
+                return x
+        formatted = df.drop(columns=['id']).applymap(format_fields)
+        df = pd.concat([df['id'], formatted], axis=1)
+
+        df['id'] = df.apply(self.generate_link, axis=1)
+        table = dash_table.DataTable(
+            id='prompts-table',
+            columns=[
+                {"name": i, "id": i, 'presentation': 'markdown'} 
+                for i in df.columns
+            ],
+            data=df.to_dict('records'),
+            style_as_list_view=True,
+            style_header={
+                'textAlign': 'left',
+            },
+            markdown_options={
+                'link_target': '_self',
+            },
+        )
+        
+        search = dbc.Input(
+            name='search',
+            placeholder='Search',
+        )
+
+        search_input = dbc.Form([
+            search,
+        ])
+
+        return html.Div(children=[
+            dbc.Row([
+                dbc.Col(
+                    [
+                        html.H1(self.collection),
+                    ],
+                    width=3,
+                ),
+                dbc.Col(
+                    [
+                        html.Div(
+                            search_input,
+                        ),
+                    ],
+                    width=9,
+                ),
+            ]),
+            table
+        ])
+
+
 class AdminPage(BaseModel):
     app: Dash
     name: str
@@ -79,7 +149,6 @@ class AdminIndexPage(AdminPage):
     
     def register_callbacks(self):
         @self.app.callback(
-            Output(f'{self.name}-details', 'children'),
             Output(f'{self.name}-table', 'children'),
             Input('fetch-interval', 'n_intervals'),
             Input('url', 'pathname'),
@@ -95,47 +164,19 @@ class AdminIndexPage(AdminPage):
         response = requests.get(api_path)
         if response.status_code == 200:
             data = response.json()
-            details = data.get('details', {})
-            index = data.get('list', [])
+            l = data.get('list', [])
         else:
             raise Exception(f'Error getting index {self.name}: {response.status_code}')
         
-        details = html.H1(details.get('name', self.name))
-        if len(index) == 0:
-            return details, html.P('Nothing to see here.'),
+        if len(l) == 0:
+            return html.P('Nothing to see here.'),
 
-        df = pd.DataFrame(index)
-        df['id'] = df.apply(self.generate_link, axis=1)
-
-        def format_fields(x):
-            if isinstance(x, str):
-                x = x.split('\n')[0]
-                return x[:64] + ' ...'
-            else:
-                return x
-        formatted = df.drop(columns=['id']).applymap(format_fields)
-        df = pd.concat([df['id'], formatted], axis=1)
-        index_table = dash_table.DataTable(
-            id='prompts-table',
-            columns=[
-                {"name": i, "id": i, 'presentation': 'markdown'} 
-                for i in self.get_columns(df)
-            ],
-            data=df.to_dict('records'),
-            style_as_list_view=True,
-            style_header={
-                'textAlign': 'left',
-            },
-            markdown_options={
-                'link_target': '_self',
-            },
-        )
-
-        return details, index_table
+        df = pd.DataFrame(l)
+        index = Index(df=df, collection=self.collection)
+        return index.render()
 
     def layout(self):
         return html.Div([
-            html.Div(id=f'{self.name}-details'),
             html.Div(id=f'{self.name}-table'),
             
             dcc.Location(id='url', refresh=False), 
@@ -147,14 +188,13 @@ class AdminIndexPage(AdminPage):
         ])
 
 
-class AdminEntityPage(AdminPage):
+class _AdminEntityPage(AdminPage):
 
     def fetch(self, pathname):
         api_path = urljoin(API_URL, pathname)
         response = requests.get(api_path)
         if response.status_code == 200:
             data = response.json()
-            print('DATA', data)
             details_data = [
                 {'field': k, 'value': v}
                 for k, v in data.get('details', {}).items()
@@ -344,6 +384,73 @@ class AdminEntityPage(AdminPage):
                 max_intervals=1  # Only trigger once
             ),
         ])
+
+
+class AdminEntityPage(AdminPage):
+
+    def layout(self, **kwargs):
+        return html.Div(children=[
+            dcc.Location(id='url', refresh=False), 
+            dcc.Loading(id='loading', type='default', children=[
+                dcc.Store(id=f'{self.name}-data-store'),
+                html.Div(id=f'{self.name}-details'),
+            ]),
+            
+            dcc.Interval(
+                id=f'fetch-interval',
+                interval=1,  # Set an interval that triggers once
+                max_intervals=1  # Only trigger once
+            ),
+        ])
+    
+    def register_callbacks(self):
+        @self.app.callback(
+            Output(f'{self.name}-data-store', 'data'),
+            Output(f'{self.name}-details', 'children'),
+            Input('fetch-interval', 'n_intervals'),
+            Input('url', 'pathname'),
+        )
+        def fetch_data(n_intervals, pathname):
+            if n_intervals is None or n_intervals == 0:
+                return no_update
+            api_path = urljoin(API_URL, pathname)
+            response = requests.get(api_path)
+            if response.status_code == 200:
+                data = response.json()
+                details_data = data.get('details', {})
+                table_data = [
+                    {'field': k, 'value': v}
+                    for k, v in details_data.items()
+                    if type(v) in [str, int, float, bool]
+                ]
+                table_data += [
+                    {'field': k, 'value': v.get('title')}
+                    for k, v in details_data.items()
+                    if type(v) == dict
+                ]
+                table = dash_table.DataTable(
+                    id='details-table',
+                    columns=[{"name": i, "id": i} for i in ['field', 'value']],
+                    data=table_data,
+                    style_as_list_view=True,
+                    style_table={
+                        'width': '500px',
+                    },
+                    style_cell={
+                        'textAlign': 'left',
+                        'maxWidth': '250px',
+                        'textOverflow': 'ellipsis',
+                    }
+                )
+
+                details = html.Div([
+                    html.H2(details_data.get('name', details_data.get('id'))),
+                    table,
+                ])
+
+                return data, details
+            else:
+                raise Exception(f'Error getting entity ({api_path}): {response.status_code}')
 
 
 class TemplateIndex(AdminIndexPage):

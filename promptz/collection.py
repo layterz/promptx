@@ -46,6 +46,15 @@ class ChromaVectorDB(VectorDB):
     
     def get_or_create_collection(self, name, **kwargs):
         return self.client.get_or_create_collection(name, **kwargs)
+    
+    def create_collection(self, name, **kwargs):
+        return self.client.create_collection(name, **kwargs)
+    
+    def get_collection(self, name, **kwargs):
+        try:
+            return self.client.get_collection(name, **kwargs)
+        except ValueError:
+            return None
 
 
 class EntitySeries(pd.Series):

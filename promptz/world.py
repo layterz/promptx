@@ -245,13 +245,16 @@ class World:
         return session
     
     def create_collection(self, name, metadata=None):
-        if metadata is None:
-            metadata = {"hnsw:space": "cosine"}
-        collection = self.db.get_or_create_collection(name, metadata=metadata)
+        collection = self.db.get_collection(name)
+        if collection is None:
+            if metadata is None:
+                metadata = {"hnsw:space": "cosine"}
+            collection = self.db.create_collection(name, metadata=metadata)
+            r = CollectionRecord(collection=name)
+            self.collections.embed(r)
         c = Collection.load(collection)
         self._collections[name] = c
-        r = CollectionRecord(collection=name)
-        self.collections.embed(r)
+        return collection
 
     def create_template(self, template: Template):
         return self.templates.embed(template)

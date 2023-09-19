@@ -66,7 +66,7 @@ class App:
             module = importlib.import_module(f'{package_name}.{file_name}')
             for name, obj in vars(module).items():
                 if isinstance(obj, type) and issubclass(obj, cls) and obj != cls:
-                    r[name] = obj()
+                    r[name] = obj(id=name)
         return r
     
     def _load_templates(self, templates_dir=None):
