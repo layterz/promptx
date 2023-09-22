@@ -50,14 +50,17 @@ class API:
             return {"list": templates}
 
         @self.fastapi_app.get("/{collection}")
-        async def get_index(collection: str):
+        async def get_index(collection: str, query: str = None):
             if collection == 'collections':
                 c = self.world.collections
             else:
                 c = self.world._collections[collection]
             if c is None:
                 raise HTTPException(status_code=404, detail=f"{collection} collection not found")
-            r = c.objects
+            if query is not None:
+                r = c(query).objects
+            else:
+                r = c.objects
             return {'list': r}
 
         @self.fastapi_app.get("/{collection}/{id}")
@@ -67,7 +70,7 @@ class API:
             else:
                 c = self.world._collections[collection]
             r = c(ids=[id]).first
-            return {'details': r, 'results': []}
+            return {'details': r, 'results': [], 'collection': collection}
 
         @self.fastapi_app.get("/templates/{id}")
         async def get_template(id: str):

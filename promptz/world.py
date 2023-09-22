@@ -169,11 +169,7 @@ class Session:
     def collection(self, name=None):
         if name is None:
             name = self._collection
-        try:
-            collection = self.world._collections[name]
-        except KeyError:
-            self.world.create_collection(name)
-            collection = self.world._collections[name]
+        collection = self.world._collections[name]
         return collection
     
     def evaluate(self, actual, expected, **kwargs):
@@ -216,10 +212,13 @@ class World:
         
         collection = self.db.get_or_create_collection('collections')
         self.collections = Collection.load(collection)
-        self.create_collection('default')
-        self.create_collection('logs')
+        self.create_collection('default', 'Default collection used when calling store()')
+        self.create_collection('logs', 'Stores a log of all prompts and their outputs')
+        self.create_collection('queries', 'Public and private shared queries')
+        self.create_collection('agents', 'Configurations for interactive and autonomous AI agents')
+        self.create_collection('models', 'Configurations for AI models')
 
-        self.create_collection('templates')
+        self.create_collection('templates', 'Prompt templates used to interact with AI models')
         for template in (templates or []):
             self.create_template(template)
         
@@ -244,13 +243,13 @@ class World:
         self.sessions.append(session)
         return session
     
-    def create_collection(self, name, metadata=None):
+    def create_collection(self, name, description=None, metadata=None):
         collection = self.db.get_collection(name)
         if collection is None:
             if metadata is None:
                 metadata = {"hnsw:space": "cosine"}
             collection = self.db.create_collection(name, metadata=metadata)
-            r = CollectionRecord(collection=name)
+            r = CollectionRecord(name=name, description=description)
             self.collections.embed(r)
         c = Collection.load(collection)
         self._collections[name] = c

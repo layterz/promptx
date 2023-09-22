@@ -244,5 +244,6 @@ class Collection(pd.DataFrame):
 
 
 class CollectionRecord(Entity):
-    type: str = 'collection_record'
-    collection: str = None
+    type: str = 'collection'
+    name: str = None
+    description: str = None
