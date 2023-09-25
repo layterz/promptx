@@ -35,7 +35,9 @@ class Index(BaseModel):
         )
         
         @self.app.callback(
-            Output(f'{self.id}-query-results', 'children'),
+            Output(
+                f'{self.id}-query-results', 'children',
+            ),
             [
                 Input(f'{self.id}-search-submit', 'n_clicks'),
             ],
@@ -45,18 +47,36 @@ class Index(BaseModel):
         )
         def submit_form(n_clicks, value):
             if n_clicks is None or n_clicks == 0:
-                return self.fetch()
+                return no_update
             
             return self.fetch(query=value)
+        
+        @self.app.callback(
+            Output(
+                f'{self.id}-query-results', 'children',
+                allow_duplicate=True,
+            ),
+            [
+                Input(f'fetch-interval', 'n_intervals'),
+            ],
+            prevent_initial_call=True,
+        )
+        def load(n_intervals):
+            if n_intervals is not None and n_intervals > 0:
+                return self.fetch()
+            else:
+                return no_update
     
     def fetch(self, query=None):
+        if self.collection == '':
+            return html.P('No collection specified.')
         api_path = urljoin(API_URL, self.pathname)
         response = requests.get(api_path, params={'query': query})
         if response.status_code == 200:
             data = response.json()
             l = data.get('list', [])
         else:
-            raise Exception(f'Error getting index {self.name}: {response.status_code}')
+            raise Exception(f'Error getting index {self.collection}: {response.status_code}')
         
         if len(l) == 0:
             return html.P('Nothing to see here.'),
@@ -75,7 +95,7 @@ class Index(BaseModel):
         return f'/{self.collection}'
 
     def generate_link(self, row):
-        link = os.path.join(self.pathname, row['id'])
+        link = os.path.join(f'/{self.collection}', row['id'])
         return html.A(row.get('id'), href=link, target='_self')
 
     def render(self, **kwargs):
@@ -128,6 +148,7 @@ class Index(BaseModel):
                 interval=1,  # Set an interval that triggers once
                 max_intervals=1  # Only trigger once
             ),
+            dcc.Store(id=f'{self.id}-data-store'),
         ])
 
 
@@ -187,7 +208,8 @@ class AdminIndexPage(AdminPage):
         )
 
     def layout(self):
-        return self.index.render()
+        content = self.index.render()
+        return content
 
 
 class EntityDetails(BaseModel):
@@ -204,20 +226,8 @@ class EntityDetails(BaseModel):
             for k, v in self.data.items()
             if type(v) == dict
         ]
-        table = dash_table.DataTable(
-            id='details-table',
-            columns=[{"name": i, "id": i} for i in ['field', 'value']],
-            data=table_data,
-            style_as_list_view=True,
-            style_table={
-                'width': '100%',
-            },
-            style_cell={
-                'textAlign': 'left',
-                'maxWidth': '500px',
-                'textOverflow': 'ellipsis',
-            }
-        )
+        
+        table = dbc.Table.from_dataframe(pd.DataFrame(table_data))
 
         details = html.Div([
             html.H2(self.data.get('name', self.data.get('id'))),
@@ -291,35 +301,7 @@ class EntityInputForm(BaseModel):
 
 
 class AdminEntityPage(AdminPage):
-
-    def layout(self, **kwargs):
-        return html.Div(children=[
-            dcc.Location(id='url', refresh=False), 
-            dcc.Loading(id='loading', type='default', children=[
-                dcc.Store(id=f'{self.name}-data-store'),
-                html.Div(id=f'{self.name}-details'),
-                html.Div(id=f'{self.name}-input-form'),
-                html.Div(id=f'{self.name}-results'),
-            ]),
-            
-            dcc.Interval(
-                id=f'fetch-interval',
-                interval=1,  # Set an interval that triggers once
-                max_intervals=1  # Only trigger once
-            ),
-        ])
-    
-    def details(self, data):
-        return EntityDetails(data=data.get('details')).render()
-    
-    def input_form(self, data):
-        data = data.get('details')
-        if data.get('input') is None or data.get('input') == 'null':
-            return None
-        return EntityInputForm(data=data).render()
-    
-    def results(self, data):
-        pass
+    results_index: Index = None
     
     def register_callbacks(self):
         @self.app.callback(
@@ -344,6 +326,32 @@ class AdminEntityPage(AdminPage):
             else:
                 raise Exception(f'Error getting entity ({api_path}): {response.status_code}')
 
+    def layout(self, **kwargs):
+        return html.Div(children=[
+            dcc.Location(id='url', refresh=False), 
+            dcc.Loading(id='loading', type='default', children=[
+                dcc.Store(id=f'{self.name}-data-store'),
+                html.Div(id=f'{self.name}-details'),
+                html.Div(id=f'{self.name}-input-form'),
+                html.Div(id=f'{self.name}-results'),
+            ]),
+            
+            dcc.Interval(
+                id=f'fetch-interval',
+                interval=1,  # Set an interval that triggers once
+                max_intervals=1  # Only trigger once
+            ),
+        ])
+    
+    def details(self, data):
+        return EntityDetails(data=data.get('details')).render()
+    
+    def input_form(self, data):
+        return None
+    
+    def results(self, data):
+        return None
+    
 
 class TemplateIndex(AdminIndexPage):
 
@@ -406,7 +414,7 @@ class CollectionIndex(AdminIndexPage):
         )
 
 
-class Inbox(AdminPage):
+class Inbox(AdminIndexPage):
     menu: bool = False
 
     def __init__(self, app, **kwargs):
@@ -414,6 +422,7 @@ class Inbox(AdminPage):
             app,
             name="Inbox",
             path="/inbox",
+            collection='inbox',
             **kwargs,
         )
 
@@ -446,11 +455,45 @@ class CollectionPage(AdminIndexPage):
 
 class DetailsPage(AdminEntityPage):
 
-    def __init__(self, app, **kwargs):
+    def __init__(self, app, collection, **kwargs):
         super().__init__(
             app,
             name="Details",
-            path_template="/<collection>/<id>",
+            path_template=f"/{collection}/<id>",
+            **kwargs,
+        )
+
+
+class TemplateDetailsPage(AdminEntityPage):
+
+    def __init__(self, app, **kwargs):
+        super().__init__(
+            app,
+            name="Template Details",
+            path_template="/templates/<id>",
+            **kwargs,
+        )
+        self.results_index = Index(
+            app=self.app, 
+            collection='logs', 
+            columns=['id', 'name', 'instructions']
+        )
+    
+    def input_form(self, data):
+        return EntityInputForm(data=data.get('details')).render()
+    
+    def results(self, data):
+        return self.results_index.render()
+
+
+class CollectionDetailsPage(AdminEntityPage):
+    results_index: Index = None
+
+    def __init__(self, app, **kwargs):
+        super().__init__(
+            app,
+            name="Collection Details",
+            path_template="/collections/<id>",
             **kwargs,
         )
 
@@ -469,7 +512,8 @@ class Admin:
         )
 
         pages = [
-            DetailsPage(self.app),
+            TemplateDetailsPage(self.app),
+            CollectionDetailsPage(self.app),
 
             Inbox(self.app, menu=True),
             QueryIndex(self.app, menu=True),
