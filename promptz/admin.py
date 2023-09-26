@@ -48,30 +48,20 @@ class Index(BaseModel):
         )
         def submit_form(n_clicks, value):
             if n_clicks is None or n_clicks == 0:
-                return no_update
+                return self.fetch()
             
             return self.fetch(query=value)
-        
-        @self.app.callback(
-            Output(
-                f'{self.id}-query-results', 'children',
-                allow_duplicate=True,
-            ),
-            [
-                Input(f'fetch-interval', 'n_intervals'),
-            ],
-            prevent_initial_call=True,
-        )
-        def load(n_intervals):
-            print('load', n_intervals)
-            if n_intervals is not None and n_intervals > 0:
-                return self.fetch()
-            else:
-                return no_update
     
     def fetch(self, query=None):
+        TEXT_MESSAGE_STYLE = {
+            'width': '100%',
+            'height': '100px',
+            'padding': '2rem 0',
+            'text-align': 'center',
+        }
+
         if self.collection == '':
-            return html.P('No collection specified.')
+            return html.P('No collection specified.', style=TEXT_MESSAGE_STYLE)
         api_path = urljoin(API_URL, self.pathname)
         response = requests.get(api_path, params={'query': query})
         if response.status_code == 200:
@@ -81,7 +71,7 @@ class Index(BaseModel):
             raise Exception(f'Error getting index {self.collection}: {response.status_code}')
         
         if len(l) == 0:
-            return html.P('Nothing to see here.'),
+            return html.P('Nothing to see here.', style=TEXT_MESSAGE_STYLE),
 
         df = pd.DataFrame(l)
         df['id'] = df.apply(self.generate_link, axis=1)
@@ -101,7 +91,11 @@ class Index(BaseModel):
         return html.A(row.get('id'), href=link, target='_self')
 
     def render(self, **kwargs):
-        results = html.Div([], id=f'{self.id}-query-results')
+        RESULTS_STYLE = {
+            'border-top': '1px solid lightgray',
+        }
+
+        results = html.Div([], id=f'{self.id}-query-results', style=RESULTS_STYLE)
 
         search = dbc.Input(
             name='search',
@@ -122,11 +116,9 @@ class Index(BaseModel):
 
         HEADER_STYLE = {
             'padding': '10px',
-            'border-bottom': '1px solid lightgray',
         }
 
         INDEX_STYLE = {
-            'padding': '10px',
             'background-color': 'white',
             'border-radius': '5px',
         }
@@ -151,7 +143,9 @@ class Index(BaseModel):
                 ],
                 style=HEADER_STYLE,
             ),
-            results,
+            dbc.Row(
+                results,
+            ),
             dcc.Interval(
                 id=f'fetch-interval',
                 n_intervals=1,  # Set an interval that triggers once
