@@ -17,6 +17,7 @@ API_URL = 'http://localhost:8000'
 
 
 class Index(BaseModel):
+    
     class Config:
         arbitrary_types_allowed = True
 
@@ -62,6 +63,7 @@ class Index(BaseModel):
             prevent_initial_call=True,
         )
         def load(n_intervals):
+            print('load', n_intervals)
             if n_intervals is not None and n_intervals > 0:
                 return self.fetch()
             else:
@@ -120,6 +122,13 @@ class Index(BaseModel):
 
         HEADER_STYLE = {
             'padding': '10px',
+            'border-bottom': '1px solid lightgray',
+        }
+
+        INDEX_STYLE = {
+            'padding': '10px',
+            'background-color': 'white',
+            'border-radius': '5px',
         }
 
         return html.Div(children=[
@@ -145,11 +154,11 @@ class Index(BaseModel):
             results,
             dcc.Interval(
                 id=f'fetch-interval',
-                interval=1,  # Set an interval that triggers once
+                n_intervals=1,  # Set an interval that triggers once
                 max_intervals=1  # Only trigger once
             ),
             dcc.Store(id=f'{self.id}-data-store'),
-        ])
+        ], style=INDEX_STYLE)
 
 
 class AdminPage(BaseModel):
@@ -158,18 +167,20 @@ class AdminPage(BaseModel):
     path: str = None
     path_template: str = None
     menu: bool = False
+    icon: str = None
     api_path: str = None
 
     class Config:
         arbitrary_types_allowed = True
 
-    def __init__(self, app, name, path=None, path_template=None, menu=False):
+    def __init__(self, app, name, path=None, path_template=None, menu=False, icon=None):
         super().__init__(
             app=app,
             name=name,
             path=path,
             path_template=path_template,
             menu=menu,
+            icon=icon,
         )
         self.register_callbacks()
 
@@ -344,7 +355,10 @@ class AdminEntityPage(AdminPage):
         ])
     
     def details(self, data):
-        return EntityDetails(data=data.get('details')).render()
+        details = data.get('details')
+        if details is None:
+            return None
+        return EntityDetails(data=details).render()
     
     def input_form(self, data):
         return None
@@ -362,6 +376,7 @@ class TemplateIndex(AdminIndexPage):
             name="Templates",
             path="/templates",
             columns=['id', 'name', 'instructions'],
+            icon='bi bi-code-slash',
             **kwargs,
         )
 
@@ -374,6 +389,7 @@ class QueryIndex(AdminIndexPage):
             name="Queries",
             path="/queries",
             collection='queries',
+            icon='bi bi-search',
             **kwargs,
         )
 
@@ -386,6 +402,20 @@ class AgentIndex(AdminIndexPage):
             name="Agents",
             path="/agents",
             collection='agents',
+            icon='bi bi-robot',
+            **kwargs,
+        )
+
+
+class SubscriptionIndex(AdminIndexPage):
+
+    def __init__(self, app, **kwargs):
+        super().__init__(
+            app,
+            name="Subscriptions",
+            path="/subscriptions",
+            collection='subscriptions',
+            icon='bi bi-inbox',
             **kwargs,
         )
 
@@ -398,6 +428,7 @@ class ModelIndex(AdminIndexPage):
             name="Models",
             path="/models",
             collection='models',
+            icon='bi bi-infinity',
             **kwargs,
         )
 
@@ -410,6 +441,7 @@ class CollectionIndex(AdminIndexPage):
             name="Collections",
             path="/collections",
             collection='collections',
+            icon='bi bi-database',
             **kwargs,
         )
 
@@ -423,6 +455,7 @@ class Inbox(AdminIndexPage):
             name="Inbox",
             path="/inbox",
             collection='inbox',
+            icon='bi bi-envelope',
             **kwargs,
         )
 
@@ -435,6 +468,7 @@ class Logs(AdminIndexPage):
             name="Logs",
             path="/logs",
             collection='logs',
+            icon='bi bi-list',
             **kwargs,
         )
 
@@ -508,7 +542,7 @@ class Admin:
             world.name, 
             use_pages=True,
             pages_folder='',
-            external_stylesheets=[dbc.themes.ZEPHYR, dbc.icons.FONT_AWESOME],
+            external_stylesheets=[dbc.themes.ZEPHYR, dbc.icons.FONT_AWESOME, dbc.icons.BOOTSTRAP],
         )
 
         pages = [
@@ -517,6 +551,7 @@ class Admin:
 
             Inbox(self.app, menu=True),
             QueryIndex(self.app, menu=True),
+            SubscriptionIndex(self.app, menu=True),
             TemplateIndex(self.app, menu=True),
             AgentIndex(self.app, menu=True),
             CollectionIndex(self.app, menu=True),
@@ -527,41 +562,80 @@ class Admin:
         for page in pages:
             register_page(page.name, layout=page.layout, path=page.path, path_template=page.path_template)
         
-        menu = [page.name for page in pages if page.menu]
         SIDEBAR_STYLE = {
             "position": "fixed",
-            "top": 0,
+            "top": "68px",
             "left": 0,
             "bottom": 0,
             "width": "18rem",
-            "padding": "2rem 1rem",
+            "padding": "1rem 1rem",
             "background-color": "#fff",
         }
 
         CONTENT_STYLE = {
-            "padding": "0 2rem 0 20rem",
+            "margin-top": "66px",
+            "padding": "1rem 2rem 0 20rem",
             "background-color": "#F5F5F5",
             "width": "100vw",
             "min-height": "100vh",
         }
 
+        menu = [page for page in pages if page.menu]
         nav = dbc.Nav(
             [
                 dbc.NavLink(
                     [
-                        html.I(className="bi bi-info-circle-fill me-2"),
-                        page_registry[name]['name'], 
+                        html.I(className=page.icon),
+                        '   ',
+                        page_registry[page.name]['name'], 
                     ],
-                    href=page_registry[name]['relative_path'], 
+                    href=page_registry[page.name]['relative_path'], 
                     active='exact',
                 )
-                for name in menu
+                for page in menu
             ],
             vertical=True,
             pills=True,
         )
 
         self.app.layout = html.Div([
+            dbc.Navbar(
+                dbc.Container(
+                    children=[
+                        dbc.Col(
+                            dbc.NavbarBrand(
+                                "Promptz",
+                                href="/",
+                                className="ml-2",
+                            ),
+                            width=3,
+                        ),
+                        dbc.Col(
+                            dbc.Input(
+                                type="text",
+                                placeholder="Run command >",
+                            ),
+                            width=6,
+                        ),
+                        dbc.Col(
+                            dbc.NavItem(
+                                dbc.NavLink(html.I(className="bi bi-person-circle"), href="/")
+                            ),
+                            width=3,
+                            style={
+                                'text-align': 'right',
+                                'font-size': '1.5em',
+                            },
+                        )
+                    ],
+                ),
+                color="white",
+                dark=False,
+                fixed='top',
+                style={
+                    'border-bottom': '1px solid lightgray'
+                }
+            ),
             dbc.Container(
                 [
                     dbc.Row(
@@ -584,5 +658,7 @@ class Admin:
                     ),
                 ],
                 fluid=True,
+                style={
+                },
             ),
         ])
