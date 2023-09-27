@@ -1,4 +1,5 @@
 import os
+import json
 from urllib.parse import urljoin
 import uuid
 import requests
@@ -243,11 +244,39 @@ class EntityDetails(BaseModel):
 
 
 class EntityInputForm(BaseModel):
-    data: dict
+    
+    class Config:
+        arbitrary_types_allowed = True
 
-    def render(self):
-        # TODO: this isn't handling "null", which should be parsed into None
-        if self.data.get('input') is None or self.data.get('input') == 'null':
+    id: str
+    app: Dash 
+
+    def __init__(self, app, **kwargs):
+        super().__init__(
+            id=str(uuid.uuid4()),
+            app=app,
+            **kwargs,
+        )
+        
+        @self.app.callback(
+            Output(
+                f'{self.id}-form-output', 'children',
+            ),
+            [
+                Input(f'{self.id}-submit', 'n_clicks'),
+                Input({'type': 'json_field', 'index': ALL}, 'value'),
+            ],
+        )
+        def submit_form(n_clicks, values):
+            print('submit_form', n_clicks, values)
+            return None
+
+    def render(self, data):
+        input_data = data.get('input')
+        if input_data is None:
+            return None
+        input = json.loads(input_data)
+        if input is None or input == 'null':
             inputs = [{
                 'id': 'input',
                 'label': 'Input',
@@ -255,7 +284,7 @@ class EntityInputForm(BaseModel):
         else:
             input_schema = {
                 name: field
-                for name, field in self.data['input']['properties'].items()
+                for name, field in input['properties'].items()
             }
             inputs = []
             for name, field in input_schema.items():
@@ -274,7 +303,6 @@ class EntityInputForm(BaseModel):
                 
                 inputs.append(input)
         
-        _id = self.data.get('id')
         form = dbc.Form(
             [
                 *[
@@ -288,25 +316,21 @@ class EntityInputForm(BaseModel):
                     ])
                     for input in inputs
                 ],
-                *[
-                    html.Div(id=f'{_id}-{i}', style={ 'display': 'none'})
-                    for i in range(len(inputs), 100) 
-                ],
                 html.Div(
-                    dbc.Button('Submit', id=f'{_id}-submit', n_clicks=0, color='primary')
+                    dbc.Button('Submit', id=f'{self.id}-submit', n_clicks=0, color='secondary')
                 ),
-                html.Div(id=f'{_id}-form-output'),
+                html.Div(id=f'{self.id}-form-output'),
             ],
             style={
                 'padding': '10px',
-                'background-color': 'lightgray',
+                'margin': '10px 0',
+                'background-color': 'white',
             }
         )
         return form
 
 
 class AdminEntityPage(AdminPage):
-    results_index: Index = None
     
     def register_callbacks(self):
         @self.app.callback(
@@ -324,9 +348,9 @@ class AdminEntityPage(AdminPage):
             response = requests.get(api_path)
             if response.status_code == 200:
                 data = response.json()
-                details = self.details(data)
-                input_form = self.input_form(data)
-                results = self.results(data)
+                details = self.render_details(data)
+                input_form = self.render_input_form(data)
+                results = self.render_results(data)
                 return data, details, input_form, results
             else:
                 raise Exception(f'Error getting entity ({api_path}): {response.status_code}')
@@ -348,16 +372,16 @@ class AdminEntityPage(AdminPage):
             ),
         ])
     
-    def details(self, data):
+    def render_details(self, data):
         details = data.get('details')
         if details is None:
             return None
         return EntityDetails(data=details).render()
     
-    def input_form(self, data):
+    def render_input_form(self, data):
         return None
     
-    def results(self, data):
+    def render_results(self, data):
         return None
     
 
@@ -493,6 +517,8 @@ class DetailsPage(AdminEntityPage):
 
 
 class TemplateDetailsPage(AdminEntityPage):
+    results_index: Index = None
+    input_form: EntityInputForm = None
 
     def __init__(self, app, **kwargs):
         super().__init__(
@@ -501,16 +527,21 @@ class TemplateDetailsPage(AdminEntityPage):
             path_template="/templates/<id>",
             **kwargs,
         )
+
         self.results_index = Index(
             app=self.app, 
             collection='logs', 
             columns=['id', 'name', 'instructions']
         )
+
+        self.input_form = EntityInputForm(
+            app=self.app,
+        )
     
-    def input_form(self, data):
-        return EntityInputForm(data=data.get('details')).render()
+    def render_input_form(self, data):
+        return self.input_form.render(data.get('details', {}))
     
-    def results(self, data):
+    def render_results(self, data):
         return self.results_index.render()
 
 
