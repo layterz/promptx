@@ -32,7 +32,7 @@ class Session:
         rendered = s.render(t, {'input': s.parse(input)})
         try:
             r = s(t, input, dryrun=dryrun, retries=retries, **kwargs)
-            log = PromptLog(template=t.id, input=json.dumps(input), raw_input=rendered, output=json.dumps(r.content), raw_output=r.raw)
+            log = PromptLog(template=t.id, raw_input=rendered, raw_output=r.raw)
             self.store(log, collection='logs')
             if isinstance(r.content, list):
                 if len(r.content) > 0 and isinstance(r.content[0], BaseModel):
@@ -51,7 +51,7 @@ class Session:
                     return r.content
         except MaxRetriesExceeded as e:
             self.logger.error(f'Max retries exceeded: {e}')
-            log = PromptLog(template=t.id, input=json.dumps(input), raw_input=rendered, error=str(e))
+            log = PromptLog(template=t.id, input=json.dumps(input.dict()), raw_input=rendered, error=str(e))
             self.store(log, collection='logs')
             return None
     

@@ -229,12 +229,12 @@ def create_entity_from_schema(schema, data):
             data['id'] = str(uuid.uuid4())
     
     definitions = schema.get('definitions', {})
-    for name, field in schema.get('properties', {}).items():
+    for name, field in schema.get('raw_inpuiproperties', {}).items():
         _type = _get_field_type(field, definitions)
-        if issubclass(_type, Enum):
+        if isinstance(_type, type) and issubclass(_type, Enum):
             if data.get(name):
                 data[name] = data[name].lower()
-        elif getattr(_type, '__origin__', None) == list and issubclass(_type.__args__[0], Enum):
+        elif getattr(_type, '__origin__', None) == list and isinstance(_type.__args__[0], type) and issubclass(_type.__args__[0], Enum):
             if data.get(name):
                 data[name] = [d.lower() for d in data[name]]
     

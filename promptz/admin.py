@@ -6,12 +6,14 @@ import requests
 import pandas as pd
 from pydantic import BaseModel
 from textblob import Word
+import dash
 from dash import Dash, html, dcc, dash_table, no_update, page_container, page_registry, register_page, Output, Input, State
 from dash.exceptions import PreventUpdate
 from dash.dependencies import ALL
 import dash_bootstrap_components as dbc
 
 from promptz.world import World
+from promptz.template import Template
 
 
 API_URL = 'http://localhost:8000'
@@ -91,7 +93,7 @@ class Index(BaseModel):
         link = os.path.join(f'/{self.collection}', row['id'])
         return html.A(row.get('id'), href=link, target='_self')
 
-    def render(self, **kwargs):
+    def render(self, data=None, **kwargs):
         RESULTS_STYLE = {
             'border-top': '1px solid lightgray',
         }
@@ -221,7 +223,7 @@ class AdminIndexPage(AdminPage):
 class EntityDetails(BaseModel):
     data: dict
 
-    def render(self):
+    def render(self, **kwargs):
         table_data = [
             {'field': k, 'value': v}
             for k, v in self.data.items()
@@ -249,12 +251,14 @@ class EntityInputForm(BaseModel):
         arbitrary_types_allowed = True
 
     id: str
+    page: str
     app: Dash 
 
-    def __init__(self, app, **kwargs):
+    def __init__(self, app, page, submit, **kwargs):
         super().__init__(
             id=str(uuid.uuid4()),
             app=app,
+            page=page,
             **kwargs,
         )
         
@@ -264,14 +268,25 @@ class EntityInputForm(BaseModel):
             ),
             [
                 Input(f'{self.id}-submit', 'n_clicks'),
-                Input({'type': 'json_field', 'index': ALL}, 'value'),
+                Input(f'{self.page}-data-store', 'data'),
             ],
+            [
+                State({'type': 'form-input', 'field': ALL}, 'value')
+            ]
         )
-        def submit_form(n_clicks, values):
-            print('submit_form', n_clicks, values)
-            return None
+        def submit_form(n_clicks, data, values):
+            if n_clicks is None or n_clicks == 0:
+                raise PreventUpdate
+            
+            field_data = {}
+            input_schema = json.loads(data.get('details', {}).get('input', '{}'))
+            fields = input_schema.get('properties', {}).keys()
+            for input_id, input_value in zip(fields, values):
+                field_data[input_id] = input_value
+            id = data.get('details', {}).get('id')
+            return submit(id, field_data)
 
-    def render(self, data):
+    def render(self, data=None):
         input_data = data.get('input')
         if input_data is None:
             return None
@@ -309,8 +324,9 @@ class EntityInputForm(BaseModel):
                     html.Div([
                         dbc.Label(input['label']),
                         dbc.Input(
-                            id={'type': 'json_field', 'index': input['id']},
+                            id={'type': 'form-input', 'field': input['id']},
                             name=input['label'],
+                            type=input['type'],
                             placeholder=f'Enter {input["label"]}',
                         )
                     ])
@@ -331,13 +347,20 @@ class EntityInputForm(BaseModel):
 
 
 class AdminEntityPage(AdminPage):
+    components: list = None
+
+    def __init__(self, app, components=None, **kwargs):
+        super().__init__(
+            app,
+            **kwargs,
+        )
+        self.components = components or []
     
     def register_callbacks(self):
         @self.app.callback(
             Output(f'{self.name}-data-store', 'data'),
             Output(f'{self.name}-details', 'children'),
-            Output(f'{self.name}-input-form', 'children'),
-            Output(f'{self.name}-results', 'children'),
+            Output(f'{self.name}-components', 'children'),
             Input('fetch-interval', 'n_intervals'),
             Input('url', 'pathname'),
         )
@@ -349,9 +372,8 @@ class AdminEntityPage(AdminPage):
             if response.status_code == 200:
                 data = response.json()
                 details = self.render_details(data)
-                input_form = self.render_input_form(data)
-                results = self.render_results(data)
-                return data, details, input_form, results
+                components = self.render_components(data)
+                return data, details, components
             else:
                 raise Exception(f'Error getting entity ({api_path}): {response.status_code}')
 
@@ -361,8 +383,7 @@ class AdminEntityPage(AdminPage):
             dcc.Loading(id='loading', type='default', children=[
                 dcc.Store(id=f'{self.name}-data-store'),
                 html.Div(id=f'{self.name}-details'),
-                html.Div(id=f'{self.name}-input-form'),
-                html.Div(id=f'{self.name}-results'),
+                html.Div(id=f'{self.name}-components'),
             ]),
             
             dcc.Interval(
@@ -378,11 +399,14 @@ class AdminEntityPage(AdminPage):
             return None
         return EntityDetails(data=details).render()
     
-    def render_input_form(self, data):
-        return None
-    
-    def render_results(self, data):
-        return None
+    def render_components(self, data):
+        details = data.get('details')
+        if details is None:
+            return None
+        return [
+            component.render(details)
+            for component in self.components
+        ]
     
 
 class TemplateIndex(AdminIndexPage):
@@ -517,8 +541,6 @@ class DetailsPage(AdminEntityPage):
 
 
 class TemplateDetailsPage(AdminEntityPage):
-    results_index: Index = None
-    input_form: EntityInputForm = None
 
     def __init__(self, app, **kwargs):
         super().__init__(
@@ -527,23 +549,34 @@ class TemplateDetailsPage(AdminEntityPage):
             path_template="/templates/<id>",
             **kwargs,
         )
-
-        self.results_index = Index(
-            app=self.app, 
+        results_index = Index(
+            app=app, 
             collection='logs', 
             columns=['id', 'name', 'instructions']
         )
 
-        self.input_form = EntityInputForm(
-            app=self.app,
-        )
-    
-    def render_input_form(self, data):
-        return self.input_form.render(data.get('details', {}))
-    
-    def render_results(self, data):
-        return self.results_index.render()
+        def handle_submit(id, data):
+            api_path = urljoin(API_URL, f'/templates/{id}/run')
+            response = requests.post(api_path, json={'input': data})
+            if response.status_code == 200:
+                data = response.json()
+                return data
+            else:
+                raise Exception(f'Error submitting form: {response.status_code}')
 
+        input_form = EntityInputForm(
+            app=app,
+            page=self.name,
+            submit=handle_submit,
+        )
+
+        components = [
+            input_form,
+            results_index,
+        ]
+
+        self.components = components
+    
 
 class CollectionDetailsPage(AdminEntityPage):
     results_index: Index = None
