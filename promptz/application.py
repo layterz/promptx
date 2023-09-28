@@ -15,10 +15,12 @@ from .collection import ChromaVectorDB
 
 class App:
     name: str
+    path: str
     world: World
 
-    def __init__(self, name, world=None, llm=None, ef=None, logger=None, db=None, templates_dir=None):
+    def __init__(self, name, path, world=None, llm=None, ef=None, logger=None, db=None, templates_dir=None):
         self.name = name
+        self.path = path
         self.logger = logger or logging.getLogger(self.name)
         templates = self._load_templates(templates_dir)
         self.world = world or World(name, templates=templates, llm=llm, ef=ef, logger=logger, db=db)
@@ -49,6 +51,7 @@ class App:
 
         parsed_config = {
             'name': config.get('NAME', 'local'),
+            'path': path,
             'llm': LLM(version=version),
             'db': db,
             'templates_dir': templates_dir,
@@ -88,4 +91,7 @@ class App:
         admin = threading.Thread(target=lambda: self._serve_admin(host=host, port=admin_port))
         api.start()
         admin.start()
+    
+    def __repr__(self):
+        return f'<App {self.name} path={self.path}>'
 

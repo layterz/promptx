@@ -1,4 +1,5 @@
 import os
+import random
 import json
 from urllib.parse import urljoin
 import uuid
@@ -224,25 +225,39 @@ class EntityDetails(BaseModel):
     data: dict
 
     def render(self, **kwargs):
-        table_data = [
-            {'field': k, 'value': v}
+        data = [
+            {'field': k, 'value': v.get('title')} if type(v) == dict else {'field': k, 'value': v}
             for k, v in self.data.items()
-            if type(v) in [str, int, float, bool]
-        ]
-        table_data += [
-            {'field': k, 'value': v.get('title')}
-            for k, v in self.data.items()
-            if type(v) == dict
+            if k not in ['id', 'type', 'name']
         ]
         
-        table = dbc.Table.from_dataframe(pd.DataFrame(table_data))
-
         details = html.Div([
-            html.H2(self.data.get('name', self.data.get('id'))),
-            table,
+            html.H3(self.data.get('name')),
+            html.P(self.data.get('type')),
         ])
 
-        return details
+        list_items = dbc.ListGroup(
+            [
+                dbc.ListGroupItem(
+                    [
+                        html.H6(item['field']),
+                        html.P(item['value']),
+                    ],
+                )
+                for item in data
+            ],
+        )
+
+        return html.Div(
+            [
+                details,
+                list_items,
+            ],
+            style={
+                'padding': '1rem',
+                'background-color': 'white',
+            },
+        )
 
 
 class EntityInputForm(BaseModel):
@@ -656,6 +671,30 @@ class Admin:
             pills=True,
         )
 
+        placeholders = [
+            "What is the capital of France?",
+            "Translate 'hello' to Spanish.",
+            "What's the distance between the Earth and the Moon?",
+            "Explain the Pythagorean theorem.",
+            "Tell me a joke about physics.",
+            "List five renewable energy sources.",
+            "Write a short poem about the ocean.",
+            "How does photosynthesis work?",
+            "When was the Declaration of Independence signed?",
+            "Who wrote 'Pride and Prejudice'?",
+            "Calculate the area of a circle with radius 5.",
+            "Recommend a classic sci-fi book.",
+            "Describe the plot of 'Moby-Dick'.",
+            "What's the chemical formula for water?",
+            "Play a trivia game about ancient civilizations.",
+            "How do I make a vegetarian lasagna?",
+            "Show me breathing exercises for relaxation.",
+            "Who was the 16th president of the United States?",
+            "Provide a brief history of the Renaissance.",
+            "Generate a business idea for eco-friendly products."
+        ]
+
+        placeholder = random.choice(placeholders)
         self.app.layout = html.Div([
             dbc.Navbar(
                 dbc.Container(
@@ -669,10 +708,19 @@ class Admin:
                             width=3,
                         ),
                         dbc.Col(
-                            dbc.Input(
-                                type="text",
-                                placeholder="Run command >",
-                            ),
+                            dbc.InputGroup([
+                                dbc.InputGroupText(
+                                    html.I(className="bi bi-chevron-right", style={
+                                        'font-size': '1.2rem',
+                                        'line-height': '1rem',
+                                        'color': 'lightgray',
+                                    }),
+                                ),
+                                dbc.Input(
+                                    type="text",
+                                    placeholder=placeholder,
+                                ),
+                            ]),
                             width=6,
                         ),
                         dbc.Col(
@@ -686,12 +734,16 @@ class Admin:
                             },
                         )
                     ],
+                    style={
+                        'max-width': '100vw',
+                        'padding': '0 2rem',
+                    }
                 ),
                 color="white",
                 dark=False,
                 fixed='top',
                 style={
-                    'border-bottom': '1px solid lightgray'
+                    'border-bottom': '1px solid lightgray',
                 }
             ),
             dbc.Container(

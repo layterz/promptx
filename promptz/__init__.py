@@ -149,6 +149,8 @@ def load(path='local', llm=None, ef=None, logger=None, **kwargs):
         user, config = load_local_config(path)
         app = App.from_config(path, config, llm=llm, ef=ef, logger=logger, **kwargs)
     
+    print(f'Loaded {app}')
+    
     s = app.world.create_session(user)
     set_default_session(s)
     return app
