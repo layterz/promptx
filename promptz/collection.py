@@ -141,8 +141,8 @@ class Collection(pd.DataFrame):
     def objects(self):
         if self.empty:
             return []
-        ids = self['id'].values.tolist()
         if hasattr(self, 'db'):
+            ids = self['id'].values.tolist()
             d = self.db.get(ids=ids)
             m = {id: metadata for id, metadata in zip(d['ids'], d['metadatas'])}
             schemas = {

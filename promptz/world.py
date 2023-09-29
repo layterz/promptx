@@ -51,7 +51,7 @@ class Session:
                     return r.content
         except MaxRetriesExceeded as e:
             self.logger.error(f'Max retries exceeded: {e}')
-            log = PromptLog(template=t.id, input=json.dumps(input.dict()), raw_input=rendered, error=str(e))
+            log = PromptLog(template=t.id, raw_input=rendered, error=str(e))
             self.store(log, collection='logs')
             return None
     
@@ -92,6 +92,8 @@ class Session:
             )
         elif isinstance(template, str):
             template = self.world.templates(ids=[template]).first
+            if template is None:
+                raise ValueError(f'No template found with id {template}')
 
         if isinstance(input, list):
             return self._run_batch(template, input, dryrun=dryrun, retries=retries, to_json=to_json, **kwargs)

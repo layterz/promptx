@@ -221,7 +221,6 @@ class TemplateRunner:
         if t.output is None:
             return output
         out = json.loads(output)
-        print('OUT', out)
         schema = model_to_json_schema(json.loads(t.output))
         if schema.get('type', None) == 'string' or (schema.get('type', None) == 'array' and schema.get('items', {}).get('type', None) == 'string'):
             return out

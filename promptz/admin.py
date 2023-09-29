@@ -83,7 +83,10 @@ class Index(BaseModel):
         if self.columns is not None:
             df = df[self.columns]
         
-        table = dbc.Table.from_dataframe(df)
+        table = dbc.Table.from_dataframe(df, style={
+            'box-shadow': 'none',
+            'border-top': '1px solid lightgray',
+        })
         return table
     
     @property
@@ -96,16 +99,23 @@ class Index(BaseModel):
 
     def render(self, data=None, **kwargs):
         RESULTS_STYLE = {
-            'border-top': '1px solid lightgray',
         }
 
         results = html.Div([], id=f'{self.id}-query-results', style=RESULTS_STYLE)
 
-        search = dbc.Input(
-            name='search',
-            placeholder='Search',
-            id=f'{self.id}-search',
-        )
+        search = dbc.InputGroup([
+            dbc.InputGroupText(
+                html.I(className="bi bi-search"),
+                style={
+                    'color': 'lightgray',
+                }
+            ),
+            dbc.Input(
+                name='search',
+                placeholder='Search',
+                id=f'{self.id}-search',
+            ),
+        ])
 
         search_input = dbc.Form([
             dbc.Row([
@@ -113,7 +123,7 @@ class Index(BaseModel):
                     search,
                 ], width=9),
                 dbc.Col([
-                    dbc.Button('Submit', id=f'{self.id}-search-submit', n_clicks=0, color='secondary')
+                    dbc.Button('Search', id=f'{self.id}-search-submit', n_clicks=0, color='secondary')
                 ], width=3)
             ])
         ])
@@ -132,7 +142,11 @@ class Index(BaseModel):
                 [
                     dbc.Col(
                         [
-                            html.H3(self.collection),
+                            html.H4(self.collection, style={
+                                'font-size': '1.5rem',
+                                'font-weight': 'normal',
+                                'text-transform': 'capitalize',
+                            }),
                         ],
                         width=3,
                     ),
@@ -241,7 +255,11 @@ class EntityDetails(BaseModel):
                 dbc.ListGroupItem(
                     [
                         html.H6(item['field']),
-                        html.P(item['value']),
+                        html.P(item['value'], style={
+                            'max-width': '100%',
+                            'max-height': '100px',
+                            'overflow': 'hidden',
+                        }),
                     ],
                 )
                 for item in data
@@ -266,12 +284,14 @@ class EntityInputForm(BaseModel):
         arbitrary_types_allowed = True
 
     id: str
+    name: str
     page: str
     app: Dash 
 
-    def __init__(self, app, page, submit, **kwargs):
+    def __init__(self, name, app, page, submit, **kwargs):
         super().__init__(
             id=str(uuid.uuid4()),
+            name=name,
             app=app,
             page=page,
             **kwargs,
@@ -335,20 +355,35 @@ class EntityInputForm(BaseModel):
         
         form = dbc.Form(
             [
+                html.H4(self.name, style={
+                    'border-bottom': '1px solid lightgray',
+                    'padding': '10px 0',
+                    'font-weight': 'normal',
+                }),
                 *[
-                    html.Div([
-                        dbc.Label(input['label']),
-                        dbc.Input(
-                            id={'type': 'form-input', 'field': input['id']},
-                            name=input['label'],
-                            type=input['type'],
-                            placeholder=f'Enter {input["label"]}',
-                        )
-                    ])
+                    html.Div(
+                        [
+                            dbc.InputGroup([
+                                dbc.InputGroupText(input['label']),
+                                dbc.Input(
+                                    id={'type': 'form-input', 'field': input['id']},
+                                    name=input['label'],
+                                    type=input['type'],
+                                    placeholder=f'Enter {input["label"]}',
+                                )
+                            ]),
+                        ],
+                        style={
+                            'margin': '0 0 10px 0',
+                        }
+                    )
                     for input in inputs
                 ],
                 html.Div(
-                    dbc.Button('Submit', id=f'{self.id}-submit', n_clicks=0, color='secondary')
+                    dbc.Button('Submit', id=f'{self.id}-submit', n_clicks=0, color='secondary'),
+                    style={
+                        'margin': '0 0 10px 0',
+                    }
                 ),
                 html.Div(id=f'{self.id}-form-output'),
             ],
@@ -580,6 +615,7 @@ class TemplateDetailsPage(AdminEntityPage):
                 raise Exception(f'Error submitting form: {response.status_code}')
 
         input_form = EntityInputForm(
+            name='Run Template',
             app=app,
             page=self.name,
             submit=handle_submit,
