@@ -486,19 +486,6 @@ class TemplateIndex(AdminIndexPage):
         )
 
 
-class QueryIndex(AdminIndexPage):
-
-    def __init__(self, app, **kwargs):
-        super().__init__(
-            app,
-            name="Queries",
-            path="/queries",
-            collection='queries',
-            icon='bi bi-search',
-            **kwargs,
-        )
-
-
 class AgentIndex(AdminIndexPage):
 
     def __init__(self, app, **kwargs):
@@ -508,6 +495,19 @@ class AgentIndex(AdminIndexPage):
             path="/agents",
             collection='agents',
             icon='bi bi-robot',
+            **kwargs,
+        )
+
+
+class QueryIndex(AdminIndexPage):
+
+    def __init__(self, app, **kwargs):
+        super().__init__(
+            app,
+            name="Queries",
+            path="/queries",
+            collection='queries',
+            icon='bi bi-search',
             **kwargs,
         )
 
@@ -666,9 +666,9 @@ class Admin:
             TemplateDetailsPage(self.app),
             CollectionDetailsPage(self.app),
 
-            Inbox(self.app, menu=True),
+            Inbox(self.app, menu=False),
             QueryIndex(self.app, menu=True),
-            SubscriptionIndex(self.app, menu=True),
+            SubscriptionIndex(self.app, menu=False),
             TemplateIndex(self.app, menu=True),
             AgentIndex(self.app, menu=True),
             CollectionIndex(self.app, menu=True),

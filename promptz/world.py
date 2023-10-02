@@ -1,3 +1,4 @@
+from enum import Enum
 import json
 import uuid
 import logging
@@ -8,9 +9,9 @@ from chromadb.utils import embedding_functions
 
 from .collection import Collection, CollectionRecord, Query, ChromaVectorDB, VectorDB
 from .template import Template, TemplateRunner, MaxRetriesExceeded, MockLLM
-from .models import PromptLog
+from .models import PromptLog, QueryLog
 from .logging import JSONLogFormatter, NotebookFormatter
-from .utils import Entity, model_to_json_schema
+from .utils import model_to_json_schema
 
 
 class Session:
@@ -115,7 +116,18 @@ class Session:
         where = where or {}
         if field is not None:
             where['field'] = field
-        return c(*texts, ids=ids, where=where)
+        r =  c(*texts, ids=ids, where=where)
+
+        def _serializer(obj):
+            if isinstance(obj, Enum):
+                return obj.value
+            if isinstance(obj, BaseModel):
+                return obj.schema()
+            raise TypeError(f"Type {type(obj)} not serializable")
+        
+        l = QueryLog(query=texts, where=where, collection=collection, result=json.dumps(r.objects, default=_serializer))
+        self.store(l, collection='queries')
+        return r
 
     def store(self, *items, collection=None):
         def flatten(lst):
@@ -216,7 +228,7 @@ class World:
         self.collections = Collection.load(collection)
         self.create_collection('default', 'Default collection used when calling store()')
         self.create_collection('logs', 'Stores a log of all prompts and their outputs')
-        self.create_collection('queries', 'Public and private shared queries')
+        self.create_collection('queries', 'Query stored objects in collections')
         self.create_collection('subscriptions', 'Subscriptions to queries')
         self.create_collection('agents', 'Configurations for interactive and autonomous AI agents')
         self.create_collection('models', 'Configurations for AI models')

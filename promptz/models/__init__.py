@@ -21,6 +21,19 @@ class PromptLog(BaseModel):
             id=str(uuid.uuid4()), **data)
 
 
+class QueryLog(BaseModel):
+    id: str
+    type: str = 'query'
+    query: list[str] = None
+    where: dict = None
+    collection: str = None
+    result: str = None
+
+    def __init__(self, **data):
+        super().__init__(
+            id=str(uuid.uuid4()), **data)
+
+
 class Callback(BaseModel):
     name: str
     params: Dict[str, Any] = None

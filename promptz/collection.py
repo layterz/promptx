@@ -21,6 +21,14 @@ class Query(BaseModel):
         super().__init__(query=query, where=where, collection=collection, **kwargs)
 
 
+class Subscription(Entity):
+    type='subscription'
+    query: Query = None
+
+    def __init__(self, query=None, **kwargs):
+        super().__init__(query=query, **kwargs)
+
+
 class VectorDB:
 
     @abstractmethod
