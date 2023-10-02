@@ -27,10 +27,10 @@ class Index(BaseModel):
 
     id: str
     app: Dash
-    collection: str
+    collection: str = None
     columns: list = None
 
-    def __init__(self, app, collection, columns=None, **kwargs):
+    def __init__(self, app, collection=None, columns=None, **kwargs):
         super().__init__(
             id=str(uuid.uuid4()),
             app=app,
@@ -38,7 +38,7 @@ class Index(BaseModel):
             columns=columns,
             **kwargs,
         )
-        
+
         @self.app.callback(
             Output(
                 f'{self.id}-query-results', 'children',
@@ -64,9 +64,9 @@ class Index(BaseModel):
             'text-align': 'center',
         }
 
-        if self.collection == '':
+        if self.collection is None:
             return html.P('No collection specified.', style=TEXT_MESSAGE_STYLE)
-        api_path = urljoin(API_URL, self.pathname)
+        api_path = urljoin(API_URL, f'/{self.collection}')
         response = requests.get(api_path, params={'query': query})
         if response.status_code == 200:
             data = response.json()
@@ -88,16 +88,17 @@ class Index(BaseModel):
             'border-top': '1px solid lightgray',
         })
         return table
-    
-    @property
-    def pathname(self):
-        return f'/{self.collection}'
 
     def generate_link(self, row):
         link = os.path.join(f'/{self.collection}', row['id'])
         return html.A(row.get('id'), href=link, target='_self')
 
-    def render(self, data=None, **kwargs):
+    def load(self, data):
+        print('loading index data', data)
+        details = data.get('details', {})
+        self.collection = details.get('records', {}).get('collection')
+
+    def render(self, **kwargs):
         RESULTS_STYLE = {
         }
 
@@ -242,12 +243,13 @@ class EntityDetails(BaseModel):
         data = [
             {'field': k, 'value': v.get('title')} if type(v) == dict else {'field': k, 'value': v}
             for k, v in self.data.items()
-            if k not in ['id', 'type', 'name']
+            if k not in ['id', 'type', 'name', 'description']
         ]
         
         details = html.Div([
             html.H3(self.data.get('name')),
             html.P(self.data.get('type')),
+            html.P(self.data.get('description')),
         ])
 
         list_items = dbc.ListGroup(
@@ -276,6 +278,9 @@ class EntityDetails(BaseModel):
                 'background-color': 'white',
             },
         )
+    
+    def load(self, data):
+        pass
 
 
 class EntityInputForm(BaseModel):
@@ -287,6 +292,7 @@ class EntityInputForm(BaseModel):
     name: str
     page: str
     app: Dash 
+    data: dict = None
 
     def __init__(self, name, app, page, submit, **kwargs):
         super().__init__(
@@ -321,8 +327,10 @@ class EntityInputForm(BaseModel):
             id = data.get('details', {}).get('id')
             return submit(id, field_data)
 
-    def render(self, data=None):
-        input_data = data.get('input')
+    def render(self):
+        if self.data is None:
+            return None
+        input_data = self.data.get('input')
         if input_data is None:
             return None
         input = json.loads(input_data)
@@ -394,6 +402,9 @@ class EntityInputForm(BaseModel):
             }
         )
         return form
+    
+    def load(self, data):
+        self.data = data
 
 
 class AdminEntityPage(AdminPage):
@@ -450,11 +461,13 @@ class AdminEntityPage(AdminPage):
         return EntityDetails(data=details).render()
     
     def render_components(self, data):
+        for component in self.components:
+            component.load(data)
         details = data.get('details')
         if details is None:
             return None
         return [
-            component.render(details)
+            component.render()
             for component in self.components
         ]
     
@@ -533,6 +546,7 @@ class CollectionIndex(AdminIndexPage):
             name="Collections",
             path="/collections",
             collection='collections',
+            columns=['id', 'name', 'description'],
             icon='bi bi-database',
             **kwargs,
         )
@@ -563,20 +577,6 @@ class Logs(AdminIndexPage):
             icon='bi bi-list',
             **kwargs,
         )
-
-
-class CollectionPage(AdminIndexPage):
-
-    def __init__(self, app, **kwargs):
-        super().__init__(
-            app,
-            name="Collection",
-            path_template="/collections/<id>",
-            **kwargs,
-        )
-    
-    def layout(self, id=None):
-        return super().layout()
 
 
 class DetailsPage(AdminEntityPage):
@@ -630,15 +630,23 @@ class TemplateDetailsPage(AdminEntityPage):
     
 
 class CollectionDetailsPage(AdminEntityPage):
-    results_index: Index = None
 
     def __init__(self, app, **kwargs):
         super().__init__(
             app,
-            name="Collection Details",
+            name="Collection",
             path_template="/collections/<id>",
             **kwargs,
         )
+
+        records = Index(
+            app,
+            columns=['id', 'name'],
+        )
+
+        self.components = [
+            records,
+        ]
 
 
 class Admin:

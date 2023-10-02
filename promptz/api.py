@@ -70,19 +70,14 @@ class API:
             else:
                 c = self.world._collections[collection]
             r = c(ids=[id]).first
-            return {'details': r, 'results': [], 'collection': collection}
+            return {'details': r, 'collection': collection}
 
         @self.fastapi_app.get("/templates/{id}")
         async def get_template(id: str):
-            logs = self.world.logs()
-            if logs is None or logs.empty:
-                results = []
-            else:
-                results = logs[logs['template'] == id].to_dict('records')
             template = self.world.templates(ids=[id]).first
             if template is None:
                 raise HTTPException(status_code=404, detail="Template not found")
-            return {'details': template, 'results': results}
+            return {'details': template}
         
         @self.fastapi_app.post("/templates")
         async def create_template(details: Template):
@@ -135,7 +130,7 @@ class API:
         @self.fastapi_app.get("/systems/{name}")
         async def get_system(name: str):
             system = self.world.systems(ids=[name]).first
-            return {"details": system, "results": []}
+            return {"details": system}
         
         @self.fastapi_app.post("/systems/run")
         async def run_systems():

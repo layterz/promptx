@@ -17,7 +17,7 @@ class Query(BaseModel):
     where: Dict[str, (int|str|bool)] = None
     collection: str = None
 
-    def __init__(self, query, where=None, collection=None, **kwargs):
+    def __init__(self, query=None, where=None, collection=None, **kwargs):
         super().__init__(query=query, where=where, collection=collection, **kwargs)
 
 
@@ -247,3 +247,9 @@ class CollectionRecord(Entity):
     type: str = 'collection'
     name: str = None
     description: str = None
+    records: Query = None
+
+    def __init__(self, name, description=None, records=None, **kwargs):
+        if records is None:
+            records = Query(collection=name)
+        super().__init__(name=name, description=description, records=records, **kwargs)

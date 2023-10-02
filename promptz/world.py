@@ -217,6 +217,7 @@ class World:
         self.create_collection('default', 'Default collection used when calling store()')
         self.create_collection('logs', 'Stores a log of all prompts and their outputs')
         self.create_collection('queries', 'Public and private shared queries')
+        self.create_collection('subscriptions', 'Subscriptions to queries')
         self.create_collection('agents', 'Configurations for interactive and autonomous AI agents')
         self.create_collection('models', 'Configurations for AI models')
 
