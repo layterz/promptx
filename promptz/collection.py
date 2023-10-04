@@ -43,6 +43,12 @@ class VectorDB:
         Return a collection or create a new one if it doesn't exist.
         '''
 
+    @abstractmethod
+    def delete_collection(self, name, **kwargs):
+        '''
+        Return a collection or create a new one if it doesn't exist.
+        '''
+
 
 class ChromaVectorDB(VectorDB):
 
@@ -63,6 +69,9 @@ class ChromaVectorDB(VectorDB):
             return self.client.get_collection(name, **kwargs)
         except ValueError:
             return None
+    
+    def delete_collection(self, name, **kwargs):
+        return self.client.delete_collection(name, **kwargs)
 
 
 class EntitySeries(pd.Series):
@@ -122,6 +131,7 @@ class Collection(pd.DataFrame):
         else:
             results = self.db.query(query_texts=texts, where=where, **kwargs)
             for i in range(len(results['ids'])):
+                print('results', i, results['ids'][i])
                 for id, d, m in zip(results['ids'][i], results['distances'][i], results['metadatas'][i]):
                     if m.get('item') != 1:
                         id = m.get('item_id')
@@ -192,15 +202,25 @@ class Collection(pd.DataFrame):
                 if isinstance(obj, BaseModel):
                     return obj.schema()
                 raise TypeError(f"Type {type(obj)} not serializable")
+            
+            if isinstance(item, str):
+                item = Entity(type='string', value=item)
 
             for name, field in item.dict().items():
                 if name in ['id', 'type']:
                     continue
 
+                # if field is an Entity, call embed recursively
+                if 'id' in field:
+                    self.embed(field)
+                    document = field['id']
+                else:
+                    document = json.dumps({name: field}, default=_serializer)
+
                 # TODO: Handle nested fields
                 field_record = {
                     'id': f'{item.id}_{name}',
-                    'document': json.dumps({name: field}, default=_serializer),
+                    'document': document,
                     'metadata': {
                         'field': name,
                         'collection': self.name,

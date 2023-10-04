@@ -34,6 +34,8 @@ class Entity(BaseModel):
         arbitrary_types_allowed = True
     
     def __init__(self, id=None, **data):
+        if 'type' not in data:
+            data['type'] = self.__class__.__name__.lower()
         super().__init__(**{'id': id or str(uuid.uuid4()), **data})
     
     def generate_schema_for_field(self, name, field_type: Any, default=False):

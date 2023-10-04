@@ -94,7 +94,6 @@ class Index(BaseModel):
         return html.A(row.get('id'), href=link, target='_self')
 
     def load(self, data):
-        print('loading index data', data)
         details = data.get('details', {})
         self.collection = details.get('records', {}).get('collection')
 

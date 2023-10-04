@@ -38,6 +38,10 @@ def store(*items, collection=None, **kwargs) -> Collection:
     return DEFAULT_SESSION.store(*items, collection=collection, **kwargs)
 
 
+def delete(collection=None, **kwargs) -> None:
+    return DEFAULT_SESSION.delete(collection=collection, **kwargs)
+
+
 def query(*texts, field=None, where=None, collection=None, **kwargs) -> Collection:
     return DEFAULT_SESSION.query(
         *texts, field=field, where=where, collection=collection, **kwargs)

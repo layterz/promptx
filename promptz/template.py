@@ -225,7 +225,6 @@ class TemplateRunner:
         if schema.get('type', None) == 'string' or (schema.get('type', None) == 'array' and schema.get('items', {}).get('type', None) == 'string'):
             return out
         entities = create_entity_from_schema(schema, out)
-        print('ENTITIES', entities)
         return entities
     
     def dict(self):

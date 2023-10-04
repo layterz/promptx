@@ -125,8 +125,6 @@ class Session:
                 return obj.schema()
             raise TypeError(f"Type {type(obj)} not serializable")
         
-        l = QueryLog(query=texts, where=where, collection=collection, result=json.dumps(r.objects, default=_serializer))
-        self.store(l, collection='queries')
         return r
 
     def store(self, *items, collection=None):
@@ -144,8 +142,14 @@ class Session:
         ])
         
         c = self.collection(collection)
+        if c is None:
+            self.world.create_collection(collection)
+            c = self.collection(collection)
         c.embed(*[item for item in items if item is not None])
         return None
+    
+    def delete(self, *items, collection=None):
+        self.world.delete_collection(collection)
     
     def chain(self, *steps, llm=None, **kwargs):
         llm = llm or self.llm
@@ -183,7 +187,7 @@ class Session:
     def collection(self, name=None):
         if name is None:
             name = self._collection
-        collection = self.world._collections[name]
+        collection = self.world._collections.get(name)
         return collection
     
     def evaluate(self, actual, expected, **kwargs):
@@ -269,6 +273,11 @@ class World:
         c = Collection.load(collection)
         self._collections[name] = c
         return collection
+    
+    def delete_collection(self, name):
+        self.db.delete_collection(name)
+        if name in self._collections:
+            del self._collections[name]
 
     def create_template(self, template: Template):
         return self.templates.embed(template)
