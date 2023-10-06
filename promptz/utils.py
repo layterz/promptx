@@ -38,7 +38,7 @@ class Entity(BaseModel):
             data['type'] = self.__class__.__name__.lower()
         super().__init__(**{'id': id or str(uuid.uuid4()), **data})
     
-    def generate_schema_for_field(self, name, field_type: Any, default=False):
+    def generate_schema_for_field(self, name, field_type: Any, default=None):
         return_list = False
         definitions = {}
         
@@ -54,14 +54,17 @@ class Entity(BaseModel):
         # Handle Pydantic model types (reference schema)
         elif isinstance(field_type, type) and issubclass(field_type, BaseModel):
             # If the schema for this model hasn't been generated before
-            for name, info in field_type.__fields__.items():
-                if name not in definitions:
-                    field, defs = self.generate_schema_for_field(name, info.type_, info.default)
-                    definitions[name] = {
-                        "type": "object",
-                        "properties": field,
-                    }
+            props = {}
+            for subfield, info in field_type.__fields__.items():
+                if subfield not in definitions:
+                    field, defs, reqs = self.generate_schema_for_field(subfield, info.type_, info.default)
+                    props[subfield] = field
                     definitions = {**definitions, **defs}
+            definitions[name.capitalize()] = {
+                "type": "object",
+                "properties": props,
+                "required": reqs,
+            }
             schema = {
                 "type": "object",
                 "$ref": f"#/definitions/{field_type.__name__}",
@@ -86,7 +89,7 @@ class Entity(BaseModel):
 
         if default:
             schema['default'] = default
-        return schema, definitions
+        return schema, definitions, []
     
     def schema(self, by_alias: bool = True, **kwargs):
         properties = {}
@@ -231,7 +234,7 @@ def create_entity_from_schema(schema, data):
             data['id'] = str(uuid.uuid4())
     
     definitions = schema.get('definitions', {})
-    for name, field in schema.get('raw_inpuiproperties', {}).items():
+    for name, field in schema.get('properties', {}).items():
         _type = _get_field_type(field, definitions)
         if isinstance(_type, type) and issubclass(_type, Enum):
             if data.get(name):
