@@ -109,14 +109,17 @@ class Session:
         elif isinstance(item, list):
             return [self.embed(i, field=field) for i in item]
     
-    def query(self, *texts, field=None, ids=None, where=None, collection=None):
+    def query(self, *texts, field=None, ids=None, where=None, collection=None, limit=None):
         c = self.collection(collection)
         if len(texts) == 0 and field is None and where is None:
-            return c
+            if limit is None:
+                return c
+            else:
+                return c.head(limit)
         where = where or {}
         if field is not None:
             where['field'] = field
-        r =  c(*texts, ids=ids, where=where)
+        r =  c(*texts, ids=ids, where=where, limit=limit)
 
         def _serializer(obj):
             if isinstance(obj, Enum):

@@ -217,7 +217,7 @@ def create_model_from_schema(schema):
     }
     if 'type' not in fields:
         fields['type'] = (str, ...)
-    return create_model(schema.get('title', 'Entity'), **fields, __base__=Entity)
+    return create_model(schema.get('title', 'Entity').capitalize(), **fields, __base__=Entity)
 
 
 def create_entity_from_schema(schema, data):

@@ -115,7 +115,7 @@ class Collection(pd.DataFrame):
         c.db = db
         return c
     
-    def embedding_query(self, *texts, ids=None, where=None, threshold=0.5, **kwargs):
+    def embedding_query(self, *texts, ids=None, where=None, threshold=0.5, limit=None, **kwargs):
         texts = [t for t in texts if t is not None]
         
         scores = {}
@@ -143,7 +143,10 @@ class Collection(pd.DataFrame):
             filtered_scores = {k: v for k, v in scores.items() if v >= threshold}
             sorted_ids = sorted(filtered_scores, key=filtered_scores.get, reverse=True)
             results = self[self['id'].isin(sorted_ids)].set_index('id').loc[sorted_ids].reset_index()
-            return results
+            if limit is not None:
+                return results.head(limit)
+            else:
+                return results
         except KeyError as e:
             return None
     
@@ -170,7 +173,7 @@ class Collection(pd.DataFrame):
                 create_entity_from_schema(
                     schemas.get(r['id']),
                     {
-                        k: v for k, v in r.items() if v is not None
+                        k: v for k, v in r.items() if pd.notnull(v)
                     }
                 ) 
                 for r in self.to_dict('records')
@@ -211,6 +214,14 @@ class Collection(pd.DataFrame):
 
                 # TODO: Handle nested fields
                 document = json.dumps({name: field}, default=_serializer)
+
+                f = item.__fields__[name]
+                if issubclass(f.type_, Entity):
+                    continue
+                if f.field_info.extra.get('embed', True) == False:
+                    continue
+                if isinstance(field, int) or isinstance(field, float) or isinstance(field, bool):
+                    continue
 
                 field_record = {
                     'id': f'{item.id}_{name}',
