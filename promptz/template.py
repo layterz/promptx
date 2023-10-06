@@ -154,6 +154,12 @@ class TemplateRunner:
             definition = definitions.get(ref, {})
             type_ = f'{definition.get("title", ref)}'
             options += f'''Select only one option: {", ".join(definition['enum'])}'''
+        elif field.get('$ref'):
+            ref = field.get('$ref')
+            ref = ref.split('/')[-1]
+            definition = definitions.get(ref, {})
+            type_ = f'{definition.get("title", ref)}'
+            options += f'''Select only one option: {", ".join(definition['enum'])}'''
         else:
             type_ = field.get('type', 'str')
 

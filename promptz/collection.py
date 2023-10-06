@@ -131,7 +131,6 @@ class Collection(pd.DataFrame):
         else:
             results = self.db.query(query_texts=texts, where=where, **kwargs)
             for i in range(len(results['ids'])):
-                print('results', i, results['ids'][i])
                 for id, d, m in zip(results['ids'][i], results['distances'][i], results['metadatas'][i]):
                     if m.get('item') != 1:
                         id = m.get('item_id')
@@ -210,14 +209,9 @@ class Collection(pd.DataFrame):
                 if name in ['id', 'type']:
                     continue
 
-                # if field is an Entity, call embed recursively
-                if 'id' in field:
-                    self.embed(field)
-                    document = field['id']
-                else:
-                    document = json.dumps({name: field}, default=_serializer)
-
                 # TODO: Handle nested fields
+                document = json.dumps({name: field}, default=_serializer)
+
                 field_record = {
                     'id': f'{item.id}_{name}',
                     'document': document,
