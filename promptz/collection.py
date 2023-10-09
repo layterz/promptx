@@ -91,7 +91,7 @@ class EntitySeries(pd.Series):
 
 
 class Collection(pd.DataFrame):
-    _metadata = ['db']
+    _metadata = ['db', 'schema']
 
     @property
     def _constructor(self, *args, **kwargs):
@@ -179,9 +179,13 @@ class Collection(pd.DataFrame):
                 for r in self.to_dict('records')
             ]
         else:
-            #TODO: handle schema somehow
             return [
-                Entity(**{k: v for k, v in r.items() if v is not None})
+                create_entity_from_schema(
+                    self.schema or {},
+                    {
+                        k: v for k, v in r.items() if pd.notnull(v)
+                    }
+                ) 
                 for r in self.to_dict('records')
             ]
     

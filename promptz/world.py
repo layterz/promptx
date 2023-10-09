@@ -45,6 +45,12 @@ class Session:
                     return es
                 else:
                     c = Collection(es)
+                    if t.output is not None:
+                        output_schema = json.loads(t.output)
+                        # if output schema is a list, get the inner type
+                        if output_schema.get('type', None) == 'array':
+                            output_schema = output_schema.get('items', {})
+                        c.schema = output_schema
                     return c
             else:
                 if to_json:

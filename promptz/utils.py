@@ -55,7 +55,11 @@ class Entity(BaseModel):
         # Handle Pydantic model types (reference schema)
         elif isinstance(field_type, type) and issubclass(field_type, Entity):
             schema = {
-                "type": "string",
+                "type": "object",
+                "properties": {
+                    "id": {"type": "string"},
+                    "type": {"type": "string"},
+                },
             }
         
         # Handle default case by getting the cls field and calling schema
@@ -127,35 +131,6 @@ class Entity(BaseModel):
         return self.json()
 
 
-def model_to_json_schema(model):
-    output = None
-    if isinstance(model, list):
-        inner = model[0]
-        if issubclass(inner, BaseModel):
-            schema = inner.schema()
-            output = {
-                'type': 'array',
-                'items': schema,
-                'definitions': schema.get('definitions', {})
-            }
-        else:
-            output = {
-                'type': 'array',
-                'items': {
-                    'type': PYTYPE_TO_JSONTYPE[inner]
-                }
-            }
-    elif isinstance(model, dict):
-        output = model
-    elif isinstance(model, BaseModel):
-        output = model.schema()
-    elif isinstance(model, type):
-        if issubclass(model, BaseModel):
-            output = model.schema()
-    
-    return output
-
-
 def _is_list(schema):
     return schema.get('type') == 'array'
 
@@ -198,6 +173,35 @@ def _create_field(field_info, definitions, required=False):
     field_type = _get_field_type(field_info, definitions)
     field_default = field_info.get('default', ... if required else None)
     return (field_type, field_default)
+
+
+def model_to_json_schema(model):
+    output = None
+    if isinstance(model, list):
+        inner = model[0]
+        if issubclass(inner, BaseModel):
+            schema = inner.schema()
+            output = {
+                'type': 'array',
+                'items': schema,
+                'definitions': schema.get('definitions', {})
+            }
+        else:
+            output = {
+                'type': 'array',
+                'items': {
+                    'type': PYTYPE_TO_JSONTYPE[inner]
+                }
+            }
+    elif isinstance(model, dict):
+        output = model
+    elif isinstance(model, BaseModel):
+        output = model.schema()
+    elif isinstance(model, type):
+        if issubclass(model, BaseModel):
+            output = model.schema()
+    
+    return output
 
 
 def create_model_from_schema(schema):
