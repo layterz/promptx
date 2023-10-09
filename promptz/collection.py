@@ -201,7 +201,7 @@ class Collection(pd.DataFrame):
             def _serializer(obj):
                 if isinstance(obj, Enum):
                     return obj.value
-                if isinstance(obj, BaseModel):
+                elif isinstance(obj, BaseModel):
                     return obj.schema()
                 raise TypeError(f"Type {type(obj)} not serializable")
             
@@ -212,9 +212,6 @@ class Collection(pd.DataFrame):
                 if name in ['id', 'type']:
                     continue
 
-                # TODO: Handle nested fields
-                document = json.dumps({name: field}, default=_serializer)
-
                 f = item.__fields__[name]
                 if issubclass(f.type_, Entity):
                     continue
@@ -222,6 +219,9 @@ class Collection(pd.DataFrame):
                     continue
                 if isinstance(field, int) or isinstance(field, float) or isinstance(field, bool):
                     continue
+
+                # TODO: Handle nested fields
+                document = json.dumps({name: field}, default=_serializer)
 
                 field_record = {
                     'id': f'{item.id}_{name}',
@@ -237,6 +237,10 @@ class Collection(pd.DataFrame):
                 records.append(field_record)
 
             doc = { k: v for k, v in item.dict().items() if k not in ['id'] }
+            for k in item.__fields__.keys():
+                v = getattr(item, k)
+                if isinstance(v, Entity):
+                    doc[k] = v.id
             doc_record = {
                 'id': item.id,
                 'document': json.dumps(doc, default=_serializer),

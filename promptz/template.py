@@ -283,14 +283,3 @@ class TemplateRunner:
             return self.forward(t, x, retries=retries-1, **kwargs)
         self.logger.log(METRICS, response.metrics)
         return response
-
-
-class ChatPrompt(Template):
-    '''
-    You are a helpful assistant.
-    '''
-
-    template = '''
-    {{input}}
-    {{output}}
-    '''

@@ -38,7 +38,8 @@ class Entity(BaseModel):
             data['type'] = self.__class__.__name__.lower()
         super().__init__(**{'id': id or str(uuid.uuid4()), **data})
     
-    def generate_schema_for_field(self, name, field_type: Any, default=None):
+    @classmethod
+    def generate_schema_for_field(cls, name, field_type: Any, default=None):
         return_list = False
         definitions = {}
         
@@ -52,22 +53,9 @@ class Entity(BaseModel):
             schema = {"type": type_}
 
         # Handle Pydantic model types (reference schema)
-        elif isinstance(field_type, type) and issubclass(field_type, BaseModel):
-            # If the schema for this model hasn't been generated before
-            props = {}
-            for subfield, info in field_type.__fields__.items():
-                if subfield not in definitions:
-                    field, defs, reqs = self.generate_schema_for_field(subfield, info.type_, info.default)
-                    props[subfield] = field
-                    definitions = {**definitions, **defs}
-            definitions[name.capitalize()] = {
-                "type": "object",
-                "properties": props,
-                "required": reqs,
-            }
+        elif isinstance(field_type, type) and issubclass(field_type, Entity):
             schema = {
-                "type": "object",
-                "$ref": f"#/definitions/{field_type.__name__}",
+                "type": "string",
             }
         
         # Handle default case by getting the cls field and calling schema
@@ -91,14 +79,15 @@ class Entity(BaseModel):
             schema['default'] = default
         return schema, definitions, []
     
-    def schema(self, by_alias: bool = True, **kwargs):
+    @classmethod
+    def schema(cls, by_alias: bool = True, **kwargs):
         properties = {}
         required = []
         definitions = {}
 
-        for field_name, field_info in self.__fields__.items():
+        for field_name, field_info in cls.__fields__.items():
             try:
-                field, defs = self.generate_schema_for_field(field_name, field_info.type_, field_info.default)
+                field, defs, reqs = cls.generate_schema_for_field(field_name, field_info.type_, field_info.default)
                 properties[field_name] = field
                 definitions = {**definitions, **defs}
             except Exception as e:
@@ -106,10 +95,11 @@ class Entity(BaseModel):
             
             if field_info.required:
                 required.append(field_name)
+            required += reqs
 
         # Construct the base schema
         base_schema = {
-            "title": self.type or self.__class__.__name__,
+            "title": cls.__name__,
             "type": "object",
             "properties": properties,
             "definitions": definitions,  # Include definitions for references
@@ -242,6 +232,10 @@ def create_entity_from_schema(schema, data):
         elif getattr(_type, '__origin__', None) == list and isinstance(_type.__args__[0], type) and issubclass(_type.__args__[0], Enum):
             if data.get(name):
                 data[name] = [d.lower() for d in data[name]]
+    
+    # TODO: need to somehow handle nested entities which should be stored as IDs
+    # currently the schema is correct in that it defines the desired type as a string
+    # however, the entity needs to be loaded when the parent entity is loaded
     
     jsonschema.validate(data, schema)
     m = create_model_from_schema(schema)

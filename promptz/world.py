@@ -10,6 +10,7 @@ from chromadb.utils import embedding_functions
 from .collection import Collection, CollectionRecord, Query, ChromaVectorDB, VectorDB
 from .template import Template, TemplateRunner, MaxRetriesExceeded, MockLLM
 from .models import PromptLog, QueryLog
+from .chat import ChatBot
 from .logging import JSONLogFormatter, NotebookFormatter
 from .utils import model_to_json_schema
 
@@ -129,6 +130,13 @@ class Session:
             raise TypeError(f"Type {type(obj)} not serializable")
         
         return r
+    
+    def chat(self, message, input=None, bot=None, **kwargs):
+        if bot is None:
+            bot = ChatBot('default')
+        return self._run_prompt(
+            bot.template, {'message': message, 'input': input}, **kwargs
+        )
 
     def store(self, *items, collection=None):
         def flatten(lst):

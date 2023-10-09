@@ -1,24 +1,35 @@
 from .models import LLM
 from .utils import Entity
 from .collection import Collection
+from .template import Template
+
+
+class DefaultChatTemplate(Template):
+
+    template = """
+    {{input}}
+    Message: {{message}}
+    """
+
+    input_template = """
+    Context: {{input}}
+    """
+
+    output_template = """
+    {{output}}
+    """
 
 
 class ChatBot(Entity):
-
     name: str
-    model: LLM
+    template: Template
     history: Collection
 
-    def __init__(self, name, model, history=None, **kwargs):
+    def __init__(self, name, template=None, history=None, **kwargs):
         if history is None:
             history = Collection()
-        super().__init__(name=name, model=model, history=history, **kwargs)
+        
+        if template is None:
+            template = DefaultChatTemplate()
 
-    def __call__(self, input, **kwargs):
-        print(f'ChatBot: {input}')
-        r = self.model.generate(input, **kwargs)
-        print(f'ChatBot: {r}')
-        return None
-
-
-
+        super().__init__(name=name, template=template, history=history, **kwargs)
