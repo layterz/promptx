@@ -193,6 +193,12 @@ class Collection(pd.DataFrame):
         else:
             return objects[0]
     
+    def delete(self, *items):
+        self.db.delete(ids=[i.id.replace(' ', '') for i in items])
+        for item in items:
+            self.db.delete(where={'item_id': item.id})
+        self.drop(self[self['id'].isin([i.id for i in items])].index, inplace=True)
+
     def embed(self, *items, **kwargs):
         records = []
         for item in items:

@@ -157,9 +157,15 @@ class Session:
             self.world.create_collection(collection)
             c = self.collection(collection)
         c.embed(*[item for item in items if item is not None])
-        return None
     
     def delete(self, *items, collection=None):
+        c = self.collection(collection)
+        if c is None:
+            raise ValueError(f'No collection found with name {collection}')
+        
+        c.delete(*items)
+    
+    def delete_collection(self, collection):
         self.world.delete_collection(collection)
     
     def chain(self, *steps, llm=None, **kwargs):
