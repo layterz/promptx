@@ -118,6 +118,8 @@ class Session:
     
     def query(self, *texts, field=None, ids=None, where=None, collection=None, limit=None):
         c = self.collection(collection)
+        if c is None:
+            raise ValueError(f'No collection found with name {collection}')
         if len(texts) == 0 and field is None and where is None:
             if limit is None:
                 return c
@@ -127,14 +129,6 @@ class Session:
         if field is not None:
             where['field'] = field
         r =  c(*texts, ids=ids, where=where, limit=limit)
-
-        def _serializer(obj):
-            if isinstance(obj, Enum):
-                return obj.value
-            if isinstance(obj, BaseModel):
-                return obj.schema()
-            raise TypeError(f"Type {type(obj)} not serializable")
-        
         return r
     
     def chat(self, message, input=None, bot=None, **kwargs):
@@ -173,6 +167,12 @@ class Session:
     
     def delete_collection(self, collection):
         self.world.delete_collection(collection)
+    
+    def create_collection(self, collection):
+        self.world.create_collection(collection)
+    
+    def collections(self):
+        return self.world.db.collections()
     
     def chain(self, *steps, llm=None, **kwargs):
         llm = llm or self.llm
@@ -263,6 +263,9 @@ class World:
         self.create_collection('templates', 'Prompt templates used to interact with AI models')
         for template in (templates or []):
             self.create_template(template)
+        
+        for collection in self.db.collections():
+            self.create_collection(collection.name)
         
         # TODO: hack, should register as normal system
         self.template_system = TemplateRunner(llm=self.llm, logger=self.logger.getChild('template_system'))

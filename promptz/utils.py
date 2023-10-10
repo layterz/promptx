@@ -61,6 +61,7 @@ class Entity(BaseModel):
                     "type": {"type": "string"},
                 },
             }
+        # TODO: handle enums
         
         # Handle default case by getting the cls field and calling schema
         else:
@@ -232,10 +233,10 @@ def create_entity_from_schema(schema, data):
         _type = _get_field_type(field, definitions)
         if isinstance(_type, type) and issubclass(_type, Enum):
             if data.get(name):
-                data[name] = data[name].lower()
+                data[name] = data[name].name.lower()
         elif getattr(_type, '__origin__', None) == list and isinstance(_type.__args__[0], type) and issubclass(_type.__args__[0], Enum):
             if data.get(name):
-                data[name] = [d.lower() for d in data[name]]
+                data[name] = [d.name.lower() for d in data[name]]
     
     # TODO: need to somehow handle nested entities which should be stored as IDs
     # currently the schema is correct in that it defines the desired type as a string

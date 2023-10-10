@@ -42,8 +42,16 @@ def delete(*items, collection=None, **kwargs) -> None:
     return DEFAULT_SESSION.delete(*items, collection=collection, **kwargs)
 
 
-def delete_collection(collection=None, **kwargs) -> None:
+def collections():
+    return DEFAULT_SESSION.collections()
+
+
+def delete_collection(collection, **kwargs) -> None:
     return DEFAULT_SESSION.delete_collection(collection, **kwargs)
+
+
+def create_collection(collection, **kwargs) -> None:
+    return DEFAULT_SESSION.create_collection(collection, **kwargs)
 
 
 def query(*texts, field=None, where=None, collection=None, **kwargs) -> Collection:

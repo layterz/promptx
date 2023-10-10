@@ -1,11 +1,11 @@
+import time
 import random
 import json
-import uuid
-import textwrap
+import urllib3
 from typing import * 
 import jsonschema
 from pydantic import BaseModel
-from openai.error import RateLimitError
+import openai
 from jinja2 import Template as JinjaTemplate
 
 from .collection import Collection
@@ -264,7 +264,26 @@ class TemplateRunner:
         self.logger.log(INSTRUCTIONS, t.instructions)
         if t.examples: self.logger.log(EXAMPLES, self.render_examples(t))
         if len(px): self.logger.log(INPUT, px)
-        response = llm.generate(prompt_input)
+
+        try:
+            response = llm.generate(prompt_input)
+        except (urllib3.exceptions.ReadTimeoutError,
+                urllib3.exceptions.ConnectTimeoutError,
+                urllib3.exceptions.NewConnectionError) as e:
+            self.logger.warn(f'LLM generation failed: {e}')
+            time.sleep(2)
+            return self.forward(t, x, retries=retries, **kwargs)
+        except (openai.error.APIError,
+                openai.error.Timeout,
+                openai.error.ServiceUnavailableError) as e:
+            self.logger.warn(f'LLM generation failed: {e}')
+            time.sleep(2)
+            return self.forward(t, x, retries=retries, **kwargs)
+        except openai.error.RateLimitError as e:
+            self.logger.warn(f'Hit rate limit for {self}: {e}')
+            time.sleep(10)
+            return self.forward(t, x, retries=retries, **kwargs)
+
         if t.output: self.logger.log(FORMAT_INSTRUCTIONS, self.render_format(t, px))
         try:
             self.logger.log(OUTPUT, response.raw)
@@ -274,9 +293,6 @@ class TemplateRunner:
             return self.forward(t, x, retries=retries-1, **kwargs)
         except json.JSONDecodeError as e:
             self.logger.warn(f'Failed to decode JSON from {response.content}: {e}')
-            return self.forward(t, x, retries=retries-1, **kwargs)
-        except RateLimitError as e:
-            self.logger.warn(f'Hit rate limit for {self}: {e}')
             return self.forward(t, x, retries=retries-1, **kwargs)
         except Exception as e:
             self.logger.error(f'Failed to forward {x}: {e}')

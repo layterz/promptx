@@ -48,6 +48,12 @@ class VectorDB:
         '''
         Return a collection or create a new one if it doesn't exist.
         '''
+    
+    @abstractmethod
+    def collections():
+        '''
+        Return a list of collections.
+        '''
 
 
 class ChromaVectorDB(VectorDB):
@@ -72,6 +78,9 @@ class ChromaVectorDB(VectorDB):
     
     def delete_collection(self, name, **kwargs):
         return self.client.delete_collection(name, **kwargs)
+    
+    def collections(self):
+        return self.client.list_collections()
 
 
 class EntitySeries(pd.Series):
@@ -204,6 +213,33 @@ class Collection(pd.DataFrame):
         self.drop(self[self['id'].isin([i.id for i in items])].index, inplace=True)
 
     def embed(self, *items, **kwargs):
+        records = self._create_records(*items, **kwargs)
+        if len(records) == 0:
+            raise ValueError('No items to embed')
+
+        ids = [r['id'] for r in records]
+        self.db.upsert(
+            ids=ids,
+            documents=[r['document'] for r in records],
+            metadatas=[r['metadata'] for r in records],
+        )
+
+        if self.empty:
+            new_items = [r for r in records if r['metadata']['item'] == 1]
+        else:
+            new_items = [
+                r for r in records 
+                if r['id'] not in self['id'].values
+                and r['metadata']['item'] == 1
+            ]
+        docs = [{'id': r['id'], **json.loads(r['document'])} for r in new_items]
+        df = pd.concat([self, Collection(docs)], ignore_index=True)
+        self.drop(self.index, inplace=True)
+        for column in df.columns:
+            self[column] = df[column]
+        return self
+
+    def _create_records(self, *items, **kwargs):
         records = []
         for item in items:
             now = datetime.now().isoformat()
@@ -250,7 +286,7 @@ class Collection(pd.DataFrame):
             for k in item.__fields__.keys():
                 v = getattr(item, k)
                 if isinstance(v, Entity):
-                    doc[k] = v.id
+                    doc[k] = { 'id': v.id, 'type': v.type }
             doc_record = {
                 'id': item.id,
                 'document': json.dumps(doc, default=_serializer),
@@ -263,32 +299,8 @@ class Collection(pd.DataFrame):
                 },
             }
             records.append(doc_record)
-            
-        if len(records) == 0:
-            raise ValueError('No items to embed')
-
-        ids = [r['id'] for r in records]
-        self.db.upsert(
-            ids=ids,
-            documents=[r['document'] for r in records],
-            metadatas=[r['metadata'] for r in records],
-        )
-
-        if self.empty:
-            new_items = [r for r in records if r['metadata']['item'] == 1]
-        else:
-            new_items = [
-                r for r in records 
-                if r['id'] not in self['id'].values
-                and r['metadata']['item'] == 1
-            ]
-        docs = [{'id': r['id'], **json.loads(r['document'])} for r in new_items]
-        df = pd.concat([self, Collection(docs)], ignore_index=True)
-        self.drop(self.index, inplace=True)
-        for column in df.columns:
-            self[column] = df[column]
-        return self
-
+        
+        return records
 
 class CollectionRecord(Entity):
     type: str = 'collection'
