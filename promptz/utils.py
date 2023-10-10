@@ -51,6 +51,13 @@ class Entity(BaseModel):
         if isinstance(field_type, type) and issubclass(field_type, (int, float, str, bool)):
             type_ = PYTYPE_TO_JSONTYPE[field_type]
             schema = {"type": type_}
+        
+        # Handle enums
+        elif isinstance(field_type, type) and issubclass(field_type, Enum):
+            schema = {
+                "type": "string",
+                "enum": [e.name.lower() for e in field_type],
+            }
 
         # Handle Pydantic model types (reference schema)
         elif isinstance(field_type, type) and issubclass(field_type, Entity):

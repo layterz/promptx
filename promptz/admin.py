@@ -29,13 +29,15 @@ class Index(BaseModel):
     app: Dash
     collection: str = None
     columns: list = None
+    title: str = None
 
-    def __init__(self, app, collection=None, columns=None, **kwargs):
+    def __init__(self, app, collection=None, title=None, columns=None, **kwargs):
         super().__init__(
             id=str(uuid.uuid4()),
             app=app,
             collection=collection,
             columns=columns,
+            title=title or collection,
             **kwargs,
         )
 
@@ -142,7 +144,7 @@ class Index(BaseModel):
                 [
                     dbc.Col(
                         [
-                            html.H4(self.collection, style={
+                            html.H4(self.title, style={
                                 'font-size': '1.5rem',
                                 'font-weight': 'normal',
                                 'text-transform': 'capitalize',
@@ -239,10 +241,16 @@ class EntityDetails(BaseModel):
     data: dict
 
     def render(self, **kwargs):
+        def is_entity(v):
+            if type(v) == dict:
+                return 'id' in v and 'type' in v
+            elif type(v) == list:
+                return any([is_entity(item) for item in v])
+
         data = [
             {'field': k, 'value': v.get('title')} if type(v) == dict else {'field': k, 'value': v}
             for k, v in self.data.items()
-            if k not in ['id', 'type', 'name', 'description']
+            if k not in ['id', 'type', 'name', 'description'] and not is_entity(v)
         ]
         
         details = html.Div([
@@ -640,7 +648,7 @@ class CollectionDetailsPage(AdminEntityPage):
 
         records = Index(
             app,
-            columns=['id', 'name'],
+            title='Records',
         )
 
         self.components = [

@@ -1,15 +1,14 @@
-from enum import Enum
 import json
 import uuid
 import logging
 import numpy as np
 from pydantic import BaseModel
-from typing import Any, Dict, List, Callable
+from typing import Any, Dict, List
 from chromadb.utils import embedding_functions
 
-from .collection import Collection, CollectionRecord, Query, ChromaVectorDB, VectorDB
+from .collection import Collection, CollectionEntity, Query, VectorDB
 from .template import Template, TemplateRunner, MaxRetriesExceeded, MockLLM
-from .models import PromptLog, QueryLog
+from .models import PromptLog
 from .chat import ChatBot
 from .logging import JSONLogFormatter, NotebookFormatter
 from .utils import model_to_json_schema
@@ -294,7 +293,7 @@ class World:
             if metadata is None:
                 metadata = {"hnsw:space": "cosine"}
             collection = self.db.create_collection(name, metadata=metadata)
-            r = CollectionRecord(name=name, description=description)
+            r = CollectionEntity(name=name, description=description)
             self.collections.embed(r)
         c = Collection.load(collection)
         self._collections[name] = c

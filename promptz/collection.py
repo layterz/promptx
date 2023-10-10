@@ -2,7 +2,7 @@ import json
 from enum import Enum
 from datetime import datetime
 from abc import abstractmethod
-from typing import Any, Dict
+from typing import *
 import pandas as pd
 from pydantic import BaseModel 
 import chromadb
@@ -258,7 +258,10 @@ class Collection(pd.DataFrame):
                 if name in ['id', 'type']:
                     continue
 
-                f = item.__fields__[name]
+                f = item.__fields__.get(name)
+                if f is None:
+                    continue
+
                 if issubclass(f.type_, Entity):
                     continue
                 if f.field_info.extra.get('embed', True) == False:
@@ -302,13 +305,13 @@ class Collection(pd.DataFrame):
         
         return records
 
-class CollectionRecord(Entity):
+class CollectionEntity(Entity):
     type: str = 'collection'
     name: str = None
     description: str = None
-    records: Query = None
+    records: List[Entity] = None
 
     def __init__(self, name, description=None, records=None, **kwargs):
-        if records is None:
-            records = Query(collection=name)
-        super().__init__(name=name, description=description, records=records, **kwargs)
+        super().__init__(
+            name=name, description=description, records=records, **kwargs
+        )
