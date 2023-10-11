@@ -128,6 +128,8 @@ class Session:
         if field is not None:
             where['field'] = field
         r =  c(*texts, ids=ids, where=where, limit=limit)
+        if r is None:
+            return None
 
         def serialize(item):
             if isinstance(item, BaseModel):

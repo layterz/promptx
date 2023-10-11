@@ -262,7 +262,7 @@ class Collection(pd.DataFrame):
                 if f is None:
                     continue
 
-                if issubclass(f.type_, Entity):
+                if isinstance(f.type_, type) and issubclass(f.type_, Entity):
                     continue
                 if f.field_info.extra.get('embed', True) == False:
                     continue

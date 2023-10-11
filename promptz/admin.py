@@ -171,7 +171,7 @@ class Index(BaseModel):
                 max_intervals=1  # Only trigger once
             ),
             dcc.Store(id=f'{self.id}-data-store'),
-        ], style=INDEX_STYLE)
+        ], style=INDEX_STYLE, className='index')
 
 
 class AdminPage(BaseModel):
@@ -251,9 +251,12 @@ class EntityDetails(BaseModel):
             for k, v in self.data.items()
             if k not in ['id', 'type', 'name', 'description'] and not is_entity(v)
         ]
+
+        print('self.data', self.data)
+        print('data', data)
         
         details = html.Div([
-            html.H3(self.data.get('name')),
+            html.H3(self.data.get('id')),
             html.P(self.data.get('type')),
             html.P(self.data.get('description')),
         ])
@@ -468,7 +471,11 @@ class AdminEntityPage(AdminPage):
     
     def render_components(self, data):
         for component in self.components:
-            component.load(data)
+            try:
+                component.load(data)
+            except Exception as e:
+                print(f'Error loading component: {e}')
+
         details = data.get('details')
         if details is None:
             return None
@@ -679,8 +686,8 @@ class Admin:
             QueryIndex(self.app, menu=True),
             SubscriptionIndex(self.app, menu=False),
             TemplateIndex(self.app, menu=True),
-            AgentIndex(self.app, menu=True),
             CollectionIndex(self.app, menu=True),
+            AgentIndex(self.app, menu=True),
             ModelIndex(self.app, menu=True),
             Logs(self.app, menu=True),
         ]
@@ -730,6 +737,18 @@ class Admin:
             'Summarize the latest AI papers on arXiv',
         ]
 
+        styles = """
+        .index table {
+            max-width: 100%;
+        }
+
+        .index table td {
+            max-width: 300px;
+            max-height: 100px;
+            overflow: hidden;
+        }
+        """
+        data_uri = f"data:text/css;charset=utf-8,{styles}"
         placeholder = random.choice(placeholders)
         self.app.layout = html.Div([
             dbc.Navbar(
@@ -807,4 +826,5 @@ class Admin:
                 style={
                 },
             ),
+            html.Link(rel="stylesheet", href=data_uri)
         ])
