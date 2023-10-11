@@ -8,7 +8,7 @@ from chromadb.utils import embedding_functions
 
 from .collection import Collection, CollectionEntity, Query, VectorDB
 from .template import Template, TemplateRunner, MaxRetriesExceeded, MockLLM
-from .models import PromptLog
+from .models import PromptLog, QueryLog
 from .chat import ChatBot
 from .logging import JSONLogFormatter, NotebookFormatter
 from .utils import model_to_json_schema
@@ -128,13 +128,27 @@ class Session:
         if field is not None:
             where['field'] = field
         r =  c(*texts, ids=ids, where=where, limit=limit)
+
+        def serialize(item):
+            if isinstance(item, BaseModel):
+                return item.json()
+            else:
+                return item
+        
+        log = QueryLog(
+            query=texts,
+            where=where,
+            collection=collection,
+            result=json.dumps(r.objects, default=serialize),
+        )
+        self.store(log, collection='queries')
         return r
     
-    def chat(self, message, input=None, bot=None, **kwargs):
-        if bot is None:
-            bot = ChatBot('default')
+    def chat(self, message, input=None, agent=None, **kwargs):
+        if agent is None:
+            agent = ChatBot('default')
         return self._run_prompt(
-            bot.template, {'message': message, 'input': input}, **kwargs
+            agent.template, {'message': message, 'input': input}, **kwargs
         )
 
     def store(self, *items, collection=None):

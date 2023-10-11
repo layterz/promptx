@@ -85,11 +85,10 @@ class Index(BaseModel):
         if self.columns is not None:
             df = df[self.columns]
         
-        table = dbc.Table.from_dataframe(df, style={
+        return dbc.Table.from_dataframe(df, style={
             'box-shadow': 'none',
             'border-top': '1px solid lightgray',
         })
-        return table
 
     def generate_link(self, row):
         link = os.path.join(f'/{self.collection}', row['id'])
@@ -588,10 +587,10 @@ class Logs(AdminIndexPage):
 
 class DetailsPage(AdminEntityPage):
 
-    def __init__(self, app, collection, **kwargs):
+    def __init__(self, app, collection, name=None, **kwargs):
         super().__init__(
             app,
-            name="Details",
+            name=name or collection,
             path_template=f"/{collection}/<id>",
             **kwargs,
         )
@@ -670,6 +669,9 @@ class Admin:
         )
 
         pages = [
+            DetailsPage(self.app, '<collection>', name='Entity Details'),
+            DetailsPage(self.app, 'logs'),
+            DetailsPage(self.app, 'queries'),
             TemplateDetailsPage(self.app),
             CollectionDetailsPage(self.app),
 
@@ -722,27 +724,10 @@ class Admin:
             pills=True,
         )
 
+        # list of input placeholders for the command prompt to cycle through
+        # and help show users how to get the most out of it
         placeholders = [
-            "What is the capital of France?",
-            "Translate 'hello' to Spanish.",
-            "What's the distance between the Earth and the Moon?",
-            "Explain the Pythagorean theorem.",
-            "Tell me a joke about physics.",
-            "List five renewable energy sources.",
-            "Write a short poem about the ocean.",
-            "How does photosynthesis work?",
-            "When was the Declaration of Independence signed?",
-            "Who wrote 'Pride and Prejudice'?",
-            "Calculate the area of a circle with radius 5.",
-            "Recommend a classic sci-fi book.",
-            "Describe the plot of 'Moby-Dick'.",
-            "What's the chemical formula for water?",
-            "Play a trivia game about ancient civilizations.",
-            "How do I make a vegetarian lasagna?",
-            "Show me breathing exercises for relaxation.",
-            "Who was the 16th president of the United States?",
-            "Provide a brief history of the Renaissance.",
-            "Generate a business idea for eco-friendly products."
+            'Summarize the latest AI papers on arXiv',
         ]
 
         placeholder = random.choice(placeholders)
