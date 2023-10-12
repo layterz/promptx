@@ -137,13 +137,14 @@ class Session:
             else:
                 return item
         
-        log = QueryLog(
-            query=texts,
-            where=where,
-            collection=collection,
-            result=json.dumps(r.objects, default=serialize),
-        )
-        self.store(log, collection='queries')
+        if False:
+            log = QueryLog(
+                query=texts,
+                where=where,
+                collection=collection,
+                result=json.dumps(r.objects, default=serialize),
+            )
+            self.store(log, collection='queries')
         return r
     
     def chat(self, message, input=None, agent=None, **kwargs):

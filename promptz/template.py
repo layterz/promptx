@@ -131,6 +131,9 @@ class TemplateRunner:
         return output
     
     def format_field(self, name, field, definitions, required):
+        # TODO: hack, source should be stored on the schema
+        if name in ['id', 'type', 'source']:
+            return None
         description = field.get('description', '')
         options = ''
 
@@ -289,10 +292,10 @@ class TemplateRunner:
             self.logger.log(OUTPUT, response.raw)
             response.content = self.process(t, px, response.raw, **kwargs)
         except jsonschema.exceptions.ValidationError as e:
-            self.logger.warn(f'Output validation failedcls: {e} {response.content}')
+            self.logger.error(f'Output validation failed: {e}')
             return self.forward(t, x, retries=retries-1, **kwargs)
         except json.JSONDecodeError as e:
-            self.logger.warn(f'Failed to decode JSON from {response.content}: {e}')
+            self.logger.warn(f'Failed to decode JSON from {e}')
             return self.forward(t, x, retries=retries-1, **kwargs)
         except Exception as e:
             self.logger.error(f'Failed to forward {x}: {e}')

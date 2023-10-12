@@ -57,7 +57,7 @@ class Index(BaseModel):
                 return self.fetch()
             
             return self.fetch(query=value)
-    
+
     def fetch(self, query=None):
         TEXT_MESSAGE_STYLE = {
             'width': '100%',
@@ -85,6 +85,12 @@ class Index(BaseModel):
         if self.columns is not None:
             df = df[self.columns]
         
+        for col in df.columns:
+            df[col] = df[col].apply(lambda x: x[:100] if type(x) == str else x)
+        
+        for col in df.columns:
+            df[col] = df[col].apply(lambda x: json.dumps(x) if type(x) == dict else x)
+        
         return dbc.Table.from_dataframe(df, style={
             'box-shadow': 'none',
             'border-top': '1px solid lightgray',
@@ -95,8 +101,13 @@ class Index(BaseModel):
         return html.A(row.get('id'), href=link, target='_self')
 
     def load(self, data):
-        details = data.get('details', {})
-        self.collection = details.get('records', {}).get('collection')
+        if data is None:
+            return
+        name = data.get('name')
+        if name is None:
+            name = data.get('details', {}).get('name')
+        self.collection = name
+        print(f'Loaded index {self.collection}', data)
 
     def render(self, **kwargs):
         RESULTS_STYLE = {
@@ -251,9 +262,6 @@ class EntityDetails(BaseModel):
             for k, v in self.data.items()
             if k not in ['id', 'type', 'name', 'description'] and not is_entity(v)
         ]
-
-        print('self.data', self.data)
-        print('data', data)
         
         details = html.Div([
             html.H3(self.data.get('id')),
@@ -683,7 +691,7 @@ class Admin:
             CollectionDetailsPage(self.app),
 
             Inbox(self.app, menu=False),
-            QueryIndex(self.app, menu=True),
+            QueryIndex(self.app, menu=False),
             SubscriptionIndex(self.app, menu=False),
             TemplateIndex(self.app, menu=True),
             CollectionIndex(self.app, menu=True),

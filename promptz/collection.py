@@ -305,11 +305,11 @@ class Collection(pd.DataFrame):
         
         return records
 
+
 class CollectionEntity(Entity):
     type: str = 'collection'
     name: str = None
     description: str = None
-    records: List[Entity] = None
 
     def __init__(self, name, description=None, records=None, **kwargs):
         super().__init__(

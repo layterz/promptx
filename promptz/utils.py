@@ -47,17 +47,18 @@ class Entity(BaseModel):
             field_type = field_type[0]
             return_list = True
             
-        # Handle basic types
-        if isinstance(field_type, type) and issubclass(field_type, (int, float, str, bool)):
-            type_ = PYTYPE_TO_JSONTYPE[field_type]
-            schema = {"type": type_}
         
         # Handle enums
-        elif isinstance(field_type, type) and issubclass(field_type, Enum):
+        if isinstance(field_type, type) and issubclass(field_type, Enum):
             schema = {
                 "type": "string",
                 "enum": [e.name.lower() for e in field_type],
             }
+
+        # Handle basic types
+        elif isinstance(field_type, type) and issubclass(field_type, (int, float, str, bool)):
+            type_ = PYTYPE_TO_JSONTYPE[field_type]
+            schema = {"type": type_}
 
         # Handle Pydantic model types (reference schema)
         elif isinstance(field_type, type) and issubclass(field_type, Entity):
@@ -68,7 +69,6 @@ class Entity(BaseModel):
                     "type": {"type": "string"},
                 },
             }
-        # TODO: handle enums
         
         # Handle default case by getting the cls field and calling schema
         else:
