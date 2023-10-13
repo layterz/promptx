@@ -82,6 +82,7 @@ class Template(Entity):
     examples: List = None
     input: str = None
     output: str = None
+    context: str = None
 
 
 class TemplateRunner:
@@ -267,7 +268,7 @@ class TemplateRunner:
         if len(px): self.logger.log(INPUT, px)
 
         try:
-            response = llm.generate(prompt_input)
+            response = llm.generate(prompt_input, context=t.context)
         except (urllib3.exceptions.ReadTimeoutError,
                 urllib3.exceptions.ConnectTimeoutError,
                 urllib3.exceptions.NewConnectionError) as e:

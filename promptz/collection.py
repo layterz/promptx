@@ -152,7 +152,6 @@ class Collection(pd.DataFrame):
             filtered_scores = {k: v for k, v in scores.items() if v >= threshold}
             sorted_ids = sorted(filtered_scores, key=filtered_scores.get, reverse=True)
             results = self[self['id'].isin(sorted_ids)].set_index('id').loc[sorted_ids].reset_index()
-            results = results.dropna(axis=1, how='all')
             if limit is not None:
                 return results.head(limit)
             else:
