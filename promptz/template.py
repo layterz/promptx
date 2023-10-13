@@ -144,11 +144,6 @@ class TemplateRunner:
                 ref = ref.split('/')[-1]
                 definition = definitions.get(ref, {})
                 type_ = f'{definition.get("title", ref)}[]'
-
-                if 'enum' in definition:
-                    options += f'''
-                    Select any relevant options from: {", ".join(definition["enum"])}
-                    '''
             else:
                 type_ = f'{item_type}[]'
         elif len(field.get('allOf', [])) > 0:
@@ -156,15 +151,18 @@ class TemplateRunner:
             ref = ref.split('/')[-1]
             definition = definitions.get(ref, {})
             type_ = f'{definition.get("title", ref)}'
-            options += f'''Select only one option: {", ".join(definition['enum'])}'''
         elif field.get('$ref'):
             ref = field.get('$ref')
             ref = ref.split('/')[-1]
             definition = definitions.get(ref, {})
             type_ = f'{definition.get("title", ref)}'
-            options += f'''Select only one option: {", ".join(definition['enum'])}'''
         else:
             type_ = field.get('type', 'str')
+        
+        if 'enum' in field:
+            options += f'''
+            Select any relevant options from: {", ".join(field["enum"])}
+            '''
 
         if len(options) > 0:
             description += ' ' + options
