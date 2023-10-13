@@ -124,7 +124,7 @@ class Collection(pd.DataFrame):
         c.db = db
         return c
     
-    def embedding_query(self, *texts, ids=None, where=None, threshold=0.5, limit=None, **kwargs):
+    def embedding_query(self, *texts, ids=None, where=None, threshold=0.1, limit=None, **kwargs):
         texts = [t for t in texts if t is not None]
         
         scores = {}
