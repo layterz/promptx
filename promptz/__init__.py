@@ -59,8 +59,8 @@ def query(*texts, field=None, where=None, collection=None, **kwargs) -> Collecti
         *texts, field=field, where=where, collection=collection, **kwargs)
 
 
-def chat(message, input=None, **kwargs):
-    return DEFAULT_SESSION.chat(message, input, **kwargs)
+def chat(message, context=None, **kwargs):
+    return DEFAULT_SESSION.chat(message, context, **kwargs)
 
 
 def evaluate(*testcases, **kwargs) -> Collection:

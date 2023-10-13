@@ -15,6 +15,7 @@ from .utils import model_to_json_schema
 
 
 class Session:
+    _chat_history: List[PromptLog] = None
 
     def __init__(self, world, name, db, llm, ef=None, default_collection='default', logger=None, collections=None):
         self.world = world
@@ -23,16 +24,17 @@ class Session:
         self.llm = llm
         self.ef = ef or embedding_functions.DefaultEmbeddingFunction()
         self._collection = default_collection
+        self._chat_history = []
         if collections is not None:
             self._collections = collections 
         self.logger = logger or self.world.logger.getChild(self.name)
     
-    def _run_prompt(self, t, input, context=None, dryrun=False, retries=3, to_json=False, **kwargs):
+    def _run_prompt(self, t, input, context=None, history=None, dryrun=False, retries=3, to_json=False, **kwargs):
         e = None
         s = self.world.template_system
         rendered = s.render(t, {'input': s.parse(input)})
         try:
-            r = s(t, input, context=context, dryrun=dryrun, retries=retries, **kwargs)
+            r = s(t, input, context=context, history=history, dryrun=dryrun, retries=retries, **kwargs)
             log = PromptLog(template=t.id, raw_input=rendered, raw_output=r.raw)
             self.store(log, collection='logs')
             if isinstance(r.content, list):
@@ -138,6 +140,7 @@ class Session:
                 return item
         
         if False:
+            # TODO: fix this
             log = QueryLog(
                 query=texts,
                 where=where,
@@ -159,9 +162,16 @@ class Session:
             except:
                 context = None
 
-        return self._run_prompt(
-            agent.template, {'message': message }, context=context
+        history = self._chat_history[-5:]
+        output = self._run_prompt(
+            agent.template, {'message': message }, context=context, history=history,
         )
+        self._chat_history.append(PromptLog(
+            template=agent.template.id,
+            input=message,
+            output=output,
+        ))
+        return output
 
     def store(self, *items, collection=None):
         def flatten(lst):
