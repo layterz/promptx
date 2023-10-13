@@ -27,12 +27,12 @@ class Session:
             self._collections = collections 
         self.logger = logger or self.world.logger.getChild(self.name)
     
-    def _run_prompt(self, t, input, dryrun=False, retries=3, to_json=False, **kwargs):
+    def _run_prompt(self, t, input, context=None, dryrun=False, retries=3, to_json=False, **kwargs):
         e = None
         s = self.world.template_system
         rendered = s.render(t, {'input': s.parse(input)})
         try:
-            r = s(t, input, dryrun=dryrun, retries=retries, **kwargs)
+            r = s(t, input, context=context, dryrun=dryrun, retries=retries, **kwargs)
             log = PromptLog(template=t.id, raw_input=rendered, raw_output=r.raw)
             self.store(log, collection='logs')
             if isinstance(r.content, list):
@@ -147,11 +147,20 @@ class Session:
             self.store(log, collection='queries')
         return r
     
-    def chat(self, message, input=None, agent=None, **kwargs):
+    def chat(self, message, context=None, agent=None, **kwargs):
         if agent is None:
             agent = ChatBot('default')
+        
+        if isinstance(context, Collection):
+            try:
+                context = '\n'.join([
+                    quote.text for quote in context(message, limit=3).objects
+                ])
+            except:
+                context = None
+
         return self._run_prompt(
-            agent.template, {'message': message, 'input': input}, **kwargs
+            agent.template, {'message': message }, context=context
         )
 
     def store(self, *items, collection=None):

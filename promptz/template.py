@@ -248,7 +248,7 @@ class TemplateRunner:
     def __call__(self, t, x, **kwargs):
         return self.forward(t, x, **kwargs)
     
-    def forward(self, t, x, retries=3, dryrun=False, **kwargs):
+    def forward(self, t, x, context=None, retries=3, dryrun=False, **kwargs):
         if retries and retries <= 0:
             e = MaxRetriesExceeded(f'{t.name} failed to forward {x}')
             self.logger.error(e)
@@ -268,7 +268,7 @@ class TemplateRunner:
         if len(px): self.logger.log(INPUT, px)
 
         try:
-            response = llm.generate(prompt_input, context=t.context)
+            response = llm.generate(prompt_input, context=context or t.context)
         except (urllib3.exceptions.ReadTimeoutError,
                 urllib3.exceptions.ConnectTimeoutError,
                 urllib3.exceptions.NewConnectionError) as e:
