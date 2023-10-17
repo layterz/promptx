@@ -30,6 +30,13 @@ class Subscription(Entity):
 
 
 class VectorDB:
+    name: str
+
+    @abstractmethod
+    def get(self, ids=None, where=None, **kwargs):
+        '''
+        Get embeddings by ids or where clause.
+        '''
 
     @abstractmethod
     def query(self, texts, where=None, ids=None, **kwargs):
@@ -53,6 +60,12 @@ class VectorDB:
     def collections():
         '''
         Return a list of collections.
+        '''
+    
+    @abstractmethod
+    def upsert(self, ids, documents, metadatas, **kwargs):
+        '''
+        Upsert embeddings.
         '''
 
 
@@ -81,6 +94,12 @@ class ChromaVectorDB(VectorDB):
     
     def collections(self):
         return self.client.list_collections()
+    
+    def upsert(self, ids, documents, metadatas, **kwargs):
+        return self.client.upsert(ids, documents, metadatas, **kwargs)
+    
+    def get(self, ids=None, where=None, **kwargs):
+        return self.client.get(ids=ids, where=where, **kwargs)
 
 
 class EntitySeries(pd.Series):

@@ -34,8 +34,6 @@ class Session:
         s = self.world.template_system
         rendered = s.render(t, {'input': s.parse(input)})
         try:
-            if t.data is not None:
-                print('t.data', t.data)
             r = s(t, input, context=context, history=history, dryrun=dryrun, retries=retries, **kwargs)
             log = PromptLog(template=t.id, raw_input=rendered, raw_output=r.raw)
             self.store(log, collection='logs')
