@@ -184,6 +184,42 @@ def _create_field(field_info, definitions, required=False):
 
 
 def model_to_json_schema(model):
+    """
+    Convert a Pydantic BaseModel or Python data type to a JSON schema.
+
+    Args:
+        model: A Pydantic BaseModel, a Python data type, a list of BaseModel instances, or a dictionary.
+
+    Returns:
+        dict: A JSON schema representation of the input model.
+
+    This function takes various types of input and converts them into a JSON schema representation:
+
+    - If `model` is a Pydantic BaseModel, it extracts its schema using `model.schema()`.
+
+    - If `model` is a Python data type (e.g., str, int, float), it maps it to the corresponding JSON type.
+
+    - If `model` is a list of Pydantic BaseModels, it generates a JSON schema for an array of the BaseModel's schema.
+
+    - If `model` is a dictionary, it is returned as is.
+
+    Example:
+    >>> from pydantic import BaseModel
+    >>> class Person(BaseModel):
+    ...     name: str
+    ...     age: int
+    ...
+    >>> schema = model_to_json_schema(Person)
+    >>> print(schema)
+    {
+        'type': 'object',
+        'properties': {
+            'name': {'type': 'string'},
+            'age': {'type': 'integer'}
+        },
+        'required': ['name']
+    }
+    """
     output = None
     if isinstance(model, list):
         inner = model[0]
@@ -212,7 +248,40 @@ def model_to_json_schema(model):
     return output
 
 
+
 def create_model_from_schema(schema):
+    """
+    Create a Pydantic BaseModel from a JSON schema.
+
+    Args:
+        schema (dict): The JSON schema to create the Pydantic model from.
+
+    Returns:
+        pydantic.BaseModel: A Pydantic data model class generated from the schema.
+
+    This function takes a JSON schema and generates a Pydantic BaseModel class
+    with fields corresponding to the properties defined in the schema. It
+    also handles definitions and required fields.
+
+    If the schema doesn't specify a 'type' field, it defaults to 'Entity'.
+
+    Example:
+    >>> schema = {
+    ...     'title': 'Person',
+    ...     'type': 'object',
+    ...     'properties': {
+    ...         'name': {'type': 'string'},
+    ...         'age': {'type': 'integer'}
+    ...     },
+    ...     'required': ['name']
+    ... }
+    >>> Person = create_model_from_schema(schema)
+    >>> person = Person(name='Alice', age=30)
+    >>> person.name
+    'Alice'
+    >>> person.age
+    30
+    """
     properties = _get_properties(schema)
     definitions = schema.get('definitions', {})
     required = schema.get('required', [])
