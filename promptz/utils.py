@@ -248,7 +248,6 @@ def model_to_json_schema(model):
     return output
 
 
-
 def create_model_from_schema(schema):
     """
     Create a Pydantic BaseModel from a JSON schema.
@@ -295,6 +294,67 @@ def create_model_from_schema(schema):
 
 
 def create_entity_from_schema(schema, data):
+    """
+    Create a Pydantic data entity from a JSON schema and input data.
+
+    Args:
+        schema (dict): The JSON schema that defines the structure of the entity.
+        data (dict or list): The input data to populate the entity. For a single entity, provide a dictionary.
+                             For a list of entities, provide a list of dictionaries.
+
+    Returns:
+        pydantic.BaseModel or List[pydantic.BaseModel]: A Pydantic data entity or a list of entities generated
+                                                      from the schema and input data.
+
+    This function takes a JSON schema and input data and creates a Pydantic data entity or a list of entities
+    based on the schema and data provided. It handles properties, definitions, and optional fields defined
+    in the schema.
+
+    If the schema defines an entity as a list, the input data should be a list of dictionaries. Each dictionary
+    represents an entity. If 'id' is not provided for each entity, it will be generated using a random UUID.
+
+    If the schema defines an entity as an object (not a list), the input data should be a dictionary representing
+    a single entity. If 'id' is not provided, it will be generated using a random UUID.
+
+    Example:
+    >>> schema = {
+    ...     'title': 'Person',
+    ...     'type': 'object',
+    ...     'properties': {
+    ...         'name': {'type': 'string'},
+    ...         'age': {'type': 'integer'}
+    ...     },
+    ...     'required': ['name']
+    ... }
+    >>> data = {'name': 'Alice', 'age': 30}
+    >>> person = create_entity_from_schema(schema, data)
+    >>> person.name
+    'Alice'
+    >>> person.age
+    30
+
+    >>> schema_list = {
+    ...     'title': 'People',
+    ...     'type': 'array',
+    ...     'items': {
+    ...         'type': 'object',
+    ...         'properties': {
+    ...             'name': {'type': 'string'},
+    ...             'age': {'type': 'integer'}
+    ...         },
+    ...         'required': ['name']
+    ...     }
+    ... }
+    >>> data_list = [{'name': 'Alice', 'age': 30}, {'name': 'Bob', 'age': 25}]
+    >>> people = create_entity_from_schema(schema_list, data_list)
+    >>> len(people)
+    2
+    >>> people[0].name
+    'Alice'
+    >>> people[1].age
+    25
+    """
+
     if _is_list(schema):
         data = [
             {**o, 'id': str(uuid.uuid4()) if o.get('id') is None else o['id']}
