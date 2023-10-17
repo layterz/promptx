@@ -8,7 +8,7 @@ from pydantic import BaseModel
 import openai
 from jinja2 import Template as JinjaTemplate
 
-from .collection import Collection
+from .collection import Collection, Query
 from .logging import *
 from .models import LLM, MockLLM
 from .utils import Entity, model_to_json_schema, create_entity_from_schema
@@ -83,6 +83,7 @@ class Template(Entity):
     input: str = None
     output: str = None
     context: str = None
+    data: Query = None
 
 
 class TemplateRunner:

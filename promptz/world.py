@@ -34,6 +34,8 @@ class Session:
         s = self.world.template_system
         rendered = s.render(t, {'input': s.parse(input)})
         try:
+            if t.data is not None:
+                print('t.data', t.data)
             r = s(t, input, context=context, history=history, dryrun=dryrun, retries=retries, **kwargs)
             log = PromptLog(template=t.id, raw_input=rendered, raw_output=r.raw)
             self.store(log, collection='logs')
@@ -154,17 +156,30 @@ class Session:
         if agent is None:
             agent = ChatBot('default')
         
+        _context = []
+        
         if isinstance(context, Collection):
             try:
-                context = '\n'.join([
-                    quote.text for quote in context(message, limit=3).objects
-                ])
-            except:
-                context = None
+                for item in context(message, limit=3).objects:
+                    try:
+                        _context.append(item.text)
+                    except AttributeError:
+                        _context.append(item.value)
+            except Exception as e:
+                self.logger.error(f'Error getting context: {e}')
+
+        if len(_context):
+            _context = [
+                '''
+                The following is some additional context to the question being asked.
+                You can use other information from your training data as well, but the answer should be focused on the information provided.
+                ''',
+                *_context,
+            ]
 
         history = self._chat_history[-5:]
         output = self._run_prompt(
-            agent.template, {'message': message }, context=context, history=history,
+            agent.template, {'message': message }, context='\n'.join(_context), history=history,
         )
         self._chat_history.append(PromptLog(
             template=agent.template.id,
