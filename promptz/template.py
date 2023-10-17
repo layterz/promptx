@@ -273,17 +273,17 @@ class TemplateRunner:
         except (urllib3.exceptions.ReadTimeoutError,
                 urllib3.exceptions.ConnectTimeoutError,
                 urllib3.exceptions.NewConnectionError) as e:
-            self.logger.warn(f'LLM generation failed: {e}')
+            self.logger.warning(f'LLM generation failed: {e}')
             time.sleep(2)
             return self.forward(t, x, retries=retries, **kwargs)
         except (openai.error.APIError,
                 openai.error.Timeout,
                 openai.error.ServiceUnavailableError) as e:
-            self.logger.warn(f'LLM generation failed: {e}')
+            self.logger.warning(f'LLM generation failed: {e}')
             time.sleep(2)
             return self.forward(t, x, retries=retries, **kwargs)
         except openai.error.RateLimitError as e:
-            self.logger.warn(f'Hit rate limit for {self}: {e}')
+            self.logger.warning(f'Hit rate limit for {self}: {e}')
             time.sleep(10)
             return self.forward(t, x, retries=retries, **kwargs)
 
@@ -295,7 +295,7 @@ class TemplateRunner:
             self.logger.error(f'Output validation failed: {e}')
             return self.forward(t, x, retries=retries-1, **kwargs)
         except json.JSONDecodeError as e:
-            self.logger.warn(f'Failed to decode JSON from {e}')
+            self.logger.warning(f'Failed to decode JSON from {e}')
             return self.forward(t, x, retries=retries-1, **kwargs)
         except Exception as e:
             self.logger.error(f'Failed to forward {x}: {e}')

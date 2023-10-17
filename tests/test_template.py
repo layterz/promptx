@@ -1,4 +1,6 @@
 import pytest
+import openai
+import json
 
 from promptz.template import *
 from promptz.models import LLM, Response
@@ -38,12 +40,27 @@ def test_json_output(mocker):
     assert o.content.name == 'test'
     assert o.content.age == 20
 
+# TODO: this should probably have some kind of separate retry budget
 def test_exception_handling(mocker):
     llm = mocker.Mock(spec=LLM)
-    llm.generate.side_effect = json.JSONDecodeError(msg='Invalid JSON', doc='', pos=0)
+    llm.generate.side_effect = [openai.error.Timeout, Response(raw='Test response')]
     
     t = Template()
     runner = TemplateRunner(llm=llm)
+    o = runner(t, 'test')
+    assert o.content == 'Test response'
+
+def test_parse_exception_handling(mocker):
+    llm = mocker.Mock(spec=LLM)
+    t = Template()
+    mocker.patch.object(TemplateRunner, 'process', side_effect=[*[json.JSONDecodeError('test', 'test', 0)] * 4, 'test'])
+    runner = TemplateRunner(llm=llm)
+
+    with pytest.raises(MaxRetriesExceeded):
+        runner(t, None)
     
-    with pytest.raises(json.JSONDecodeError):
-        runner(t, 'test')
+    mocker.patch.object(TemplateRunner, 'process', side_effect=[*[json.JSONDecodeError('test', 'test', 0)] * 3, 'test'])
+    runner = TemplateRunner(llm=llm)
+    o = runner(t, None)
+    
+    assert o.content == 'test'
