@@ -175,6 +175,7 @@ class Session:
                 *_context,
             ]
 
+        # TODO history should be stored in a collection
         history = self._chat_history[-5:]
         output = self._run_prompt(
             agent.template, {'message': message }, context='\n'.join(_context), history=history,

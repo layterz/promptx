@@ -91,7 +91,7 @@ class TemplateRunner:
     llm: LLM = MockLLM()
 
     def __init__(self, llm=None, logger=None, debug=False, silent=False, name=None):
-        self.logger = logger
+        self.logger = logger or logging.getLogger(name or self.__class__.__name__)
         self.llm = llm or self.llm
     
     def parse(self, x):
