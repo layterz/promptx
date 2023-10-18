@@ -11,7 +11,7 @@ from jinja2 import Template as JinjaTemplate
 from .collection import Collection, Query
 from .logging import *
 from .models import LLM, MockLLM
-from .utils import Entity, model_to_json_schema, create_entity_from_schema
+from .utils import Entity, model_to_json_schema, create_entity_from_schema, serializer
 
 
 class MaxRetriesExceeded(Exception):
@@ -143,7 +143,6 @@ class TemplateRunner:
             'min_items', 'max_items',
             'min_length', 'max_length',
         ]
-        print('field items', name, field)
         metadata = {
             k: v for k, v in field.items()
             if k in metadata_keys
@@ -235,8 +234,8 @@ class TemplateRunner:
             return ''
         examples = [
             {
-                'input': json.dumps(self.parse(i)),
-                'output': json.dumps(self.parse(o)),
+                'input': json.dumps(self.parse(i), default=serializer),
+                'output': json.dumps(self.parse(o), default=serializer),
             }
             for i, o in random.sample(t.examples, t.num_examples)
         ]

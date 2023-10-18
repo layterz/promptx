@@ -24,7 +24,6 @@ class User(Entity):
     age: int = Field(..., ge=18, lt=100)
     role: Role = Role.admin
     traits: List[Trait] = Field(..., description='What kind of personality describes the user?', min_items=1, max_items=3)
-    friends: list['User'] = None
     banned: bool = Field(None, generate=False)
     vigor: float = Field(0, max=1, min=0)
 
@@ -246,11 +245,13 @@ def test_format_rendering_with_field_min_max_length():
     assert 'min_length: 3' in p
     assert 'max_length: 20' in p
 
-def test_format_rendering_with_nested_entity():
-    t = Template(instructions='Some example instructions', output=Account.schema_json())
+def test_example_rendering(mocker):
+    user = User(name="John Wayne", age=64, traits=[Trait.mean])
+    t = Template(instructions='Some example instructions', output=User.schema_json(), examples=[(None, user)])
     runner = TemplateRunner()
     p = runner.render(t, {'input': 'Some test input'})
-    assert 'hello' in p
 
-def test_example_rendering(mocker):
-    assert True == False
+    assert 'EXAMPLES' in p
+    assert 'John Wayne' in p
+    assert '64' in p
+    assert 'mean' in p

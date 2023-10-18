@@ -88,7 +88,6 @@ class Entity(BaseModel):
             }
         
         if info is not None:
-            print('info', info)
             if info.description:
                 schema['description'] = info.description
             if info.ge:
@@ -418,3 +417,11 @@ def create_entity_from_schema(schema, data):
         return [m(**{**defaults, **o}) for o in data]
     else:
         return m(**{**defaults, **data})
+
+
+def serializer(obj):
+    if isinstance(obj, Enum):
+        return obj.value
+    elif isinstance(obj, BaseModel):
+        return obj.schema()
+    raise TypeError(f"Type {type(obj)} not serializable")
