@@ -20,12 +20,13 @@ class Trait(Enum):
     smart = 'smart'
 
 class User(Entity):
-    name: str
-    age: int
+    name: str = Field(..., min_length=3, max_length=20)
+    age: int = Field(..., ge=18, lt=100)
     role: Role = Role.admin
-    traits: List[Trait] = None
+    traits: List[Trait] = Field(..., description='What kind of personality describes the user?', min_items=1, max_items=3)
     friends: list['User'] = None
-    status: str = Field(None, generate=False)
+    banned: bool = Field(None, generate=False)
+    vigor: float = Field(0, max=1, min=0)
 
 class Account(Entity):
     user: User
@@ -47,7 +48,7 @@ def test_basic_response(mocker):
 def test_json_valid_output(mocker):
     llm = mocker.Mock(spec=LLM)
     response = Response(
-        raw='{ "name": "test", "age": 20 }',
+        raw='{ "name": "test", "age": 20, "traits": ["nice"] }',
     )
     llm.generate.return_value = response
     
@@ -63,7 +64,7 @@ def test_json_valid_output__extra_field(mocker):
     llm = mocker.Mock(spec=LLM)
     t = Template(output=User.schema_json())
     response = Response(
-        raw='{ "name": "test", "age": 20, "location": "london" }',
+        raw='{ "name": "test", "age": 20, "location": "london", "traits": ["nice"] }',
     )
     llm.generate.return_value = response
     
@@ -92,7 +93,7 @@ def test_json_invalid_output__formatting(mocker):
     llm = mocker.Mock(spec=LLM)
     t = Template(output=User.schema_json())
     response = Response(
-        raw='"name": "test", "age": 20 }',
+        raw='"name": "test", "age": 20, "traits": ["nice"] }',
     )
     llm.generate.return_value = response
     
@@ -148,7 +149,7 @@ def test_invalid_input_raises_error():
 
 def test_output_parsing(mocker):
     llm = mocker.Mock(spec=LLM)
-    llm.generate.return_value = Response(raw='{ "name": "test", "age": 20 }')
+    llm.generate.return_value = Response(raw='{ "name": "test", "age": 20, "traits": ["nice"] }')
     t = Template(output=User.schema_json())
     runner = TemplateRunner(llm=llm)
 
@@ -173,7 +174,7 @@ def test_format_rendering_with_output():
     t = Template(instructions='Some example instructions', output=User.schema_json())
     runner = TemplateRunner()
     p = runner.render(t, {'input': 'Some test input'})
-    assert 'name (type: string, required: True, default: None)' in p
+    assert 'name (type: string, required: True, default: None' in p
 
 def test_format_rendering_object():
     t = Template(instructions='Some example instructions', output=User.schema_json())
@@ -191,32 +192,65 @@ def test_format_rendering_list():
     p = runner.render(t, {'input': 'Some test input'})
     assert 'Return a list of valid JSON objects with the fields described below' in p
 
-def test_format_rendering():
+def test_format_rendering_with_basic_types():
     t = Template(instructions='Some example instructions', output=User.schema_json())
     runner = TemplateRunner()
     p = runner.render(t, {'input': 'Some test input'})
-    assert 'name (type: string, required: True, default: None)' in p
-    assert 'age (type: integer, required: True, default: None)' in p
+    assert 'name (type: string, required: True, default: None' in p
+    assert 'age (type: integer, required: True, default: None' in p
 
 def test_format_rendering_with_enum():
     t = Template(instructions='Some example instructions', output=User.schema_json())
     runner = TemplateRunner()
     p = runner.render(t, {'input': 'Some test input'})
-    assert 'role (type: string, required: False, default: admin)' in p
+    assert 'role (type: string, required: False, default: admin' in p
     assert 'Select one option from: admin, user' in p
 
 def test_format_rendering_with_enum_list():
     t = Template(instructions='Some example instructions', output=User.schema_json())
     runner = TemplateRunner()
     p = runner.render(t, {'input': 'Some test input'})
-    assert 'traits (type: string[], required: False, default: None)' in p
+    assert 'traits (type: string[], required: True, default: None' in p
     assert 'Select any relevant options from: nice, mean, funny, smart' in p
 
 def test_format_rendering_with_excluded_fields():
     t = Template(instructions='Some example instructions', output=User.schema_json())
     runner = TemplateRunner()
     p = runner.render(t, {'input': 'Some test input'})
-    assert 'status (type: string, required: False, default: None)' not in p
+    assert 'banned (type: bool, required: False, default: False' not in p
+
+def test_format_rendering_with_field_description():
+    t = Template(instructions='Some example instructions', output=User.schema_json())
+    runner = TemplateRunner()
+    p = runner.render(t, {'input': 'Some test input'})
+    assert 'What kind of personality describes the user?' in p
+
+def test_format_rendering_with_field_min_max():
+    t = Template(instructions='Some example instructions', output=User.schema_json())
+    runner = TemplateRunner()
+    p = runner.render(t, {'input': 'Some test input'})
+    assert 'ge: 18' in p
+    assert 'lt: 100' in p
+
+def test_format_rendering_with_field_min_max_items():
+    t = Template(instructions='Some example instructions', output=User.schema_json())
+    runner = TemplateRunner()
+    p = runner.render(t, {'input': 'Some test input'})
+    assert 'min_items: 1' in p
+    assert 'max_items: 3' in p
+
+def test_format_rendering_with_field_min_max_length():
+    t = Template(instructions='Some example instructions', output=User.schema_json())
+    runner = TemplateRunner()
+    p = runner.render(t, {'input': 'Some test input'})
+    assert 'min_length: 3' in p
+    assert 'max_length: 20' in p
+
+def test_format_rendering_with_nested_entity():
+    t = Template(instructions='Some example instructions', output=Account.schema_json())
+    runner = TemplateRunner()
+    p = runner.render(t, {'input': 'Some test input'})
+    assert 'hello' in p
 
 def test_example_rendering(mocker):
     assert True == False

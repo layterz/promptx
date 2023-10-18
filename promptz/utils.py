@@ -40,20 +40,16 @@ class Entity(BaseModel):
         super().__init__(**{'id': id or str(uuid.uuid4()), **data})
     
     @classmethod
-    def generate_schema_for_field(cls, name, field_type: Any, default=None):
+    def generate_schema_for_field(cls, name, field_type: Any, default=None, info=None):
         return_list = False
         definitions = {}
 
-        print('generate_schema_for_field', name, field_type, default)
-        
         if _is_list_type(field_type):
-            print('list', field_type)
             field_type = get_args(field_type)[0]
             return_list = True
         
         # Handle enums
         if isinstance(field_type, type) and issubclass(field_type, Enum):
-            print('enum', field_type, return_list)
             schema = {
                 "type": "string",
                 "enum": [e.name.lower() for e in field_type],
@@ -89,7 +85,28 @@ class Entity(BaseModel):
             schema = {
                 "type": "array",
                 "items": schema
-            } 
+            }
+        
+        if info is not None:
+            print('info', info)
+            if info.description:
+                schema['description'] = info.description
+            if info.ge:
+                schema['ge'] = info.ge
+            if info.gt:
+                schema['gt'] = info.gt
+            if info.le:
+                schema['le'] = info.le
+            if info.lt:
+                schema['lt'] = info.lt
+            if info.min_length:
+                schema['min_length'] = info.min_length
+            if info.max_length:
+                schema['max_length'] = info.max_length
+            if info.min_items:
+                schema['min_items'] = info.min_items
+            if info.max_items:
+                schema['max_items'] = info.max_items
 
         if default:
             schema['default'] = default
@@ -101,20 +118,20 @@ class Entity(BaseModel):
         required = []
         definitions = {}
 
-        for field_name, field_info in cls.__fields__.items():
+        for field_name, field in cls.__fields__.items():
             try:
-                print('schema field', field_name, field_info.type_, cls.__annotations__)
-                type_ = cls.__annotations__.get(field_name, field_info.type_)
-                extra = field_info.field_info.extra
+                type_ = cls.__annotations__.get(field_name, field.type_)
+                extra = field.field_info.extra
                 if extra.get('generate', True) is False:
                     continue
-                field, defs, reqs = cls.generate_schema_for_field(field_name, type_, field_info.default)
-                properties[field_name] = field
+                field_schema, defs, reqs = cls.generate_schema_for_field(field_name, type_, field.default, field.field_info)
+                properties[field_name] = field_schema
                 definitions = {**definitions, **defs}
             except Exception as e:
                 print('schema field failed', field_name, e)
+                continue
             
-            if field_info.required:
+            if field.required:
                 required.append(field_name)
             required += reqs
 

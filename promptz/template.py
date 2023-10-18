@@ -64,7 +64,7 @@ class Template(Entity):
     Return the output as a valid JSON object with the fields described below. 
     {% endif %}
     {% for field in fields %}
-    - {{field.name}} (type: {{field.type_}}, required: {{field.required}}, default: {{field.default}}){% if field.description != None %}: {{field.description}}{% endif %}
+    - {{field.name}} (type: {{field.type_}}, required: {{field.required}}, default: {{field.default}}, {% for k, v in field.metadata.items()%}{{k}}: {{v}}, {% endfor %}): {{field.description}}
     {% endfor %}
 
     Make sure to use double quotes and avoid trailing commas!
@@ -138,10 +138,19 @@ class TemplateRunner:
             return None
         description = field.get('description', '')
         options = ''
+        metadata_keys = [
+            'le', 'lt', 'ge', 'gt',
+            'min_items', 'max_items',
+            'min_length', 'max_length',
+        ]
+        print('field items', name, field)
+        metadata = {
+            k: v for k, v in field.items()
+            if k in metadata_keys
+        }
 
         list_field = False
         if field.get('type') == 'array':
-            print('array', name, field)
             list_field = True
             item_type = field.get('items', {}).get('type', None)
             if item_type is None:
@@ -153,19 +162,16 @@ class TemplateRunner:
                 type_ = f'{item_type}[]'
             field = field.get('items', {})
         elif len(field.get('allOf', [])) > 0:
-            print('allOf', name, field)
             ref = field.get('allOf')[0].get('$ref')
             ref = ref.split('/')[-1]
             definition = definitions.get(ref, {})
             type_ = f'{definition.get("title", ref)}'
         elif field.get('$ref'):
-            print('ref', name, field)
             ref = field.get('$ref')
             ref = ref.split('/')[-1]
             definition = definitions.get(ref, {})
             type_ = f'{definition.get("title", ref)}'
         else:
-            print('default', name, field)
             type_ = field.get('type', 'str')
         
         if 'enum' in field:
@@ -188,6 +194,7 @@ class TemplateRunner:
             'default': field.get('default', None),
             'description': description.strip(),
             'required': name in required,
+            'metadata': metadata,
         }
     
     def render_format(self, t, x, **kwargs):
