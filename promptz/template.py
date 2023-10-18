@@ -64,7 +64,7 @@ class Template(Entity):
     Return the output as a valid JSON object with the fields described below. 
     {% endif %}
     {% for field in fields %}
-    - {{field.name}} (type: {{field.type_}}, required: {{field.required}}){% if field.description != None %}: {{field.description}}{% endif %}
+    - {{field.name}} (type: {{field.type_}}, required: {{field.required}}, default: {{field.default}}){% if field.description != None %}: {{field.description}}{% endif %}
     {% endfor %}
 
     Make sure to use double quotes and avoid trailing commas!
@@ -139,7 +139,10 @@ class TemplateRunner:
         description = field.get('description', '')
         options = ''
 
+        list_field = False
         if field.get('type') == 'array':
+            print('array', name, field)
+            list_field = True
             item_type = field.get('items', {}).get('type', None)
             if item_type is None:
                 ref = field.get('items', {}).get('$ref', None)
@@ -148,23 +151,32 @@ class TemplateRunner:
                 type_ = f'{definition.get("title", ref)}[]'
             else:
                 type_ = f'{item_type}[]'
+            field = field.get('items', {})
         elif len(field.get('allOf', [])) > 0:
+            print('allOf', name, field)
             ref = field.get('allOf')[0].get('$ref')
             ref = ref.split('/')[-1]
             definition = definitions.get(ref, {})
             type_ = f'{definition.get("title", ref)}'
         elif field.get('$ref'):
+            print('ref', name, field)
             ref = field.get('$ref')
             ref = ref.split('/')[-1]
             definition = definitions.get(ref, {})
             type_ = f'{definition.get("title", ref)}'
         else:
+            print('default', name, field)
             type_ = field.get('type', 'str')
         
         if 'enum' in field:
-            options += f'''
-            Select any relevant options from: {", ".join(field["enum"])}
-            '''
+            if list_field:
+                options += f'''
+                Select any relevant options from: {", ".join(field["enum"])}
+                '''
+            else:
+                options += f'''
+                Select one option from: {", ".join(field["enum"])}
+                '''
 
         if len(options) > 0:
             description += ' ' + options

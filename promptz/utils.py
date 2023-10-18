@@ -1,6 +1,7 @@
 import uuid
 from enum import Enum
-from typing import Any, Dict, List, Type, Union, get_origin, get_args
+from typing import *
+from typing import _GenericAlias
 import jsonschema
 from pydantic import BaseModel, create_model
 from IPython.display import display, HTML
@@ -42,14 +43,17 @@ class Entity(BaseModel):
     def generate_schema_for_field(cls, name, field_type: Any, default=None):
         return_list = False
         definitions = {}
+
+        print('generate_schema_for_field', name, field_type, default)
         
-        if isinstance(field_type, list):
-            field_type = field_type[0]
+        if _is_list_type(field_type):
+            print('list', field_type)
+            field_type = get_args(field_type)[0]
             return_list = True
-            
         
         # Handle enums
         if isinstance(field_type, type) and issubclass(field_type, Enum):
+            print('enum', field_type, return_list)
             schema = {
                 "type": "string",
                 "enum": [e.name.lower() for e in field_type],
@@ -99,7 +103,9 @@ class Entity(BaseModel):
 
         for field_name, field_info in cls.__fields__.items():
             try:
-                field, defs, reqs = cls.generate_schema_for_field(field_name, field_info.type_, field_info.default)
+                print('schema field', field_name, field_info.type_, cls.__annotations__)
+                type_ = cls.__annotations__.get(field_name, field_info.type_)
+                field, defs, reqs = cls.generate_schema_for_field(field_name, type_, field_info.default)
                 properties[field_name] = field
                 definitions = {**definitions, **defs}
             except Exception as e:
@@ -141,6 +147,11 @@ class Entity(BaseModel):
 
 def _is_list(schema):
     return schema.get('type') == 'array'
+
+
+def _is_list_type(type_hint):
+    origin = get_origin(type_hint)
+    return origin is list or (origin is List and len(get_args(type_hint)) == 1)
 
 
 def _get_title(schema):
