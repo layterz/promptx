@@ -105,6 +105,9 @@ class Entity(BaseModel):
             try:
                 print('schema field', field_name, field_info.type_, cls.__annotations__)
                 type_ = cls.__annotations__.get(field_name, field_info.type_)
+                extra = field_info.field_info.extra
+                if extra.get('generate', True) is False:
+                    continue
                 field, defs, reqs = cls.generate_schema_for_field(field_name, type_, field_info.default)
                 properties[field_name] = field
                 definitions = {**definitions, **defs}
