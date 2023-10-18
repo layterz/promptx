@@ -106,6 +106,11 @@ class Entity(BaseModel):
                 schema['min_items'] = info.min_items
             if info.max_items:
                 schema['max_items'] = info.max_items
+            
+            extra = info.extra
+            if extra is not None:
+                if 'generate' in extra:
+                    schema['generate'] = extra['generate']
 
         if default:
             schema['default'] = default
@@ -120,9 +125,6 @@ class Entity(BaseModel):
         for field_name, field in cls.__fields__.items():
             try:
                 type_ = cls.__annotations__.get(field_name, field.type_)
-                extra = field.field_info.extra
-                if extra.get('generate', True) is False:
-                    continue
                 field_schema, defs, reqs = cls.generate_schema_for_field(field_name, type_, field.default, field.field_info)
                 properties[field_name] = field_schema
                 definitions = {**definitions, **defs}

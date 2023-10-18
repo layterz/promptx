@@ -255,3 +255,12 @@ def test_example_rendering(mocker):
     assert 'John Wayne' in p
     assert '64' in p
     assert 'mean' in p
+    assert 'banned' not in p
+
+def test_example_rendering_multiple(mocker):
+    user = User(name="John Wayne", age=64, traits=[Trait.mean])
+    t = Template(instructions='Some example instructions', output=User.schema_json(), examples=[(None, user)] * 5, num_examples=3)
+    runner = TemplateRunner()
+    p = runner.render(t, {'input': 'Some test input'})
+
+    assert p.count('John Wayne') == 3

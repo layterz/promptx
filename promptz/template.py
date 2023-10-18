@@ -95,13 +95,18 @@ class TemplateRunner:
         self.llm = llm or self.llm
     
     def parse(self, x):
+        if x is None:
+            return {}
+        skip_list = [k for k, v in x.__fields__.items() if v.field_info.extra.get('generate') == False]
+        skip_list += ['id', 'type']
+        print('CCC', x, skip_list)
         if isinstance(x, BaseModel):
-            return {k: v for k, v in x.dict().items() if k not in ['id', 'type']}
+            return {k: v for k, v in x.dict().items() if k not in skip_list}
         elif isinstance(x, Entity):
-            return {k: v for k, v in x.object.dict().items() if k not in ['id', 'type']}
+            return {k: v for k, v in x.object.dict().items() if k not in skip_list}
         elif isinstance(x, Collection):
             return [
-                {k: v for k, v in y.dict().items() if k not in ['id', 'type']}
+                {k: v for k, v in y.dict().items() if k not in skip_list}
                 for y in x.objects
             ]
         elif isinstance(x, str):
@@ -110,8 +115,6 @@ class TemplateRunner:
             return {k: self.parse(v) for k, v in x.items()}
         elif isinstance(x, list):
             return [self.parse(y) for y in x]
-        elif x is None:
-            return {}
         else:
             return x
     
@@ -135,6 +138,8 @@ class TemplateRunner:
     def format_field(self, name, field, definitions, required):
         # TODO: hack, source should be stored on the schema
         if name in ['id', 'type', 'source']:
+            return None
+        if field.get('generate', True) == False:
             return None
         description = field.get('description', '')
         options = ''
@@ -232,6 +237,7 @@ class TemplateRunner:
     def render_examples(self, t, **kwargs):
         if t.examples is None or len(t.examples) == 0:
             return ''
+        
         examples = [
             {
                 'input': json.dumps(self.parse(i), default=serializer),
