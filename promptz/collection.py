@@ -45,6 +45,12 @@ class VectorDB:
         '''
 
     @abstractmethod
+    def get_collection(self, name, **kwargs):
+        '''
+        Return a collection if it exists.
+        '''
+
+    @abstractmethod
     def get_or_create_collection(self, name, **kwargs):
         '''
         Return a collection or create a new one if it doesn't exist.
