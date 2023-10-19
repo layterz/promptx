@@ -40,7 +40,7 @@ def test_basic_response(mocker):
     
     t = Template()
     runner = TemplateRunner(llm=llm)
-    o = runner(t, 'test')
+    o = runner(t, None)
 
     assert o.content == 'Test response'
 
@@ -122,7 +122,7 @@ def test_exception_handling(mocker):
     
     t = Template()
     runner = TemplateRunner(llm=llm)
-    o = runner(t, 'test')
+    o = runner(t, None)
     assert o.content == 'Test response'
 
 def test_parse_exception_handling(mocker):

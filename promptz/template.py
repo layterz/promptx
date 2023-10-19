@@ -97,12 +97,13 @@ class TemplateRunner:
     def parse(self, x):
         if x is None:
             return {}
-        skip_list = [k for k, v in x.__fields__.items() if v.field_info.extra.get('generate') == False]
-        skip_list += ['id', 'type']
+        skip_list = ['id', 'type']
         print('CCC', x, skip_list)
         if isinstance(x, BaseModel):
+            skip_list += [k for k, v in x.__fields__.items() if v.field_info.extra.get('generate') == False]
             return {k: v for k, v in x.dict().items() if k not in skip_list}
         elif isinstance(x, Entity):
+            skip_list += [k for k, v in x.__fields__.items() if v.field_info.extra.get('generate') == False]
             return {k: v for k, v in x.object.dict().items() if k not in skip_list}
         elif isinstance(x, Collection):
             return [

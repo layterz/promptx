@@ -121,11 +121,6 @@ class Session:
         c = self.collection(collection)
         if c is None:
             raise ValueError(f'No collection found with name {collection}')
-        if len(texts) == 0 and field is None and where is None:
-            if limit is None:
-                return c
-            else:
-                return c.head(limit)
         where = where or {}
         if field is not None:
             where['field'] = field
