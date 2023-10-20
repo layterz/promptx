@@ -207,7 +207,7 @@ class Collection(pd.DataFrame):
                 create_entity_from_schema(
                     schemas.get(r['id']),
                     {
-                        k: v for k, v in r.items() if pd.notnull(v)
+                        k: v for k, v in r.items() if (len(v) if isinstance(v, list) else pd.notnull(v))
                     }
                 ) 
                 for r in self.to_dict('records')
