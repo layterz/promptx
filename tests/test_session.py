@@ -56,7 +56,7 @@ def session():
 
 def _user():
     name = random.choice(['John', 'Jane', 'Jack', 'Jill'])
-    age = random.randint(18, 100)
+    age = random.randint(18, 99)
     role = random.choice(list(Role))
     banned = random.choice([True, False])
     vigor = random.random()

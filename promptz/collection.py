@@ -266,15 +266,44 @@ class Collection(pd.DataFrame):
 
     def _create_records(self, *items, **kwargs):
         records = []
+
+        def _field_serializer(obj):
+            if isinstance(obj, Enum):
+                return obj.value
+            elif isinstance(obj, Entity):
+                return { 'id': obj.id, 'type': obj.type }
+            raise TypeError(f"Type {type(obj)} not serializable")
+
+        def _serializer(obj):
+            if isinstance(obj, Enum):
+                return obj.value
+            elif isinstance(obj, Entity):
+                record = { 'id': obj.id, 'type': obj.type }
+                for name, field in obj.dict().items():
+                    if name in ['id', 'type']:
+                        continue
+                    f = obj.__fields__.get(name)
+                    if f is None:
+                        print(f'Field {name} not found in {obj.__class__}')
+                        continue
+                    if isinstance(f.type_, type) and issubclass(f.type_, Entity):
+                        print(f'Field {name} is an Entity')
+                        field = _field_serializer(getattr(obj, name))
+                    if f.field_info.extra.get('embed', True) == False:
+                        print(f'Field {name} is not embeddable')
+                        continue
+                    record[name] = field
+            raise TypeError(f"Type {type(obj)} is not serializable")
+
+        def _schema_serializer(obj):
+            if isinstance(obj, Enum):
+                return obj.value
+            elif isinstance(obj, BaseModel):
+                return obj.schema()
+            raise TypeError(f"Type {type(obj)} not serializable")
+
         for item in items:
             now = datetime.now().isoformat()
-
-            def _serializer(obj):
-                if isinstance(obj, Enum):
-                    return obj.value
-                elif isinstance(obj, BaseModel):
-                    return obj.schema()
-                raise TypeError(f"Type {type(obj)} not serializable")
             
             if isinstance(item, str):
                 item = Entity(type='string', value=item)
@@ -288,7 +317,7 @@ class Collection(pd.DataFrame):
                     continue
 
                 if isinstance(f.type_, type) and issubclass(f.type_, Entity):
-                    continue
+                    print(f'Field {name} is an Entity')
                 if f.field_info.extra.get('embed', True) == False:
                     continue
                 if isinstance(field, int) or isinstance(field, float) or isinstance(field, bool):
@@ -311,10 +340,19 @@ class Collection(pd.DataFrame):
                 records.append(field_record)
 
             doc = { k: v for k, v in item.dict().items() if k not in ['id'] }
-            for k in item.__fields__.keys():
-                v = getattr(item, k)
-                if isinstance(v, Entity):
-                    doc[k] = { 'id': v.id, 'type': v.type }
+            for k, v in doc.items():
+                # if v represents an Entity field then create records for it and replace it with a reference
+                # use __fields__ to check if the current v is an Entity
+                f = item.__fields__.get(k)
+                if f is None:
+                    continue
+                if v is None:
+                    continue
+                if isinstance(f.type_, type) and issubclass(f.type_, Entity):
+                    print(f'Field {k} is an Entity')
+                    doc[k] = _field_serializer(getattr(item, k))
+                    records += self._create_records(v)
+
             doc_record = {
                 'id': item.id,
                 'document': json.dumps(doc, default=_serializer),
@@ -322,7 +360,7 @@ class Collection(pd.DataFrame):
                     'collection': self.name,
                     'type': item.type,
                     'item': 1,
-                    'schema': json.dumps(item.schema(), default=_serializer),
+                    'schema': json.dumps(item.schema(), default=_schema_serializer),
                     'created_at': now,
                 },
             }
