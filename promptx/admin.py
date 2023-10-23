@@ -13,8 +13,8 @@ from dash.exceptions import PreventUpdate
 from dash.dependencies import ALL
 import dash_bootstrap_components as dbc
 
-from promptz.world import World
-from promptz.template import Template
+from .world import World
+from .template import Template
 
 
 API_URL = 'http://localhost:8000'

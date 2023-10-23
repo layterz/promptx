@@ -1,7 +1,7 @@
 import pytest
 from enum import Enum
 from pydantic import BaseModel
-from promptz.utils import *
+from promptx.utils import *
 
 
 class Color(Enum):

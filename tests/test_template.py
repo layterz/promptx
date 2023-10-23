@@ -4,9 +4,9 @@ import json
 from enum import Enum
 from pydantic import Field
 
-from promptz.template import *
-from promptz.models import LLM, Response
-from promptz.utils import Entity
+from promptx.template import *
+from promptx.models import LLM, Response
+from promptx.utils import Entity
 
 
 class Role(Enum):

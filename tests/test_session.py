@@ -4,10 +4,10 @@ import pytest
 from enum import Enum
 from pydantic import Field
 
-from promptz import *
-from promptz.utils import Entity
-from promptz.world import World
-from promptz.collection import VectorDB, ChromaVectorDB
+from promptx import *
+from promptx.utils import Entity
+from promptx.world import World
+from promptx.collection import VectorDB, ChromaVectorDB
 
 
 class Role(Enum):

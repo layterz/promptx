@@ -1,7 +1,7 @@
 import pytest
 
-from promptz.collection import *
-from promptz.utils import Entity
+from promptx.collection import *
+from promptx.utils import Entity
 
 
 class User(Entity):
