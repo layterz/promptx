@@ -5,6 +5,7 @@ from abc import abstractmethod
 from typing import *
 import pandas as pd
 from pydantic import BaseModel 
+from pydantic_core._pydantic_core import PydanticUndefined, PydanticUndefinedType
 import chromadb
 
 
@@ -279,14 +280,14 @@ class Collection(pd.DataFrame):
                 return obj.value
             elif isinstance(obj, Entity):
                 record = { 'id': obj.id, 'type': obj.type }
-                for name, field in obj.dict().items():
+                for name, field in obj.model_dump().items():
                     if name in ['id', 'type']:
                         continue
-                    f = obj.__fields__.get(name)
+                    f = obj.model_fields.get(name)
                     if f is None:
                         print(f'Field {name} not found in {obj.__class__}')
                         continue
-                    if isinstance(f.type_, type) and issubclass(f.type_, Entity):
+                    if isinstance(f.annotation, type) and issubclass(f.annotation, Entity):
                         print(f'Field {name} is an Entity')
                         field = _field_serializer(getattr(obj, name))
                     if f.field_info.extra.get('embed', True) == False:
@@ -298,9 +299,11 @@ class Collection(pd.DataFrame):
         def _schema_serializer(obj):
             if isinstance(obj, Enum):
                 return obj.value
+            elif isinstance(obj, PydanticUndefinedType):
+                return None
             elif isinstance(obj, BaseModel):
-                return obj.schema()
-            raise TypeError(f"Type {type(obj)} not serializable")
+                return obj.model_json_schema()
+            raise TypeError(f"Type {type(obj)} not serializable", obj)
 
         for item in items:
             now = datetime.now().isoformat()
@@ -308,17 +311,18 @@ class Collection(pd.DataFrame):
             if isinstance(item, str):
                 item = Entity(type='string', value=item)
 
-            for name, field in item.dict().items():
+            for name, field in item.model_dump().items():
                 if name in ['id', 'type']:
                     continue
 
-                f = item.__fields__.get(name)
+                f = item.model_fields.get(name)
                 if f is None:
                     continue
 
-                if isinstance(f.type_, type) and issubclass(f.type_, Entity):
+                print(f'Field {name} is {f}')
+                if isinstance(f.annotation, type) and issubclass(f.annotation, Entity):
                     print(f'Field {name} is an Entity')
-                if f.field_info.extra.get('embed', True) == False:
+                if f.json_schema_extra and f.json_schema_extra.get('embed', True) == False:
                     continue
                 if isinstance(field, int) or isinstance(field, float) or isinstance(field, bool):
                     continue
@@ -339,20 +343,21 @@ class Collection(pd.DataFrame):
                 }
                 records.append(field_record)
 
-            doc = { k: v for k, v in item.dict().items() if k not in ['id'] }
+            doc = { k: v for k, v in item.model_dump().items() if k not in ['id'] }
             for k, v in doc.items():
                 # if v represents an Entity field then create records for it and replace it with a reference
-                # use __fields__ to check if the current v is an Entity
-                f = item.__fields__.get(k)
+                # use model_fields to check if the current v is an Entity
+                f = item.model_fields.get(k)
                 if f is None:
                     continue
                 if v is None:
                     continue
-                if isinstance(f.type_, type) and issubclass(f.type_, Entity):
+                if isinstance(f.annotation, type) and issubclass(f.annotation, Entity):
                     print(f'Field {k} is an Entity')
                     doc[k] = _field_serializer(getattr(item, k))
                     records += self._create_records(v)
 
+            print('doc', doc, item, item.schema())
             doc_record = {
                 'id': item.id,
                 'document': json.dumps(doc, default=_serializer),

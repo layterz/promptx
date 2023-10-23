@@ -113,7 +113,7 @@ class Session:
         if isinstance(item, str):
             return self.ef([item])[0]
         elif isinstance(item, BaseModel):
-            return self.ef([item.json()])[0]
+            return self.ef([item.model_dump_json()])[0]
         elif isinstance(item, list):
             return [self.embed(i, field=field) for i in item]
     
@@ -130,7 +130,7 @@ class Session:
 
         def serialize(item):
             if isinstance(item, BaseModel):
-                return item.json()
+                return item.model_dump_json()
             else:
                 return item
         
@@ -338,7 +338,8 @@ class World:
             if metadata is None:
                 metadata = {"hnsw:space": "cosine"}
             collection = self.db.create_collection(name, metadata=metadata)
-            r = CollectionEntity(name=name, description=description)
+            print(f'Created collection {name}', description)
+            r = CollectionEntity(name=name, description=description or '')
             self.collections.embed(r)
         c = Collection.load(collection)
         self._collections[name] = c

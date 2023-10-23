@@ -61,7 +61,7 @@ def test_convert_list_of_pydantic_models_to_json_schema():
             },
             'required': ['name', 'price']
         },
-        'definitions': {},
+        '$defs': {},
     }
     assert schema == expected_schema
 
@@ -90,11 +90,11 @@ def test_convert_pydantic_model_with_nested_models_to_json_schema():
             'name': {'title': 'Name', 'type': 'string'},
             'age': {'title': 'Age', 'type': 'integer'},
             'address': {
-                '$ref': '#/definitions/Address'
+                '$ref': '#/$defs/Address'
             }
         },
         'required': ['name', 'age', 'address'],
-        'definitions': {
+        '$defs': {
             'Address': {
                 'type': 'object',
                 'title': 'Address',
@@ -110,7 +110,6 @@ def test_convert_pydantic_model_with_nested_models_to_json_schema():
 
 
 def test_convert_pydantic_enum_to_json_schema():
-
     schema = model_to_json_schema(Item)
     expected_schema = {
         'type': 'object',
@@ -121,15 +120,15 @@ def test_convert_pydantic_enum_to_json_schema():
                 'type': 'string'
             },
             'color': {
-                '$ref': '#/definitions/Color'
+                '$ref': '#/$defs/Color'
             }
         },
         'required': ['name', 'color'],
-        'definitions': {
+        '$defs': {
             'Color': {
                 'title': 'Color',
-                'description': 'An enumeration.',
-                'enum': ['red', 'green', 'blue']
+                'enum': ['red', 'green', 'blue'],
+                'type': 'string',
             }
         }
     }
@@ -171,17 +170,18 @@ def test_convert_pydantic_model_with_nested_list_of_enums_to_json_schema():
                 'type': 'string'
             },
             'colors': {
+                'title': 'Colors',
                 'type': 'array',
                 'items': {
-                    '$ref': '#/definitions/Color'
+                    '$ref': '#/$defs/Color'
                 }
             }
         },
         'required': ['name', 'colors'],
-        'definitions': {
+        '$defs': {
             'Color': {
                 'title': 'Color',
-                'description': 'An enumeration.',
+                'type': 'string',
                 'enum': ['red', 'green', 'blue']
             }
         }
@@ -198,11 +198,11 @@ def test_convert_pydantic_model_with_nested_base_model_to_json_schema():
             'name': {'title': 'Name', 'type': 'string'},
             'age': {'title': 'Age', 'type': 'integer'},
             'address': {
-                '$ref': '#/definitions/Address'
+                '$ref': '#/$defs/Address'
             }
         },
         'required': ['name', 'age', 'address'],
-        'definitions': {
+        '$defs': {
             'Address': {
                 'title': 'Address',
                 'type': 'object',
@@ -225,18 +225,18 @@ def test_convert_pydantic_model_with_nested_list_of_base_models_to_json_schema()
         'properties': {
             'order_id': {'title': 'Order Id', 'type': 'string'},
             'person': {
-                '$ref': '#/definitions/Person'
+                '$ref': '#/$defs/Person'
             },
             'items': {
                 'title': 'Items',
                 'type': 'array',
                 'items': {
-                    '$ref': '#/definitions/Item'
+                    '$ref': '#/$defs/Item'
                 }
             }
         },
         'required': ['order_id', 'person', 'items'],
-        'definitions': {
+        '$defs': {
             'Person': {
                 'title': 'Person',
                 'type': 'object',
@@ -244,7 +244,7 @@ def test_convert_pydantic_model_with_nested_list_of_base_models_to_json_schema()
                     'name': {'title': 'Name', 'type': 'string'},
                     'age': {'title': 'Age', 'type': 'integer'},
                     'address': {
-                        '$ref': '#/definitions/Address'
+                        '$ref': '#/$defs/Address'
                     },
                 },
                 'required': ['name', 'age', 'address']
@@ -260,7 +260,7 @@ def test_convert_pydantic_model_with_nested_list_of_base_models_to_json_schema()
             },
             'Color': {
                 'title': 'Color',
-                'description': 'An enumeration.',
+                'type': 'string',
                 'enum': ['red', 'green', 'blue']
             },
             'Item': {
@@ -269,7 +269,7 @@ def test_convert_pydantic_model_with_nested_list_of_base_models_to_json_schema()
                 'properties': {
                     'name': {'title': 'Name', 'type': 'string'},
                     'color': {
-                        '$ref': '#/definitions/Color'
+                        '$ref': '#/$defs/Color'
                     }
                 },
                 'required': ['name', 'color']

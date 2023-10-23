@@ -18,14 +18,10 @@ class App:
     path: str
     world: World
 
-    def __init__(self, name, path, world=None, llm=None, ef=None, logger=None, db=None, templates_dir=None):
+    def __init__(self, name, path, world=None, db=None):
         self.name = name
         self.path = path
-        self.logger = logger or logging.getLogger(self.name)
-        templates = self._load_templates(templates_dir)
-        self.world = world or World(name, templates=templates, llm=llm, ef=ef, logger=logger, db=db)
-        self.api = API(self.world)
-        self.admin = Admin(self.world)
+        self.world = world or World(name, db=db)
     
     @classmethod
     def load(cls, path):
@@ -39,40 +35,18 @@ class App:
 
         return cls(**config)
 
-    @classmethod
-    def from_config(cls, path, config, **kwargs):
-        def get_llm(org, model):
-            if org == 'openai':
-                auth = {
-                    'api_key': config.get('OPENAI_API_KEY'),
-                    'org_id': config.get('OPENAI_ORG_ID'),
-                }
-                if model == 'chatgpt':
-                    return partial(openai.ChatGPT, **auth)
-                elif model == 'instructgpt':
-                    return partial(openai.InstructGPT, **auth)
-            
-            raise Exception(f'Unknown LLM config: {org}:{cls}')
+    @property
+    def api(self):
+        if self._api is None:
+            self._api = API(self.world)
+        return self._api
 
-        default_llm = config.get('DEFAULT_LLM', 'ai://openai:chatgpt:latest')
-        templates_dir = os.path.join(path, config.get('TEMPLATES_DIR', 'templates'))
-        llm_str = default_llm.split('ai://')[-1]
-        org, model, version = llm_str.split(':')
-        LLM = get_llm(org, model)
-        db = ChromaVectorDB(path=path)
+    @property
+    def admin(self):
+        if self._admin is None:
+            self._admin = Admin(self.world)
+        return self._admin
 
-        parsed_config = {
-            'name': config.get('NAME', 'local'),
-            'path': path,
-            'llm': LLM(version=version),
-            'db': db,
-            'templates_dir': templates_dir,
-        }
-
-        return cls(
-            **{**parsed_config, **{k: v for k, v in kwargs.items() if v is not None}}
-        )
-    
     def _load(self, dir, cls):
         r = {}
         for file in glob.glob(os.path.join(dir, '*.py')):

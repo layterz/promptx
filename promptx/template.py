@@ -100,10 +100,10 @@ class TemplateRunner:
         skip_list = ['id', 'type']
         print('CCC', x, skip_list)
         if isinstance(x, BaseModel):
-            skip_list += [k for k, v in x.__fields__.items() if v.field_info.extra.get('generate') == False]
-            return {k: v for k, v in x.dict().items() if k not in skip_list}
+            skip_list += [k for k, v in x.model_fields.items() if v.field_info.extra.get('generate') == False]
+            return {k: v for k, v in x.model_dump().items() if k not in skip_list}
         elif isinstance(x, Entity):
-            skip_list += [k for k, v in x.__fields__.items() if v.field_info.extra.get('generate') == False]
+            skip_list += [k for k, v in x.model_fields.items() if v.field_info.extra.get('generate') == False]
             return {k: v for k, v in x.object.dict().items() if k not in skip_list}
         elif isinstance(x, Collection):
             return [
@@ -137,8 +137,7 @@ class TemplateRunner:
         return output
     
     def format_field(self, name, field, definitions, required):
-        # TODO: hack, source should be stored on the schema
-        if name in ['id', 'type', 'source']:
+        if name in ['id', 'type']:
             return None
         if field.get('generate', True) == False:
             return None
@@ -146,11 +145,10 @@ class TemplateRunner:
         options = ''
         metadata_keys = [
             'le', 'lt', 'ge', 'gt',
-            'min_items', 'max_items',
             'min_length', 'max_length',
         ]
         metadata = {
-            k: v for k, v in field.items()
+            k: v for k, v in field.metadata.items()
             if k in metadata_keys
         }
 
@@ -218,12 +216,12 @@ class TemplateRunner:
         properties = {}
         if output.get('type', None) == 'array':
             properties = output.get('items', {}).get('properties', {})
-            definitions = output.get('items', {}).get('definitions', {})
+            definitions = output.get('items', {}).get('$defs', {})
             required = output.get('items', {}).get('required', [])
             list_output = True
         elif output.get('type', None) == 'object':
             properties = output.get('properties', {})
-            definitions = output.get('definitions', {})
+            definitions = output.get('$defs', {})
             required = output.get('required', [])
         
         for name, property in properties.items():

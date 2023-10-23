@@ -110,7 +110,7 @@ Embedding = List[float]
 EmbedFunction = Callable[[List[str]], List[Embedding]]
 
 
-def find_project_root(path=None, config_filename='/.px'):
+def find_project_root(path=None, config_filename='.px'):
     home_dir = os.path.expanduser("~")
     if path is None:
         path = os.getcwd()

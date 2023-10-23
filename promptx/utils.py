@@ -1,9 +1,8 @@
 import uuid
 from enum import Enum
 from typing import *
-from typing import _GenericAlias
 import jsonschema
-from pydantic import BaseModel, create_model
+from pydantic import BaseModel, Field, ConfigDict, create_model
 from IPython.display import display, HTML
 
 
@@ -29,10 +28,7 @@ PYTYPE_TO_JSONTYPE: Dict[Type, str] = {
 class Entity(BaseModel):
     id: str = None
     type: str = None
-
-    class Config:
-        extra = 'allow'
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(arbitrary_types_allowed=True)
     
     def __init__(self, id=None, **data):
         if 'type' not in data:
@@ -40,7 +36,7 @@ class Entity(BaseModel):
         super().__init__(**{'id': id or str(uuid.uuid4()), **data})
     
     @classmethod
-    def generate_schema_for_field(cls, name, field_type: Any, default=None, info=None):
+    def generate_schema_for_field(cls, name, field_type: Any, field: Field):
         return_list = False
         definitions = {}
 
@@ -77,9 +73,9 @@ class Entity(BaseModel):
             if field_type.__name__ not in definitions:
                 definitions[field_type.__name__] = {
                     "type": "object",
-                    "properties": default.schema() if default is not None else {}
+                    "properties": field.default.schema() if field.default is not None else {}
                 }
-            schema = {"$ref": f"#/definitions/{field_type.__name__}"} 
+            schema = {"$ref": f"#/$defs/{field_type.__name__}"} 
 
         if return_list:
             schema = {
@@ -87,6 +83,7 @@ class Entity(BaseModel):
                 "items": schema
             }
         
+        info = None
         if info is not None:
             if info.description:
                 schema['description'] = info.description
@@ -102,18 +99,14 @@ class Entity(BaseModel):
                 schema['min_length'] = info.min_length
             if info.max_length:
                 schema['max_length'] = info.max_length
-            if info.min_items:
-                schema['min_items'] = info.min_items
-            if info.max_items:
-                schema['max_items'] = info.max_items
             
             extra = info.extra
             if extra is not None:
                 if 'generate' in extra:
                     schema['generate'] = extra['generate']
 
-        if default:
-            schema['default'] = default
+        if field.default:
+            schema['default'] = field.default
         return schema, definitions, []
     
     @classmethod
@@ -122,17 +115,17 @@ class Entity(BaseModel):
         required = []
         definitions = {}
 
-        for field_name, field in cls.__fields__.items():
+        for field_name, field in cls.model_fields.items():
             try:
-                type_ = cls.__annotations__.get(field_name, field.type_)
-                field_schema, defs, reqs = cls.generate_schema_for_field(field_name, type_, field.default, field.field_info)
+                type_ = cls.__annotations__.get(field_name, field.annotation)
+                field_schema, defs, reqs = cls.generate_schema_for_field(field_name, type_, field)
                 properties[field_name] = field_schema
                 definitions = {**definitions, **defs}
             except Exception as e:
-                print('schema field failed', field_name, e)
+                print('schema field failed', field_name, e, field)
                 continue
             
-            if field.required:
+            if field.is_required:
                 required.append(field_name)
             required += reqs
 
@@ -141,7 +134,7 @@ class Entity(BaseModel):
             "title": cls.__name__,
             "type": "object",
             "properties": properties,
-            "definitions": definitions,  # Include definitions for references
+            "$defs": definitions,  # Include definitions for references
             "required": required,
         }
 
@@ -153,17 +146,17 @@ class Entity(BaseModel):
             get_ipython
         except NameError:
             # If we're not in an IPython environment, fall back to json
-            return self.json()
+            return self.model_dump_json()
 
         # Convert the dictionary to a HTML table
         html = '<table>'
-        for field, value in self.dict().items():
+        for field, value in self.model_dump().items():
             html += f'<tr><td>{field}</td><td>{value}</td></tr>'
         html += '</table>'
 
         # Display the table
         display(HTML(html))
-        return self.json()
+        return self.model_dump_json()
 
 
 def _is_list(schema):
@@ -194,7 +187,7 @@ def _get_field_type(field_info, definitions):
             return str
         ref_name = ref.split('/')[-1]
         field_type = ref_name
-        definition = definitions.get(ref_name)
+        definition = definitions.get(ref_name, {})
         if 'enum' in definition:
             members = {v: v for v in definition['enum']}
             E = Enum(definition.get('title', ref_name), members)
@@ -256,11 +249,11 @@ def model_to_json_schema(model):
     if isinstance(model, list):
         inner = model[0]
         if issubclass(inner, BaseModel):
-            schema = inner.schema()
+            schema = inner.model_json_schema()
             output = {
                 'type': 'array',
                 'items': schema,
-                'definitions': schema.get('definitions', {})
+                '$defs': schema.get('$defs', {})
             }
         else:
             output = {
@@ -272,10 +265,10 @@ def model_to_json_schema(model):
     elif isinstance(model, dict):
         output = model
     elif isinstance(model, BaseModel):
-        output = model.schema()
+        output = model.model_json_schema()
     elif isinstance(model, type):
         if issubclass(model, BaseModel):
-            output = model.schema()
+            output = model.model_json_schema()
     
     return output
 
@@ -314,7 +307,7 @@ def create_model_from_schema(schema):
     30
     """
     properties = _get_properties(schema)
-    definitions = schema.get('definitions', {})
+    definitions = schema.get('$defs', {})
     required = schema.get('required', [])
     fields = {
         name: _create_field(field_info, definitions, name in required)
@@ -425,5 +418,5 @@ def serializer(obj):
     if isinstance(obj, Enum):
         return obj.value
     elif isinstance(obj, BaseModel):
-        return obj.schema()
+        return obj.model_json_schema()
     raise TypeError(f"Type {type(obj)} not serializable")

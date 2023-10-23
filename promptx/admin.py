@@ -5,7 +5,7 @@ from urllib.parse import urljoin
 import uuid
 import requests
 import pandas as pd
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from dash import Dash, html, dcc, no_update, page_container, page_registry, register_page, Output, Input, State
 from dash.exceptions import PreventUpdate
 from dash.dependencies import ALL
@@ -18,10 +18,7 @@ API_URL = 'http://localhost:8000'
 
 
 class Index(BaseModel):
-    
-    class Config:
-        arbitrary_types_allowed = True
-
+    model_config = ConfigDict(arbitrary_types_allowed=True)
     id: str
     app: Dash
     collection: str = None
@@ -191,8 +188,7 @@ class AdminPage(BaseModel):
     icon: str = None
     api_path: str = None
 
-    class Config:
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     def __init__(self, app, name, path=None, path_template=None, menu=False, icon=None):
         super().__init__(
@@ -296,12 +292,8 @@ class EntityDetails(BaseModel):
     def load(self, data):
         pass
 
-
 class EntityInputForm(BaseModel):
-    
-    class Config:
-        arbitrary_types_allowed = True
-
+    model_config = ConfigDict(arbitrary_types_allowed=True)
     id: str
     name: str
     page: str

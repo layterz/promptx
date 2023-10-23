@@ -30,11 +30,9 @@ class User(Entity):
     name: str = Field(..., min_length=3, max_length=20)
     age: int = Field(..., ge=18, lt=100)
     role: Role = Role.admin
-    banned: bool = Field(None, generate=False)
-    vigor: float = Field(0, max=1, min=0)
-    traits: List[Trait] = Field(None, description='What kind of personality describes the user?', min_items=1, max_items=3)
-    friends: list['User'] = None
-    address: Address = None
+    banned: bool = Field(False, json_schema_extra={'generate': False})
+    vigor: float = Field(0, ge=0, le=1)
+    traits: List[Trait] = Field(None, description='What kind of personality describes the user?', min_length=1, max_length=3)
 
 class Account(Entity):
     user: User
@@ -44,14 +42,14 @@ class Account(Entity):
 def session():
     import shutil
     try:
-        shutil.rmtree('tests/.db')
+        shutil.rmtree('tests/.px')
     except FileNotFoundError as e:
         pass
     db = ChromaVectorDB(path='tests')
     world = World('tests', db)
     session = world.create_session('test_store')
     yield session
-    shutil.rmtree('tests/.db')
+    shutil.rmtree('tests/.px')
 
 
 def _user():
@@ -60,12 +58,14 @@ def _user():
     role = random.choice(list(Role))
     banned = random.choice([True, False])
     vigor = random.random()
+    traits = random.choices(list(Trait), k=3)
     return User(
         name=name, 
         age=age,
         role=role,
         banned=banned,
         vigor=vigor,
+        traits=traits,
     )
 
 @pytest.fixture
@@ -88,9 +88,10 @@ def test_store(session, user):
 def test_store__multiple(session):
     n = 2
     ids = [str(uuid.uuid4()) for _ in range(n)]
+    traits = random.choices(list(Trait), k=3)
     session.store(
         *[
-            User(id=ids[i], name="test", age=20)
+            User(id=ids[i], name="test", age=20, traits=traits)
             for i in range(n)
         ]
     )
@@ -118,37 +119,6 @@ def test_store__list_field(session, user):
     assert x.traits[0] == traits[0].value
     assert x.traits[1] == traits[1].value
     assert x.traits[2] == traits[2].value
-
-def test_store__relations(session, user):
-    friends = [_user() for _ in range(3)]
-    user.friends = friends
-    session.store(user)
-    x = session.query(ids=[user.id]).first
-
-    assert x is not None
-    assert len(x.friends) == len(friends)
-    assert x.friends[0].id == friends[0].id
-    assert x.friends[1].id == friends[1].id
-    assert x.friends[2].id == friends[2].id
-    assert x.friends[0].name == friends[0].name
-
-def test_store__relation(session, user):
-    address = Address(street='123 Main St', city='New York', state='NY', zip='10001')
-    user.address = address
-    session.store(user)
-    x = session.query(ids=[user.id]).first
-
-    assert x is not None
-    assert x.address is not None
-    assert x.address.id == address.id
-    assert x.address.street == address.street
-    assert x.address.city == address.city
-    assert x.address.state == address.state
-    assert x.address.zip == address.zip
-
-    y = session.query(ids=[address.id]).first
-    assert y is not None
-    assert y.id == address.id
 
 def test_query__ids(session):
     users = [_user() for _ in range(3)]

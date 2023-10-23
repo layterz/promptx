@@ -21,7 +21,7 @@ def test_embedding_an_entity(mocker):
     user = User(name="test", age=20)
     db = mocker.Mock(spec=VectorDB)
     db.name = 'test'
-    db.get.return_value = {'ids': [user.id], 'documents': [user.json()], 'metadatas': [{'schema': user.schema_json()}]}
+    db.get.return_value = {'ids': [user.id], 'documents': [user.model_dump_json()], 'metadatas': [{'schema': json.dumps(user.model_json_schema())}]}
     collection = Collection.load(db)
     collection.embed(user)
 
