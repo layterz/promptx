@@ -12,7 +12,7 @@ from .utils import Entity, create_entity_from_schema
 
 
 class Query(BaseModel):
-    type='query'
+    type: str = 'query'
     query: str = None
     where: Dict[str, (int|str|bool)] = None
     collection: str = None
@@ -22,7 +22,7 @@ class Query(BaseModel):
 
 
 class Subscription(Entity):
-    type='subscription'
+    type: str = 'subscription'
     query: Query = None
 
     def __init__(self, query=None, **kwargs):
@@ -78,7 +78,7 @@ class VectorDB:
 class ChromaVectorDB(VectorDB):
 
     def __init__(self, endpoint=None, api_key=None, path=None, **kwargs):
-        self.client = chromadb.PersistentClient(path=f'{path}/.db' if path else "./.db")
+        self.client = chromadb.PersistentClient(path=f'{path}/.px' if path else "./.px")
 
     def query(self, texts, where=None, ids=None, **kwargs):
         return self.client.query(texts, where=where, **kwargs)

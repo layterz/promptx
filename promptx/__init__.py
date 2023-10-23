@@ -1,6 +1,8 @@
 import os
 import sys
 from typing import Callable, List
+from dotenv import load_dotenv
+from pathlib import Path
 
 from .collection import Collection 
 from .world import Session
@@ -108,48 +110,20 @@ Embedding = List[float]
 EmbedFunction = Callable[[List[str]], List[Embedding]]
 
 
-def find_project_root(path=None, config_filename='.pz.env'):
+def find_project_root(path=None, config_filename='/.px'):
     home_dir = os.path.expanduser("~")
     if path is None:
         path = os.getcwd()
     while path != home_dir:
-        if os.path.exists(os.path.join(path, config_filename)):
+        if os.path.exists(os.path.join(path, config_filename)) and os.path.isdir(path):
             return path
         path = os.path.dirname(path)
+    if os.path.exists(os.path.join(home_dir, config_filename)):
+        return home_dir
     return None
 
 
-def load_local_config(path=None, filename=".pz.env"):
-    home_dir = os.path.expanduser("~")
-    current_dir = os.getcwd()
-    path = path or current_dir
-
-    while current_dir != home_dir:
-        file_path = os.path.join(current_dir, filename)
-
-        if os.path.exists(file_path):
-            with open(file_path, 'r') as f:
-                config = {
-                    line.split('=', 1)[0].strip(): line.split('=', 1)[1].strip()
-                    for line in f if '=' in line
-                }
-                return (DefaultUser(), config)
-
-        current_dir = os.path.dirname(current_dir)
-
-    file_path = os.path.join(home_dir, filename)
-    if os.path.exists(file_path):
-        with open(file_path, 'r') as f:
-            config = {
-                line.split('=', 1)[0].strip(): line.split('=', 1)[1].strip()
-                for line in f if '=' in line
-            }
-            return (DefaultUser(), config)
-
-    return None, None
-
-
-def load(path='local', llm=None, ef=None, logger=None, **kwargs):
+def load(path='local'):
     if path == 'local':
         path = find_project_root()
     
@@ -161,12 +135,13 @@ def load(path='local', llm=None, ef=None, logger=None, **kwargs):
         print('loading remote app from', path)
         raise NotImplementedError
     else:
-        sys.path.append(path)
-        user, config = load_local_config(path)
-        app = App.from_config(path, config, llm=llm, ef=ef, logger=logger, **kwargs)
+        from dotenv import load_dotenv
+        load_dotenv(os.path.join(path, '.env'))
+        app = App.load(path)
     
     print(f'Loaded {app}')
     
+    user = DefaultUser()
     s = app.world.create_session(user)
     set_default_session(s)
     return app

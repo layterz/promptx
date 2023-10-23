@@ -6,15 +6,12 @@ import uuid
 import requests
 import pandas as pd
 from pydantic import BaseModel
-from textblob import Word
-import dash
-from dash import Dash, html, dcc, dash_table, no_update, page_container, page_registry, register_page, Output, Input, State
+from dash import Dash, html, dcc, no_update, page_container, page_registry, register_page, Output, Input, State
 from dash.exceptions import PreventUpdate
 from dash.dependencies import ALL
 import dash_bootstrap_components as dbc
 
 from .world import World
-from .template import Template
 
 
 API_URL = 'http://localhost:8000'

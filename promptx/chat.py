@@ -6,16 +6,16 @@ from .template import Template
 
 class DefaultChatTemplate(Template):
 
-    template = """
+    template: str = """
     {{input}}
     Message: {{message}}
     """
 
-    input_template = """
+    input_templat: str  = """
     Context: {{input}}
     """
 
-    output_template = """
+    output_templat: str  = """
     {{output}}
     """
 

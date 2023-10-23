@@ -12,5 +12,5 @@ class User(Entity):
 
 
 class DefaultUser(User):
-    role = UserRole.admin
-    username = 'root'
+    role: UserRole = UserRole.admin
+    username: str = 'root'

@@ -28,6 +28,18 @@ class App:
         self.admin = Admin(self.world)
     
     @classmethod
+    def load(cls, path):
+        db = ChromaVectorDB(path=os.path.join(path, 'db'))
+
+        config = {
+            'name': 'local',
+            'path': path,
+            'db': db,
+        }
+
+        return cls(**config)
+
+    @classmethod
     def from_config(cls, path, config, **kwargs):
         def get_llm(org, model):
             if org == 'openai':

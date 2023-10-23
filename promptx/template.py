@@ -22,7 +22,7 @@ E = TypeVar('E', bound=BaseModel)
 
 class Template(Entity):
     
-    template = """
+    template: str = """
     INSTRUCTIONS
     ---
     {{instructions}}
@@ -32,20 +32,20 @@ class Template(Entity):
     {{output}}
     """
 
-    input_template = """
+    input_template: str = """
     INPUT
     ---
     {{input}}
     END_INPUT
     """
 
-    output_template = """
+    output_template: str = """
     OUTPUT
     ---
     {{output}}
     """
 
-    example_template = f"""
+    example_template: str = f"""
     EXAMPLES
     ---
     {input_template}
@@ -53,7 +53,7 @@ class Template(Entity):
     END_EXAMPLES
     """
 
-    format_template = """
+    format_template: str = """
     FORMAT INSTRUCTIONS
     ---
     {% if string_list_output %}
