@@ -1,41 +1,27 @@
-# promptz
+# promptx
 
-A lightweight library, built on top of pandas and pydantic, that lets you interact with language models and store the output as queryable embeddings.
+A lightweight library, built on top of Pandas and Pydantic, that lets you interact intuitively with language models and embed the output in a vector store.
 
 ## Getting starting
 
-To follow along and run the examples interactively you can use [./getting-started.ipynb](https://github.com/layterz/promptz/blob/main/getting-started.ipynb) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/layterz/promptz/blob/main/getting-started.ipynb)
+To follow along and run the examples interactively you can use [./getting-started.ipynb](https://github.com/layterz/promptx/blob/main/getting-started.ipynb) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/layterz/promptx/blob/main/getting-started.ipynb)
 
 ```python
-pip install promptz
+pip install pxx
 ```
-
-*Note: if install hangs or returns `Killed`, try running `pip install promptz --no-cache-dir`*
 
 First, you need to initialize the library, specifying the language model and embedding function to use.
 
 ```python
-import os
-import promptz
-from chromadb.utils.embedding_functions import OpenAIEmbeddingFunction
+import promptx as px
 
-llm = promptz.ChatGPT(
-    api_key=os.environ['OPENAI_API_KEY'],
-    org_id=os.environ['OPENAI_ORGANIZATION_ID'],
-)
-
-ef = OpenAIEmbeddingFunction(
-    api_key=os.environ['OPENAI_API_KEY'],
-    model_name="text-embedding-ada-002",
-)
-
-promptz.init(llm=llm, ef=ef)
+px.load()
 ```
 
 Now we can use the `prompt` helper to make a request to the initialised language model.
 
 ```python
-from promptz import prompt
+from promptx import prompt
 
 character = 'Batman'
 prompt(f'Write a character profile for {character}')
@@ -66,7 +52,7 @@ To do that, you can pass a `pydantic.BaseModel` as `output=` when calling `promp
 ```python
 from typing import List
 from pydantic import BaseModel, Field
-from promptz import prompt
+from promptx import prompt
 
 class Character(BaseModel):
     name: str = Field(..., unique=True, embed=False),
@@ -76,7 +62,7 @@ class Character(BaseModel):
 
 characters = prompt(
     'Generate some characters from the Batman universe',
-    output=List[Character],
+    output=[Character],
 )
 ```
 ```
@@ -101,7 +87,7 @@ You can further guide the model output by providing few shot examples. Here, we 
 descriptions = prompt(
     'Write some 2-3 sentence character descriptions in the style of Alan Moore',
     input={'characters': [c.name for c in characters.objects]},
-    output=List[str],
+    output=[str],
 )
 
 characters['description'] = descriptions['output']
@@ -117,7 +103,7 @@ Run the above until it's generated some output you're happy with and then we can
 
 ```python
 import pandas as pd
-from promptz import Prompt
+from promptx import Prompt
 
 p = Prompt(
     '''
@@ -130,7 +116,7 @@ p = Prompt(
             characters[2:].objects,
         ),
     ],
-    output=List[Character],
+    output=[Character],
 )
 
 for _ in range(5):
@@ -178,7 +164,7 @@ Running this for 5 iterations on ChatGPT generates something like this.
 You can store any generated output in a `Collection` using the `store` helper.  Collections are dataframes that also support querying using embeddings by using vector space modelling to convert each field into an embedding.
 
 ```python
-from promptz import store
+from promptx import store
 
 store(characters)
 ```
@@ -196,7 +182,7 @@ store(characters)
 For example, `[{name: 'Batman'}, {description: 'Batman, also known as...'}, {age: 35}]` would be converted into 3 embeddings for the first item. You can then query collections using those field embeddings.
 
 ```python
-from promptz import query
+from promptx import query
 
 villains = query('they are a villain')
 ```

@@ -4,14 +4,14 @@ with open('requirements.txt') as f:
     requirements = f.read().splitlines()
 
 setup(
-    name='promptz',
-    version='0.0.10',
-    description='A Python package for interactive prompts',
-    packages=['promptz'],
+    name='promptx',
+    version='0.0.1',
+    description='An AI framework',
+    packages=['promptx'],
     install_requires=requirements,
     entry_points={
         "console_scripts": [
-            "pz = promptz.cli:main",
+            "px = promptx.cli:main",
         ],
     },
 )
