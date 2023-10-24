@@ -231,6 +231,7 @@ def test_format_rendering_with_field_min_max_length(template):
 def test_example_rendering(template):
     user = User(name="John Wayne", age=64, traits=[Trait.mean])
     runner = TemplateRunner()
+    template.examples = [(None, user)]
     p = runner.render(template, {'input': 'Some test input'})
 
     assert 'EXAMPLES' in p
@@ -242,6 +243,8 @@ def test_example_rendering(template):
 def test_example_rendering_multiple(template):
     user = User(name="John Wayne", age=64, traits=[Trait.mean])
     runner = TemplateRunner()
+    template.examples = [(None, user)] * 5
+    template.num_examples = 3
     p = runner.render(template, {'input': 'Some test input'})
 
     assert p.count('John Wayne') == 3

@@ -98,12 +98,11 @@ class TemplateRunner:
         if x is None:
             return {}
         skip_list = ['id', 'type']
-        print('CCC', x, skip_list)
         if isinstance(x, BaseModel):
-            skip_list += [k for k, v in x.model_fields.items() if v.field_info.extra.get('generate') == False]
+            skip_list += [k for k, v in x.model_fields.items() if v.json_schema_extra and v.json_schema_extra.get('generate') == False]
             return {k: v for k, v in x.model_dump().items() if k not in skip_list}
         elif isinstance(x, Entity):
-            skip_list += [k for k, v in x.model_fields.items() if v.field_info.extra.get('generate') == False]
+            skip_list += [k for k, v in x.model_fields.items() if v.json_schema_extra and v.json_schema_extra.get('generate') == False]
             return {k: v for k, v in x.object.dict().items() if k not in skip_list}
         elif isinstance(x, Collection):
             return [
