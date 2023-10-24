@@ -128,3 +128,22 @@ def test_query__ids(session):
     assert x is not None
     assert len(x.objects) == len(users)
     assert x[x['id'] == users[0].id].first.id == users[0].id
+
+def test_foriegn_key(session, user):
+    account = Account(user=user)
+    session.store(account)
+
+    _user = session.query(ids=[user.id]).first
+    assert _user is not None
+    assert _user.id == user.id
+
+    _account = session.query(ids=[account.id]).first
+    assert _account is not None
+    assert _account.id == account.id
+    assert _account.user['id'] == user.id
+
+def test_one_to_many():
+    pass
+
+def test_many_to_many():
+    pass

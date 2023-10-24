@@ -249,3 +249,5 @@ def test_example_rendering_multiple(template):
 
     assert p.count('John Wayne') == 3
 
+def test_loading_templaate_from_store():
+    assert True == False

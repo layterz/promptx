@@ -310,6 +310,9 @@ class Collection(pd.DataFrame):
             
             if isinstance(item, str):
                 item = Entity(type='string', value=item)
+            
+            if isinstance(item, dict):
+                pass
 
             for name, field in item.model_dump().items():
                 if name in ['id', 'type']:
@@ -353,11 +356,9 @@ class Collection(pd.DataFrame):
                 if v is None:
                     continue
                 if isinstance(f.annotation, type) and issubclass(f.annotation, Entity):
-                    print(f'Field {k} is an Entity')
                     doc[k] = _field_serializer(getattr(item, k))
-                    records += self._create_records(v)
+                    records += self._create_records(getattr(item, k))
 
-            print('doc', doc, item, item.schema())
             doc_record = {
                 'id': item.id,
                 'document': json.dumps(doc, default=_serializer),
