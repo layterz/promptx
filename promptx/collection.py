@@ -79,7 +79,7 @@ class VectorDB:
 class ChromaVectorDB(VectorDB):
 
     def __init__(self, endpoint=None, api_key=None, path=None, **kwargs):
-        self.client = chromadb.PersistentClient(path=f'{path}/.px' if path else "./.px")
+        self.client = chromadb.PersistentClient(path=f'{path}/.px/db' if path else "./.px/db")
 
     def query(self, texts, where=None, ids=None, **kwargs):
         return self.client.query(texts, where=where, **kwargs)
@@ -288,10 +288,8 @@ class Collection(pd.DataFrame):
                         print(f'Field {name} not found in {obj.__class__}')
                         continue
                     if isinstance(f.annotation, type) and issubclass(f.annotation, Entity):
-                        print(f'Field {name} is an Entity')
                         field = _field_serializer(getattr(obj, name))
                     if f.field_info.extra.get('embed', True) == False:
-                        print(f'Field {name} is not embeddable')
                         continue
                     record[name] = field
             raise TypeError(f"Type {type(obj)} is not serializable")
@@ -322,7 +320,6 @@ class Collection(pd.DataFrame):
                 if f is None:
                     continue
 
-                print(f'Field {name} is {f}')
                 if isinstance(f.annotation, type) and issubclass(f.annotation, Entity):
                     print(f'Field {name} is an Entity')
                 if f.json_schema_extra and f.json_schema_extra.get('embed', True) == False:

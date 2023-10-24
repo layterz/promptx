@@ -338,7 +338,6 @@ class World:
             if metadata is None:
                 metadata = {"hnsw:space": "cosine"}
             collection = self.db.create_collection(name, metadata=metadata)
-            print(f'Created collection {name}', description)
             r = CollectionEntity(name=name, description=description or '')
             self.collections.embed(r)
         c = Collection.load(collection)

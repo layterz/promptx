@@ -6,7 +6,7 @@ from . import LLM, ImageResponse, Response, Metrics, Callback, PromptLog
 
 
 class InstructGPT(LLM):
-    version = 'text-davinci-003'
+    version: str = 'text-davinci-003'
 
     def __init__(self, version=None):
         self.version = version or self.version
@@ -28,15 +28,15 @@ class InstructGPT(LLM):
 
 
 class ChatGPT(LLM):
-    version = 'gpt-3.5-turbo'
-    context = '''
+    version: str = 'gpt-3.5-turbo'
+    context: str = '''
     You are a helpful chat assistant.
     '''
 
-    def __init__(self, version=None, context=None, api_key=None, org_id=None):
-        self.version = version or self.version
+    def __init__(self, api_key=None, org_id=None, **kwargs):
         openai.api_key = api_key or os.environ.get('OPENAI_API_KEY')
         openai.organization = org_id or os.environ.get('OPENAI_ORG_ID')
+        super().__init__(**kwargs)
 
     def generate(self, x, context=None, history: List[PromptLog]=None, tools=None, **kwargs):
         context = { 'role': 'system', 'content': context or self.context}

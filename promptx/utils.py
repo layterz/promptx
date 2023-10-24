@@ -37,21 +37,15 @@ class Entity(BaseModel):
         self._lazy_load()
     
     def _lazy_load(self):
-        print('lazy loading')
         for name, field in self.__annotations__.items():
-            print('checking field', name, field)
             if isinstance(field, type) and issubclass(field, Entity):
-                print('setting up lazy loading for', name, field)
                 original_value = getattr(self, name, None)
                 
                 def loader(original_value=original_value, field_type=field):
                     # Lazy-loading logic here
-                    print(f'Lazy loading {name}', original_value, field_type)
                     return None
                 
                 setattr(self, name, property(loader))
-                print('done setting up lazy loading for', name, field)
-                print('prop', getattr(self, name))
     
     @classmethod
     def generate_schema_for_field(cls, name, field_type: Any, field: Field):

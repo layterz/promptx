@@ -283,6 +283,10 @@ class TemplateRunner:
             self.logger.debug(f'Dryrun: {t.output}')
             llm = MockLLM(output=t.output)
         else:
+            # TODO: llm should be looked up from collection/registered system
+            # m = self.world.models.get('id')
+            # LLM = self.world.systems(m)
+            # llm = LLM()
             llm = self.llm
         
         px = self.parse(x)

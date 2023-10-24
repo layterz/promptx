@@ -1,5 +1,5 @@
 import os
-import sys
+import time
 from typing import Callable, List
 from dotenv import load_dotenv
 from pathlib import Path
@@ -138,6 +138,16 @@ def load(path='local'):
         from dotenv import load_dotenv
         load_dotenv(os.path.join(path, '.env'))
         app = App.load(path)
+
+        # look for a config.py file and execute it
+        config_file = os.path.join(path, 'config.py')
+        if os.path.exists(config_file):
+            import importlib.util
+            spec = importlib.util.spec_from_file_location('config', config_file)
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
+            session = app.world.create_session(f'{app.name}_config_{int(time.time())}')
+            module.setup(session)
     
     print(f'Loaded {app}')
     

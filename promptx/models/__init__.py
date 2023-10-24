@@ -6,6 +6,9 @@ from pydantic import BaseModel
 from IPython.display import display, Image
 
 
+from promptx.utils import Entity
+
+
 class PromptLog(BaseModel):
     id: str
     type: str = 'prompt'
@@ -64,7 +67,7 @@ class ImageResponse(Response):
         display(Image(data=image_bytes))
 
 
-class LLM:
+class LLM(Entity):
 
     @abstractmethod
     def generate(self, x) -> Response:
@@ -72,12 +75,7 @@ class LLM:
 
 
 class MockLLM(LLM):
-    response_length: int 
-    output = None
-
-    def __init__(self, response_length=1000, output=None):
-        self.response_length = response_length
-        self.output = output
+    output: str = None
 
     def generate(self, x, tools=None, **kwargs):
         if self.output is None:
@@ -89,6 +87,11 @@ class MockLLM(LLM):
             metrics=Metrics(
                 model='mock',
                 input_tokens=len(x),
-                output_tokens=self.response_length,
             ),
         )
+
+
+__MODELS__ = {}
+def register_model(model: LLM):
+    """Registers a model to the global session"""
+    __MODELS__[model.name] = model
