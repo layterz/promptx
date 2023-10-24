@@ -213,20 +213,20 @@ def test_format_rendering_with_field_description(template):
 def test_format_rendering_with_field_min_max(template):
     runner = TemplateRunner()
     p = runner.render(template, {'input': 'Some test input'})
-    assert 'ge: 18' in p
-    assert 'lt: 100' in p
+    assert 'minimum: 18' in p
+    assert 'exclusiveMaximum: 100' in p
 
 def test_format_rendering_with_field_min_max_items(template):
     runner = TemplateRunner()
     p = runner.render(template, {'input': 'Some test input'})
-    assert 'min_length: 1' in p
-    assert 'max_length: 3' in p
+    assert 'minItems: 1' in p
+    assert 'maxItems: 3' in p
 
 def test_format_rendering_with_field_min_max_length(template):
     runner = TemplateRunner()
     p = runner.render(template, {'input': 'Some test input'})
-    assert 'min_length: 3' in p
-    assert 'max_length: 20' in p
+    assert 'minLength: 3' in p
+    assert 'maxLength: 20' in p
 
 def test_example_rendering(template):
     user = User(name="John Wayne", age=64, traits=[Trait.mean])
@@ -248,3 +248,4 @@ def test_example_rendering_multiple(template):
     p = runner.render(template, {'input': 'Some test input'})
 
     assert p.count('John Wayne') == 3
+

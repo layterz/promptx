@@ -143,14 +143,16 @@ class TemplateRunner:
         description = field.get('description', '')
         options = ''
         metadata_keys = [
-            'le', 'lt', 'ge', 'gt',
-            'min_length', 'max_length',
+            'minimum', 'maximum', 'exclusiveMinimum', 'exclusiveMaximum',
+            'minLength', 'maxLength',
+            'minItems', 'maxItems',
         ]
         metadata = {
             k: v for k, v in field.items()
             if k in metadata_keys
         }
 
+        definition = None
         list_field = False
         if field.get('type') == 'array':
             list_field = True
@@ -159,7 +161,7 @@ class TemplateRunner:
                 ref = field.get('items', {}).get('$ref', None)
                 ref = ref.split('/')[-1]
                 definition = definitions.get(ref, {})
-                type_ = f'{definition.get("title", ref)}[]'
+                type_ = f'{definition.get("type")}[]'
             else:
                 type_ = f'{item_type}[]'
             field = field.get('items', {})
@@ -167,23 +169,23 @@ class TemplateRunner:
             ref = field.get('allOf')[0].get('$ref')
             ref = ref.split('/')[-1]
             definition = definitions.get(ref, {})
-            type_ = f'{definition.get("title", ref)}'
+            type_ = f'{definition.get("type")}'
         elif field.get('$ref'):
             ref = field.get('$ref')
             ref = ref.split('/')[-1]
             definition = definitions.get(ref, {})
-            type_ = f'{definition.get("title", ref)}'
+            type_ = f'{definition.get("type")}'
         else:
             type_ = field.get('type', 'str')
         
-        if 'enum' in field:
+        if definition is not None and 'enum' in definition:
             if list_field:
                 options += f'''
-                Select any relevant options from: {", ".join(field["enum"])}
+                Select any relevant options from: {", ".join(definition["enum"])}
                 '''
             else:
                 options += f'''
-                Select one option from: {", ".join(field["enum"])}
+                Select one option from: {", ".join(definition["enum"])}
                 '''
 
         if len(options) > 0:
