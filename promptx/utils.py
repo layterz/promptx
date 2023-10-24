@@ -34,6 +34,24 @@ class Entity(BaseModel):
         if 'type' not in data:
             data['type'] = self.__class__.__name__.lower()
         super().__init__(**{'id': id or str(uuid.uuid4()), **data})
+        self._lazy_load()
+    
+    def _lazy_load(self):
+        print('lazy loading')
+        for name, field in self.__annotations__.items():
+            print('checking field', name, field)
+            if isinstance(field, type) and issubclass(field, Entity):
+                print('setting up lazy loading for', name, field)
+                original_value = getattr(self, name, None)
+                
+                def loader(original_value=original_value, field_type=field):
+                    # Lazy-loading logic here
+                    print(f'Lazy loading {name}', original_value, field_type)
+                    return None
+                
+                setattr(self, name, property(loader))
+                print('done setting up lazy loading for', name, field)
+                print('prop', getattr(self, name))
     
     @classmethod
     def generate_schema_for_field(cls, name, field_type: Any, field: Field):
@@ -83,6 +101,7 @@ class Entity(BaseModel):
                 "items": schema
             }
         
+        # TODO: need to test/fix this
         info = None
         if info is not None:
             if info.description:
@@ -157,6 +176,9 @@ class Entity(BaseModel):
         # Display the table
         display(HTML(html))
         return self.model_dump_json()
+    
+    def load(self):
+        pass
 
 
 def _is_list(schema):

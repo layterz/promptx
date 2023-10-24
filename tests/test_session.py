@@ -140,7 +140,7 @@ def test_foriegn_key(session, user):
     _account = session.query(ids=[account.id]).first
     assert _account is not None
     assert _account.id == account.id
-    assert _account.user['id'] == user.id
+    assert _account.user.id == user.id
 
 def test_one_to_many():
     pass
