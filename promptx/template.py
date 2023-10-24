@@ -148,7 +148,7 @@ class TemplateRunner:
             'min_length', 'max_length',
         ]
         metadata = {
-            k: v for k, v in field.metadata.items()
+            k: v for k, v in field.items()
             if k in metadata_keys
         }
 
