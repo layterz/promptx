@@ -1,6 +1,6 @@
 import os
-import shutil
 import click
+from rich import pretty, print
 import requests
 from IPython import embed
 from jinja2 import Environment, FileSystemLoader, select_autoescape
@@ -9,6 +9,8 @@ from . import load
 
 
 API_ENDPOINT = os.environ.get('API_ENDPOINT', 'http://localhost:8000')
+
+pretty.install()
 
 @click.group()
 def cli():
@@ -57,7 +59,7 @@ def admin(path=None, host=None, port=None):
 
 
 @cli.command(name='init')
-@click.argument('path', nargs=1)
+@click.argument('path', nargs=1, required=False)
 def init(path=None):
     # create a hidden directory in the current directory called .px
     if path is None:
@@ -69,6 +71,7 @@ def init(path=None):
         print(f'Error: {dir} already exists')
         return
     os.mkdir(dir)
+    print(f'Promptx project created at: {path}')
 
 
 def main():

@@ -1,7 +1,6 @@
 import pytest
 
 from promptx.collection import *
-from promptx.utils import Entity
 
 
 class User(Entity):

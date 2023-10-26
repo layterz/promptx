@@ -16,9 +16,8 @@ class PromptInput(BaseModel):
 class API:
     world: World
 
-    def __init__(self, world, logger=None):
+    def __init__(self, world):
         self.world = world
-        self.logger = logger or world.logger.getChild('api')
         self.fastapi_app = FastAPI()
 
         @self.fastapi_app.get("/inbox")

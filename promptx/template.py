@@ -4,14 +4,15 @@ import json
 import urllib3
 from typing import * 
 import jsonschema
+from loguru import logger
 from pydantic import BaseModel
 import openai
 from jinja2 import Template as JinjaTemplate
 
-from .collection import Collection, Query
+from .collection import Collection, Entity, Query
 from .logging import *
-from .models import LLM, MockLLM
-from .utils import Entity, model_to_json_schema, create_entity_from_schema, serializer
+from .models import MockLLM
+from .utils import model_to_json_schema, create_entity_from_schema, serializer
 
 
 class MaxRetriesExceeded(Exception):
@@ -87,12 +88,6 @@ class Template(Entity):
 
 
 class TemplateRunner:
-    template: Template
-    llm: LLM = MockLLM()
-
-    def __init__(self, llm=None, logger=None, debug=False, silent=False, name=None):
-        self.logger = logger or logging.getLogger(name or self.__class__.__name__)
-        self.llm = llm or self.llm
     
     def parse(self, x):
         if x is None:
@@ -126,7 +121,8 @@ class TemplateRunner:
         vars = {
             **x,
             'instructions': t.instructions,
-            'examples': self.render_examples(t),
+            # TODO: need to fix examples schema
+            #'examples': self.render_examples(t),
             'format': self.render_format(t, x),
             'input': input,
             'output': output,
@@ -257,7 +253,7 @@ class TemplateRunner:
         schema = model_to_json_schema(json.loads(t.output))
         if schema.get('type', None) == 'string' or (schema.get('type', None) == 'array' and schema.get('items', {}).get('type', None) == 'string'):
             return out
-        entities = create_entity_from_schema(schema, out)
+        entities = create_entity_from_schema(schema, out, base=Entity)
         return entities
     
     def dict(self):
@@ -270,63 +266,51 @@ class TemplateRunner:
             'output': self.output,
         }
     
-    def __call__(self, t, x, **kwargs):
-        return self.forward(t, x, **kwargs)
+    def __call__(self, t, x, llm, **kwargs):
+        return self.forward(t, x, llm, **kwargs)
     
-    def forward(self, t, x, context=None, history=None, retries=3, dryrun=False, **kwargs):
+    def forward(self, t, x, llm, context=None, history=None, retries=3, dryrun=False, **kwargs):
         if retries and retries <= 0:
             e = MaxRetriesExceeded(f'{t.name} failed to forward {x}')
-            self.logger.error(e)
+            logger.error(e)
             raise e
         
         if dryrun:
-            self.logger.debug(f'Dryrun: {t.output}')
+            logger.debug(f'Dryrun: {t.output}')
             llm = MockLLM(output=t.output)
-        else:
-            # TODO: llm should be looked up from collection/registered system
-            # m = self.world.models.get('id')
-            # LLM = self.world.systems(m)
-            # llm = LLM()
-            llm = self.llm
         
         px = self.parse(x)
             
         prompt_input = self.render(t, {'input': px})
-        self.logger.log(INSTRUCTIONS, t.instructions)
-        if t.examples: self.logger.log(EXAMPLES, self.render_examples(t))
-        if len(px): self.logger.log(INPUT, px)
 
         try:
             response = llm.generate(prompt_input, context=context or t.context, history=history)
         except (urllib3.exceptions.ReadTimeoutError,
                 urllib3.exceptions.ConnectTimeoutError,
                 urllib3.exceptions.NewConnectionError) as e:
-            self.logger.warning(f'LLM generation failed: {e}')
+            logger.error(f'LLM generation failed: {e}')
             time.sleep(2)
-            return self.forward(t, x, retries=retries, **kwargs)
+            return self.forward(t, x, llm, retries=retries, **kwargs)
         except (openai.error.APIError,
                 openai.error.Timeout,
                 openai.error.ServiceUnavailableError) as e:
-            self.logger.warning(f'LLM generation failed: {e}')
+            logger.error(f'LLM generation failed: {e}')
             time.sleep(2)
-            return self.forward(t, x, retries=retries, **kwargs)
+            return self.forward(t, x, llm, retries=retries, **kwargs)
         except openai.error.RateLimitError as e:
-            self.logger.warning(f'Hit rate limit for {self}: {e}')
+            logger.error(f'Hit rate limit for {self}: {e}')
             time.sleep(10)
-            return self.forward(t, x, retries=retries, **kwargs)
+            return self.forward(t, x, llm, retries=retries, **kwargs)
 
-        if t.output: self.logger.log(FORMAT_INSTRUCTIONS, self.render_format(t, px))
         try:
-            self.logger.log(OUTPUT, response.raw)
             response.content = self.process(t, px, response.raw, **kwargs)
         except jsonschema.exceptions.ValidationError as e:
-            self.logger.error(f'Output validation failed: {e}')
-            return self.forward(t, x, retries=retries-1, **kwargs)
+            logger.error(f'Output validation failed: {e}')
+            return self.forward(t, x, llm, retries=retries-1, **kwargs)
         except json.JSONDecodeError as e:
-            self.logger.warning(f'Failed to decode JSON from {e}')
-            return self.forward(t, x, retries=retries-1, **kwargs)
+            logger.warning(f'Failed to decode JSON from {e}')
+            return self.forward(t, x, llm, retries=retries-1, **kwargs)
         except Exception as e:
-            self.logger.error(f'Failed to forward {x}: {e}')
-            return self.forward(t, x, retries=retries-1, **kwargs)
-        self.logger.log(METRICS, response.metrics)
+            logger.error(f'Failed to forward {x}: {e}')
+            return self.forward(t, x, llm, retries=retries-1, **kwargs)
         return response

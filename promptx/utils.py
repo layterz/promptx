@@ -25,156 +25,6 @@ PYTYPE_TO_JSONTYPE: Dict[Type, str] = {
 }
 
 
-class Entity(BaseModel):
-    id: str = None
-    type: str = None
-    model_config = ConfigDict(arbitrary_types_allowed=True)
-    
-    def __init__(self, id=None, **data):
-        if 'type' not in data:
-            data['type'] = self.__class__.__name__.lower()
-        super().__init__(**{'id': id or str(uuid.uuid4()), **data})
-        self._lazy_load()
-    
-    def _lazy_load(self):
-        for name, field in self.__annotations__.items():
-            if isinstance(field, type) and issubclass(field, Entity):
-                original_value = getattr(self, name, None)
-                
-                def loader(original_value=original_value, field_type=field):
-                    # Lazy-loading logic here
-                    return None
-                
-                setattr(self, name, property(loader))
-    
-    @classmethod
-    def generate_schema_for_field(cls, name, field_type: Any, field: Field):
-        return_list = False
-        definitions = {}
-
-        if _is_list_type(field_type):
-            field_type = get_args(field_type)[0]
-            return_list = True
-        
-        # Handle enums
-        if isinstance(field_type, type) and issubclass(field_type, Enum):
-            schema = {
-                "type": "string",
-                "enum": [e.name.lower() for e in field_type],
-            }
-
-        # Handle basic types
-        elif isinstance(field_type, type) and issubclass(field_type, (int, float, str, bool)):
-            type_ = PYTYPE_TO_JSONTYPE[field_type]
-            schema = {"type": type_}
-
-        # Handle Pydantic model types (reference schema)
-        elif isinstance(field_type, type) and issubclass(field_type, Entity):
-            schema = {
-                "type": "object",
-                "properties": {
-                    "id": {"type": "string"},
-                    "type": {"type": "string"},
-                },
-            }
-        
-        # Handle default case by getting the cls field and calling schema
-        else:
-            if isinstance(field_type, list):
-                field_type = field_type[0]
-            if field_type.__name__ not in definitions:
-                definitions[field_type.__name__] = {
-                    "type": "object",
-                    "properties": field.default.schema() if field.default is not None else {}
-                }
-            schema = {"$ref": f"#/$defs/{field_type.__name__}"} 
-
-        if return_list:
-            schema = {
-                "type": "array",
-                "items": schema
-            }
-        
-        # TODO: need to test/fix this
-        info = None
-        if info is not None:
-            if info.description:
-                schema['description'] = info.description
-            if info.ge:
-                schema['ge'] = info.ge
-            if info.gt:
-                schema['gt'] = info.gt
-            if info.le:
-                schema['le'] = info.le
-            if info.lt:
-                schema['lt'] = info.lt
-            if info.min_length:
-                schema['min_length'] = info.min_length
-            if info.max_length:
-                schema['max_length'] = info.max_length
-            
-            extra = info.extra
-            if extra is not None:
-                if 'generate' in extra:
-                    schema['generate'] = extra['generate']
-
-        if field.default:
-            schema['default'] = field.default
-        return schema, definitions, []
-    
-    @classmethod
-    def schema(cls, by_alias: bool = True, **kwargs):
-        properties = {}
-        required = []
-        definitions = {}
-
-        for field_name, field in cls.model_fields.items():
-            try:
-                type_ = cls.__annotations__.get(field_name, field.annotation)
-                field_schema, defs, reqs = cls.generate_schema_for_field(field_name, type_, field)
-                properties[field_name] = field_schema
-                definitions = {**definitions, **defs}
-            except Exception as e:
-                print('schema field failed', field_name, e, field)
-                continue
-            
-            if field.is_required:
-                required.append(field_name)
-            required += reqs
-
-        # Construct the base schema
-        base_schema = {
-            "title": cls.__name__,
-            "type": "object",
-            "properties": properties,
-            "$defs": definitions,  # Include definitions for references
-            "required": required,
-        }
-
-        return base_schema
-    
-    def display(self):
-        # Check if we're in an IPython environment
-        try:
-            get_ipython
-        except NameError:
-            # If we're not in an IPython environment, fall back to json
-            return self.model_dump_json()
-
-        # Convert the dictionary to a HTML table
-        html = '<table>'
-        for field, value in self.model_dump().items():
-            html += f'<tr><td>{field}</td><td>{value}</td></tr>'
-        html += '</table>'
-
-        # Display the table
-        display(HTML(html))
-        return self.model_dump_json()
-    
-    def load(self):
-        pass
-
-
 def _is_list(schema):
     return schema.get('type') == 'array'
 
@@ -289,7 +139,7 @@ def model_to_json_schema(model):
     return output
 
 
-def create_model_from_schema(schema):
+def create_model_from_schema(schema, base=None):
     """
     Create a Pydantic BaseModel from a JSON schema.
 
@@ -329,12 +179,14 @@ def create_model_from_schema(schema):
         name: _create_field(field_info, definitions, name in required)
         for name, field_info in properties.items()
     }
+    if 'id' not in fields:
+        fields['id'] = (str, None)
     if 'type' not in fields:
-        fields['type'] = (str, ...)
-    return create_model(schema.get('title', 'Entity').capitalize(), **fields, __base__=Entity)
+        fields['type'] = (str, schema.get('title', 'Entity').lower())
+    return create_model(schema.get('title', 'Entity').capitalize(), **fields, __base__=base)
 
 
-def create_entity_from_schema(schema, data):
+def create_entity_from_schema(schema, data, base=None):
     """
     Create a Pydantic data entity from a JSON schema and input data.
 
@@ -420,14 +272,14 @@ def create_entity_from_schema(schema, data):
     # however, the entity needs to be loaded when the parent entity is loaded
     
     jsonschema.validate(data, schema)
-    m = create_model_from_schema(schema)
+    m = create_model_from_schema(schema, base=base)
     defaults = {
-        'type': _get_title(schema),
+        'type': _get_title(schema).lower(),
     }
     if _is_list(schema):
-        return [m(**{**defaults, **o}) for o in data]
+        return [m.load(**{**defaults, **o}) for o in data]
     else:
-        return m(**{**defaults, **data})
+        return m.load(**{**defaults, **data})
 
 
 def serializer(obj):

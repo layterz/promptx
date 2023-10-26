@@ -662,9 +662,8 @@ class CollectionDetailsPage(AdminEntityPage):
 class Admin:
     world: World
 
-    def __init__(self, world, logger=None):
+    def __init__(self, world):
         self.world = world
-        self.logger = logger or world.logger.getChild('admin')
         self.app = Dash(
             world.name, 
             use_pages=True,

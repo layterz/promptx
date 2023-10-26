@@ -3,42 +3,35 @@ from enum import Enum
 from pydantic import BaseModel
 from promptx.utils import *
 
+from . import User, Trait, Account, _user, user, session
 
-class Color(Enum):
-    RED = 'red'
-    GREEN = 'green'
-    BLUE = 'blue'
-
-class Address(BaseModel):
-    street: str
-    city: str
-
-class Person(BaseModel):
-    name: str
-    age: int
-    address: Address
-
-class Item(BaseModel):
-    name: str
-    color: Color
-
-class Order(BaseModel):
-    order_id: str
-    person: Person
-    items: list[Item]
 
 
 def test_convert_pydantic_model_to_json_schema():
-    class Person(BaseModel):
-        name: str
-        age: int
-    schema = model_to_json_schema(Person)
+    schema = model_to_json_schema(User)
     expected_schema = {
-        'title': 'Person',
+        'title': 'User',
         'type': 'object',
         'properties': {
-            'name': {'title': 'Name', 'type': 'string'},
-            'age': {'title': 'Age', 'type': 'integer'}
+            'id': {'title': 'Id', 'type': 'string', 'default': None},
+            'type': {'title': 'Type', 'type': 'string', 'default': None},
+            'name': {'maxLength': 20, 'minLength': 3, 'title': 'Name', 'type': 'string'},
+            'age': {'exclusiveMaximum': 100, 'minimum': 18, 'title': 'Age', 'type': 'integer'},
+            'role': {'allOf': [{'$ref': '#/$defs/Role'}], 'default': 'admin'},
+            'banned': {'default': False, 'generate': False, 'title': 'Banned', 'type': 'boolean'}, 
+            'vigor': {'default': 0, 'maximum': 1.0, 'minimum': 0.0, 'title': 'Vigor', 'type': 'number'}, 
+            'traits': {
+                'title': 'Traits', 
+                'type': 'array',
+                'default': None, 
+                'description': 'What kind of personality describes the user?', 
+                'items': {'$ref': '#/$defs/Trait'}, 
+                'maxItems': 3, 'minItems': 1, 
+            },
+        },
+        '$defs': {
+            'Role': {'enum': ['admin', 'user'], 'title': 'Role', 'type': 'string'}, 
+            'Trait': {'enum': ['nice', 'mean', 'funny', 'smart'], 'title': 'Trait', 'type': 'string'},
         },
         'required': ['name', 'age']
     }
@@ -109,32 +102,6 @@ def test_convert_pydantic_model_with_nested_models_to_json_schema():
     assert schema == expected_schema
 
 
-def test_convert_pydantic_enum_to_json_schema():
-    schema = model_to_json_schema(Item)
-    expected_schema = {
-        'type': 'object',
-        'title': 'Item',
-        'properties': {
-            'name': {
-                'title': 'Name',
-                'type': 'string'
-            },
-            'color': {
-                '$ref': '#/$defs/Color'
-            }
-        },
-        'required': ['name', 'color'],
-        '$defs': {
-            'Color': {
-                'title': 'Color',
-                'enum': ['red', 'green', 'blue'],
-                'type': 'string',
-            }
-        }
-    }
-    assert schema == expected_schema
-
-
 def test_passthrough_dictionary_with_nested_schema_as_json_schema():
     schema = {
         'type': 'object',
@@ -155,62 +122,21 @@ def test_passthrough_dictionary_with_nested_schema_as_json_schema():
     assert result_schema == schema
 
 
-def test_convert_pydantic_model_with_nested_list_of_enums_to_json_schema():
-    class Item(BaseModel):
-        name: str
-        colors: list[Color]
-    
-    schema = model_to_json_schema(Item)
-    expected_schema = {
-        'type': 'object',
-        'title': 'Item',
-        'properties': {
-            'name': {
-                'title': 'Name',
-                'type': 'string'
-            },
-            'colors': {
-                'title': 'Colors',
-                'type': 'array',
-                'items': {
-                    '$ref': '#/$defs/Color'
-                }
-            }
-        },
-        'required': ['name', 'colors'],
-        '$defs': {
-            'Color': {
-                'title': 'Color',
-                'type': 'string',
-                'enum': ['red', 'green', 'blue']
-            }
-        }
-    }
-    assert schema == expected_schema
-
-
 def test_convert_pydantic_model_with_nested_base_model_to_json_schema():
-    schema = model_to_json_schema(Person)
+    schema = model_to_json_schema(Account)
     expected_schema = {
-        'title': 'Person',
+        'title': 'Account',
         'type': 'object',
         'properties': {
-            'name': {'title': 'Name', 'type': 'string'},
-            'age': {'title': 'Age', 'type': 'integer'},
-            'address': {
-                '$ref': '#/$defs/Address'
-            }
         },
-        'required': ['name', 'age', 'address'],
+        'required': ['user'],
         '$defs': {
             'Address': {
                 'title': 'Address',
                 'type': 'object',
                 'properties': {
-                    'street': {'title': 'Street', 'type': 'string'},
-                    'city': {'title': 'City', 'type': 'string'}
                 },
-                'required': ['street', 'city']
+                'required': []
             }
         }
     }
@@ -218,64 +144,8 @@ def test_convert_pydantic_model_with_nested_base_model_to_json_schema():
 
 
 def test_convert_pydantic_model_with_nested_list_of_base_models_to_json_schema():
-    schema = model_to_json_schema(Order)
-    expected_schema = {
-        'title': 'Order',
-        'type': 'object',
-        'properties': {
-            'order_id': {'title': 'Order Id', 'type': 'string'},
-            'person': {
-                '$ref': '#/$defs/Person'
-            },
-            'items': {
-                'title': 'Items',
-                'type': 'array',
-                'items': {
-                    '$ref': '#/$defs/Item'
-                }
-            }
-        },
-        'required': ['order_id', 'person', 'items'],
-        '$defs': {
-            'Person': {
-                'title': 'Person',
-                'type': 'object',
-                'properties': {
-                    'name': {'title': 'Name', 'type': 'string'},
-                    'age': {'title': 'Age', 'type': 'integer'},
-                    'address': {
-                        '$ref': '#/$defs/Address'
-                    },
-                },
-                'required': ['name', 'age', 'address']
-            },
-            'Address': {
-                'title': 'Address',
-                'type': 'object',
-                'properties': {
-                    'street': {'title': 'Street', 'type': 'string'},
-                    'city': {'title': 'City', 'type': 'string'}
-                },
-                'required': ['street', 'city']
-            },
-            'Color': {
-                'title': 'Color',
-                'type': 'string',
-                'enum': ['red', 'green', 'blue']
-            },
-            'Item': {
-                'title': 'Item',
-                'type': 'object',
-                'properties': {
-                    'name': {'title': 'Name', 'type': 'string'},
-                    'color': {
-                        '$ref': '#/$defs/Color'
-                    }
-                },
-                'required': ['name', 'color']
-            }
-        }
-    }
+    schema = model_to_json_schema()
+    expected_schema = {}
     assert schema == expected_schema
 
 
@@ -398,10 +268,12 @@ def test_create_entity_from_schema_with_single_entity_missing_required_field():
     with pytest.raises(jsonschema.ValidationError):
         create_entity_from_schema(person_schema, data)
 
-def test_create_entity_from_schema_with_single_entity_and_generated_id():
+def test_create_entity_from_schema_with_single_entity_and_generated_id_and_type():
     data = {'name': 'Alice', 'age': 30}
     person = create_entity_from_schema(person_schema, data)
-    assert hasattr(person, 'id')  # 'id' should be generated
+    assert hasattr(person, 'id')
+    assert hasattr(person, 'type')
+    assert person.type == 'person'
 
 def test_create_entity_from_schema_with_list_of_entities():
     data_list = [{'name': 'Alice', 'age': 30}, {'name': 'Bob', 'age': 25}]

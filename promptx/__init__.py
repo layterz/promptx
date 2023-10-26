@@ -1,8 +1,6 @@
 import os
 import time
 from typing import Callable, List
-from dotenv import load_dotenv
-from pathlib import Path
 
 from .collection import Collection 
 from .world import Session
@@ -126,7 +124,7 @@ def find_project_root(path=None, config_filename='.px'):
 def load(path='local'):
     if path == 'local':
         path = find_project_root()
-    
+
     if path is None:
         raise ValueError('could not find project')
 
@@ -148,8 +146,6 @@ def load(path='local'):
             spec.loader.exec_module(module)
             session = app.world.create_session(f'{app.name}_config_{int(time.time())}')
             module.setup(session)
-    
-    print(f'Loaded {app}')
     
     user = DefaultUser()
     s = app.world.create_session(user)

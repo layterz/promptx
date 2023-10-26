@@ -1,76 +1,8 @@
 import random
 import uuid
 import pytest
-from enum import Enum
-from pydantic import Field
 
-from promptx import *
-from promptx.utils import Entity
-from promptx.world import World
-from promptx.collection import VectorDB, ChromaVectorDB
-
-
-class Role(Enum):
-    admin = 'admin'
-    user = 'user'
-
-class Trait(Enum):
-    nice = 'nice'
-    mean = 'mean'
-    funny = 'funny'
-    smart = 'smart'
-
-class Address(Entity):
-    street: str
-    city: str
-    state: str
-    zip: str
-
-class User(Entity):
-    name: str = Field(..., min_length=3, max_length=20)
-    age: int = Field(..., ge=18, lt=100)
-    role: Role = Role.admin
-    banned: bool = Field(False, json_schema_extra={'generate': False})
-    vigor: float = Field(0, ge=0, le=1)
-    traits: List[Trait] = Field(None, description='What kind of personality describes the user?', min_length=1, max_length=3)
-
-class Account(Entity):
-    user: User
-
-
-@pytest.fixture
-def session():
-    import shutil
-    try:
-        shutil.rmtree('tests/.px')
-    except FileNotFoundError as e:
-        pass
-    db = ChromaVectorDB(path='tests')
-    world = World('tests', db)
-    session = world.create_session('test_store')
-    yield session
-    shutil.rmtree('tests/.px')
-
-
-def _user():
-    name = random.choice(['John', 'Jane', 'Jack', 'Jill'])
-    age = random.randint(18, 99)
-    role = random.choice(list(Role))
-    banned = random.choice([True, False])
-    vigor = random.random()
-    traits = random.choices(list(Trait), k=3)
-    return User(
-        name=name, 
-        age=age,
-        role=role,
-        banned=banned,
-        vigor=vigor,
-        traits=traits,
-    )
-
-@pytest.fixture
-def user():
-    return _user()
+from . import User, Trait, Account, _user, user, session
 
 
 def test_store(session, user):

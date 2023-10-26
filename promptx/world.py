@@ -1,7 +1,7 @@
 import json
 import uuid
-import logging
 import numpy as np
+from loguru import logger
 from pydantic import BaseModel
 from typing import Any, Dict, List
 from chromadb.utils import embedding_functions
@@ -10,31 +10,23 @@ from .collection import Collection, CollectionEntity, Query, VectorDB
 from .template import Template, TemplateRunner, MaxRetriesExceeded, MockLLM
 from .models import PromptLog, QueryLog
 from .chat import ChatBot
-from .logging import JSONLogFormatter, NotebookFormatter
 from .utils import model_to_json_schema
 
 
 class Session:
     _chat_history: List[PromptLog] = None
 
-    def __init__(self, world, name, db, llm, ef=None, default_collection='default', logger=None, collections=None):
+    def __init__(self, world, default_collection='default'):
         self.world = world
-        self.name = name
-        self.db = db
-        self.llm = llm
-        self.ef = ef or embedding_functions.DefaultEmbeddingFunction()
         self._collection = default_collection
         self._chat_history = []
-        if collections is not None:
-            self._collections = collections 
-        self.logger = logger or self.world.logger.getChild(self.name)
     
-    def _run_prompt(self, t, input, context=None, history=None, dryrun=False, retries=3, to_json=False, **kwargs):
+    def _run_prompt(self, t, input, llm, context=None, history=None, dryrun=False, retries=3, to_json=False, **kwargs):
         e = None
         s = self.world.template_system
         rendered = s.render(t, {'input': s.parse(input)})
         try:
-            r = s(t, input, context=context, history=history, dryrun=dryrun, retries=retries, **kwargs)
+            r = s(t, input, context=context, llm=llm, history=history, dryrun=dryrun, retries=retries, **kwargs)
             log = PromptLog(template=t.id, raw_input=rendered, raw_output=r.raw)
             self.store(log, collection='logs')
             if isinstance(r.content, list):
@@ -59,12 +51,12 @@ class Session:
                 else:
                     return r.content
         except MaxRetriesExceeded as e:
-            self.logger.error(f'Max retries exceeded: {e}')
+            logger.error(f'Max retries exceeded: {e}')
             log = PromptLog(template=t.id, raw_input=rendered, error=str(e))
             self.store(log, collection='logs')
-            return None
+            raise e
     
-    def _run_batch(self, t, inputs, dryrun=False, retries=3, to_json=False, **kwargs):
+    def _run_batch(self, t, inputs, llm, dryrun=False, retries=3, to_json=False, **kwargs):
         o = []
         for input in inputs:
             r = self._run_prompt(t, input, dryrun=dryrun, retries=retries, to_json=to_json, **kwargs)
@@ -73,12 +65,6 @@ class Session:
         return o
 
     def prompt(self, instructions=None, input=None, output=None, id=None, context=None, template=None, llm=None, examples=None, num_examples=1, logs=None, tools=None, dryrun=False, retries=3, debug=False, silent=False, to_json=False, **kwargs):
-        logger = self.logger.getChild('prompt')
-        level = logging.INFO
-        if debug: level = logging.DEBUG
-        elif silent: level = logging.ERROR
-        logger.setLevel(level)
-
         if output is not None:
             output = model_to_json_schema(output)
             if output is not None:
@@ -89,7 +75,6 @@ class Session:
                 id=id,
                 output=output,
                 instructions=instructions,
-                llm=llm or self.llm,
                 context=context,
                 examples=examples,
                 num_examples=num_examples,
@@ -97,17 +82,25 @@ class Session:
                 tools=tools,
                 debug=debug,
                 silent=silent,
-                logger=logger,
             )
         elif isinstance(template, str):
-            template = self.world.templates(ids=[template]).first
-            if template is None:
-                raise ValueError(f'No template found with id {template}')
+            template = self.query(ids=[template], collection='templates').first
+        
+        if template is None:
+            raise ValueError(f'No template found with id {template}')
+        
+        if llm is None:
+            llm = self.query(ids=['default'], collection='models').first
+        elif isinstance(llm, str):
+            llm = self.query(ids=[llm], collection='models').first
+        
+        if llm is None:
+            raise ValueError(f'No model found')
 
         if isinstance(input, list):
-            return self._run_batch(template, input, dryrun=dryrun, retries=retries, to_json=to_json, **kwargs)
+            return self._run_batch(template, input, llm, dryrun=dryrun, retries=retries, to_json=to_json, **kwargs)
         else:
-            return self._run_prompt(template, input, dryrun=dryrun, retries=retries, to_json=to_json, **kwargs)
+            return self._run_prompt(template, input, llm, dryrun=dryrun, retries=retries, to_json=to_json, **kwargs)
     
     def embed(self, item, field=None):
         if isinstance(item, str):
@@ -159,7 +152,7 @@ class Session:
                     except AttributeError:
                         _context.append(item.value)
             except Exception as e:
-                self.logger.error(f'Error getting context: {e}')
+                logger.error(f'Error getting context: {e}')
 
         if len(_context):
             _context = [
@@ -286,14 +279,13 @@ class World:
     _collections: Dict[str, Collection]
     db: VectorDB
 
-    def __init__(self, name, db, llm=None, ef=None, logger=None, templates=None):
+    def __init__(self, name, db, llm=None, ef=None, templates=None):
         self.name = name
         self.sessions = []
         self._collections = {}
         self.llm = llm or MockLLM()
         self.ef = ef or (lambda x: [0] * len(x))
         self.db = db
-        self.logger = logger or logging.getLogger(self.name)
         
         collection = self.db.get_or_create_collection('collections')
         self.collections = Collection.load(collection)
@@ -312,23 +304,11 @@ class World:
             self.create_collection(collection.name)
         
         # TODO: hack, should register as normal system
-        self.template_system = TemplateRunner(llm=self.llm, logger=self.logger.getChild('template_system'))
+        self.template_system = TemplateRunner()
     
-    def create_session(self, user, name=None, db=None, llm=None, ef=None, logger=None, silent=False, debug=False, log_format='notebook'):
-        llm = llm or self.llm
-        ef = ef or self.ef
-        db = db or self.db
-        logger = logger or self.logger.getChild(f'session.{name}')
-        ch = logging.StreamHandler()
-        formatter = JSONLogFormatter() if log_format == 'json' else NotebookFormatter()
-        ch.setFormatter(formatter)
-        self.logger.addHandler(ch)
-        level = logging.INFO
-        if debug: level = logging.DEBUG
-        elif silent: level = logging.ERROR
-        logger.setLevel(level)
-        session = Session(self, name=name, db=db, llm=llm, ef=ef, logger=logger,
-                          collections=self.collections)
+    def create_session(self, name=None, user=None):
+        logger.info(f'Creating session: {name} / {user}')
+        session = Session(self)
         self.sessions.append(session)
         return session
     

@@ -1,16 +1,151 @@
+import uuid
 import json
 from enum import Enum
 from datetime import datetime
 from abc import abstractmethod
 from typing import *
+from loguru import logger
 import pandas as pd
-from pydantic import BaseModel 
-from pydantic_core._pydantic_core import PydanticUndefined, PydanticUndefinedType
+from pydantic import BaseModel, Field, ConfigDict
+from pydantic_core._pydantic_core import PydanticUndefinedType
 import chromadb
 
 
-from .utils import Entity, create_entity_from_schema
+from .utils import create_model_from_schema, create_entity_from_schema, _is_list_type, PYTYPE_TO_JSONTYPE, get_args
 
+
+class Entity(BaseModel):
+    id: str = None
+    type: str = None
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+    
+    def __init__(self, id=None, **data):
+        if 'type' not in data:
+            data['type'] = self.__class__.__name__.lower()
+        
+        super().__init__(**{'id': id or str(uuid.uuid4()), **data})
+    
+    @classmethod
+    def load(cls, id=None, **kwargs):
+        for name, field in cls.__annotations__.items():
+            if isinstance(field, type) and issubclass(field, Entity):
+                def loader():
+                    # Lazy-loading logic here
+                    logger.info(f'Loading {name}')
+                    return None
+                
+                setattr(cls, name, property(loader))
+        return cls(id=id, **kwargs)
+    
+    @classmethod
+    def generate_schema_for_field(cls, name, field_type: Any, field: Field):
+        return_list = False
+        definitions = {}
+
+        if _is_list_type(field_type):
+            field_type = get_args(field_type)[0]
+            return_list = True
+        
+        # Handle enums
+        if isinstance(field_type, type) and issubclass(field_type, Enum):
+            schema = {
+                "type": "string",
+                "enum": [e.name.lower() for e in field_type],
+            }
+
+        # Handle basic types
+        elif isinstance(field_type, type) and issubclass(field_type, (int, float, str, bool)):
+            type_ = PYTYPE_TO_JSONTYPE[field_type]
+            schema = {"type": type_}
+
+        # Handle Pydantic model types (reference schema)
+        elif isinstance(field_type, type) and issubclass(field_type, Entity):
+            schema = {
+                "type": "object",
+                "properties": {
+                    "id": {"type": "string"},
+                    "type": {"type": "string"},
+                },
+            }
+        
+        # Handle default case by getting the cls field and calling schema
+        else:
+            if isinstance(field_type, list):
+                field_type = field_type[0]
+            if field_type.__name__ not in definitions:
+                definitions[field_type.__name__] = {
+                    "type": "object",
+                    "properties": field.default.schema() if field.default is not None else {}
+                }
+            schema = {"$ref": f"#/$defs/{field_type.__name__}"} 
+
+        if return_list:
+            schema = {
+                "type": "array",
+                "items": schema,
+            }
+        
+        # TODO: need to test/fix this
+        info = None
+        if info is not None:
+            if info.description:
+                schema['description'] = info.description
+            if info.ge:
+                schema['ge'] = info.ge
+            if info.gt:
+                schema['gt'] = info.gt
+            if info.le:
+                schema['le'] = info.le
+            if info.lt:
+                schema['lt'] = info.lt
+            if info.min_length:
+                schema['min_length'] = info.min_length
+            if info.max_length:
+                schema['max_length'] = info.max_length
+            
+            extra = info.extra
+            if extra is not None:
+                if 'generate' in extra:
+                    schema['generate'] = extra['generate']
+
+        if field.default:
+            schema['default'] = field.default
+        return schema, definitions, []
+    
+    @classmethod
+    def schema(cls, by_alias: bool = True, **kwargs):
+        properties = {}
+        required = []
+        definitions = {}
+
+        for field_name, field in cls.model_fields.items():
+            try:
+                type_ = cls.__annotations__.get(field_name, field.annotation)
+                field_schema, defs, reqs = cls.generate_schema_for_field(field_name, type_, field)
+                properties[field_name] = field_schema
+                definitions = {**definitions, **defs}
+            except Exception as e:
+                logger.error('schema field failed', field_name, e, field)
+                continue
+            
+            if field.is_required():
+                required.append(field_name)
+            required += reqs
+
+        # Construct the base schema
+        base_schema = {
+            "title": cls.__name__,
+            "type": "object",
+            "properties": properties,
+            "$defs": definitions,  # Include definitions for references
+            "required": required,
+        }
+
+        return base_schema
+    
+    def display(self):
+        return self.model_dump_json()
+    
 
 class Query(BaseModel):
     type: str = 'query'
@@ -178,11 +313,13 @@ class Collection(pd.DataFrame):
             filtered_scores = {k: v for k, v in scores.items() if v >= threshold}
             sorted_ids = sorted(filtered_scores, key=filtered_scores.get, reverse=True)
             results = self[self['id'].isin(sorted_ids)].set_index('id').loc[sorted_ids].reset_index()
+            logger.info(f'Found {len(results)} results for query: {texts}')
             if limit is not None:
                 return results.head(limit)
             else:
                 return results
         except KeyError as e:
+            logger.error(f'Failed to parse query results: {e}')
             return None
     
     def __call__(self, *texts, where=None, **kwargs) -> Any:
@@ -209,7 +346,8 @@ class Collection(pd.DataFrame):
                     schemas.get(r['id']),
                     {
                         k: v for k, v in r.items() if (len(v) if isinstance(v, list) else pd.notnull(v))
-                    }
+                    },
+                    base=Entity,
                 ) 
                 for r in self.to_dict('records')
             ]
@@ -219,7 +357,8 @@ class Collection(pd.DataFrame):
                     self.schema or {},
                     {
                         k: v for k, v in r.items() if pd.notnull(v)
-                    }
+                    },
+                    base=Entity,
                 ) 
                 for r in self.to_dict('records')
             ]
@@ -237,6 +376,7 @@ class Collection(pd.DataFrame):
         for item in items:
             self.db.delete(where={'item_id': item.id})
         self.drop(self[self['id'].isin([i.id for i in items])].index, inplace=True)
+        logger.info(f'Deleted {len(items)} items from {self.name}')
 
     def embed(self, *items, **kwargs):
         records = self._create_records(*items, **kwargs)
@@ -263,6 +403,7 @@ class Collection(pd.DataFrame):
         self.drop(self.index, inplace=True)
         for column in df.columns:
             self[column] = df[column]
+        logger.info(f'Embedded {len(new_items)} items into {self.name}')
         return self
 
     def _create_records(self, *items, **kwargs):
@@ -285,7 +426,7 @@ class Collection(pd.DataFrame):
                         continue
                     f = obj.model_fields.get(name)
                     if f is None:
-                        print(f'Field {name} not found in {obj.__class__}')
+                        logger.error(f'Field {name} not found in {obj.__class__}')
                         continue
                     if isinstance(f.annotation, type) and issubclass(f.annotation, Entity):
                         field = _field_serializer(getattr(obj, name))
@@ -321,7 +462,7 @@ class Collection(pd.DataFrame):
                     continue
 
                 if isinstance(f.annotation, type) and issubclass(f.annotation, Entity):
-                    print(f'Field {name} is an Entity')
+                    logger.debug(f'Field {name} is an Entity')
                 if f.json_schema_extra and f.json_schema_extra.get('embed', True) == False:
                     continue
                 if isinstance(field, int) or isinstance(field, float) or isinstance(field, bool):

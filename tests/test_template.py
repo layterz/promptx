@@ -1,155 +1,118 @@
 import pytest
 import openai
 import json
-from enum import Enum
-from pydantic import Field
 
 from promptx.template import *
-from promptx.models import LLM, Response
-from promptx.utils import Entity
+from promptx.models import Response
 
+from . import User, Trait, session, llm
 
-class Role(Enum):
-    admin = 'admin'
-    user = 'user'
-
-class Trait(Enum):
-    nice = 'nice'
-    mean = 'mean'
-    funny = 'funny'
-    smart = 'smart'
-
-class User(Entity):
-    name: str = Field(..., min_length=3, max_length=20)
-    age: int = Field(..., ge=18, lt=100)
-    role: Role = Role.admin
-    traits: List[Trait] = Field(..., description='What kind of personality describes the user?', min_length=1, max_length=3)
-    banned: bool = Field(None, json_schema_extra={'generate': False})
-    vigor: float = Field(0, ge=0, le=1)
-
-class Account(Entity):
-    user: User
 
 @pytest.fixture
-def template():
+def template(session):
     t = Template(instructions='Some example instructions', output=json.dumps(User.model_json_schema()))
-    return t
+    session.store(t, collection='templates')
+    return session.query(ids=[t.id], collection='templates').first
 
 
-def test_basic_response(mocker):
+def test_basic_response(session, llm):
     template = Template(instructions='Some example instructions')
-    llm = mocker.Mock(spec=LLM)
-    response = Response(
-        raw='Test response',
-    )
-    llm.generate.return_value = response
-    runner = TemplateRunner(llm=llm)
-    o = runner(template, None)
+    o = session.prompt(template=template, llm=llm)
+    assert o is not None
+    assert o == 'This is a mock response.'
 
-    assert o.content == 'Test response'
-
-def test_json_valid_output(mocker, template):
-    llm = mocker.Mock(spec=LLM)
-    response = Response(
+def test_json_valid_output(session, template, llm):
+    llm.generate.return_value = Response(
         raw='{ "name": "test", "age": 20, "traits": ["nice"] }',
     )
-    llm.generate.return_value = response
-    
-    runner = TemplateRunner(llm=llm)
-    o = runner(template, None)
+    o = session.prompt(template=template, llm=llm)
 
-    assert o.content.type == 'User'
-    assert o.content.name == 'test'
-    assert o.content.age == 20
+    assert o is not None
+    assert o.type == 'user'
+    assert o.name == 'test'
+    assert o.age == 20
+
+def test_load_from_template_id(session, template, llm):
+    llm.generate.return_value = Response(
+        raw='{ "name": "test", "age": 20, "traits": ["nice"] }',
+    )
+    o = session.prompt(template=template.id, llm=llm)
+    assert o is not None
+    assert o.type == 'user'
+    assert o.name == 'test'
+    assert o.age == 20
     
-def test_json_valid_output__extra_field(mocker, template):
-    llm = mocker.Mock(spec=LLM)
+def test_json_valid_output__extra_field(session, template, llm):
     response = Response(
         raw='{ "name": "test", "age": 20, "location": "london", "traits": ["nice"] }',
     )
     llm.generate.return_value = response
-    
-    runner = TemplateRunner(llm=llm)
 
-    o = runner(template, None)
-    assert o.content.name == 'test'
-    assert o.content.age == 20
+    o = session.prompt(template=template, llm=llm)
+    assert o.name == 'test'
+    assert o.age == 20
     with pytest.raises(AttributeError):
-        assert o.content.location == 'london'
+        assert o.location == 'london'
     
-def test_json_invalid_output__missing_required_field(mocker, template):
-    llm = mocker.Mock(spec=LLM)
+def test_json_invalid_output__missing_required_field(session, template, llm):
     response = Response(
         raw='{ "age": 20 }',
     )
     llm.generate.return_value = response
-    
-    runner = TemplateRunner(llm=llm)
 
     with pytest.raises(MaxRetriesExceeded):
-        runner(template, None)
+        session.prompt(template=template, llm=llm)
     
-def test_json_invalid_output__formatting(mocker, template):
-    llm = mocker.Mock(spec=LLM)
+def test_json_invalid_output__formatting(session, template, llm):
     response = Response(
         raw='"name": "test", "age": 20, "traits": ["nice"] }',
     )
     llm.generate.return_value = response
-    runner = TemplateRunner(llm=llm)
 
     with pytest.raises(MaxRetriesExceeded):
-        runner(template, None)
+        session.prompt(template=template, llm=llm)
     
-def test_invalild_json_output__validation(mocker, template):
-    llm = mocker.Mock(spec=LLM)
+def test_invalild_json_output__validation(session, template, llm):
     response = Response(
         raw='{ "name": "test", "age": "young" }',
     )
     llm.generate.return_value = response
-    
-    runner = TemplateRunner(llm=llm)
 
     with pytest.raises(MaxRetriesExceeded):
-        runner(template, None)
+        session.prompt(template=template, llm=llm)
 
 # TODO: this should probably have some kind of separate retry budget
-def test_exception_handling(mocker, template):
-    llm = mocker.Mock(spec=LLM)
+def test_exception_handling(session, template, llm):
     llm.generate.side_effect = [openai.error.Timeout, Response(raw='Test response')]
     template = Template(instructions='Some example instructions')
     
-    runner = TemplateRunner(llm=llm)
-    o = runner(template, None)
-    assert o.content == 'Test response'
+    o = session.prompt(template=template, llm=llm)
+    assert o == 'Test response'
 
-def test_parse_exception_handling(mocker, template):
-    llm = mocker.Mock(spec=LLM)
+def test_parse_exception_handling(mocker, template, llm):
     mocker.patch.object(TemplateRunner, 'process', side_effect=[*[json.JSONDecodeError('test', 'test', 0)] * 4, 'test'])
-    runner = TemplateRunner(llm=llm)
+    runner = TemplateRunner()
 
     with pytest.raises(MaxRetriesExceeded):
-        runner(template, None)
+        o = runner(template, None, llm=llm)
     
     mocker.patch.object(TemplateRunner, 'process', side_effect=[*[json.JSONDecodeError('test', 'test', 0)] * 3, 'test'])
-    runner = TemplateRunner(llm=llm)
-    o = runner(template, None)
+    runner = TemplateRunner()
+    o = runner(template, None, llm=llm)
     
     assert o.content == 'test'
 
-def test_invalid_input_raises_error(template):
-    runner = TemplateRunner()
+def test_invalid_input_raises_error(session, template, llm):
     with pytest.raises(MaxRetriesExceeded):
-        runner(template, {'age': 'young'})
+        session.prompt(template=template, input={'age': 'young'}, llm=llm)
 
-def test_output_parsing(mocker, template):
-    llm = mocker.Mock(spec=LLM)
+def test_output_parsing(session, template, llm):
     llm.generate.return_value = Response(raw='{ "name": "test", "age": 20, "traits": ["nice"] }')
-    runner = TemplateRunner(llm=llm)
 
-    o = runner(template, None)
-    assert o.content.type == 'User'
-    assert o.content.name == 'test'
-    assert o.content.age == 20
+    o = session.prompt(template=template, llm=llm)
+    assert o.type == 'user'
+    assert o.name == 'test'
+    assert o.age == 20
 
 def test_format_rendering(template):
     runner = TemplateRunner()
@@ -188,13 +151,12 @@ def test_format_rendering_with_basic_types(template):
     assert 'age (type: integer, required: True, default: None' in p
 
 def test_format_rendering_with_enum(template):
-    t = Template(instructions='Some example instructions', output=json.dumps(User.model_json_schema()))
     runner = TemplateRunner()
     p = runner.render(template, {'input': 'Some test input'})
     assert 'role (type: string, required: False, default: admin' in p
     assert 'Select one option from: admin, user' in p
 
-def test_format_rendering_with_enum_list(template):
+def test_format_rendering_with_enum_list(session, template, llm):
     runner = TemplateRunner()
     p = runner.render(template, {'input': 'Some test input'})
     assert 'traits (type: string[], required: True, default: None' in p

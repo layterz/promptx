@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from IPython.display import display, Image
 
 
-from promptx.utils import Entity
+from ..collection import Entity
 
 
 class PromptLog(BaseModel):

@@ -1,6 +1,4 @@
-from .models import LLM
-from .utils import Entity
-from .collection import Collection
+from .collection import Collection, Entity
 from .template import Template
 
 

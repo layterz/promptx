@@ -80,11 +80,12 @@ class ChatGPT(LLM):
         )
 
 
-class DALL_E(LLM):
-    
-    def __init__(self, api_key=None, org_id=None):
+class DALLE(LLM):
+
+    def __init__(self, api_key=None, org_id=None, **kwargs):
         openai.api_key = api_key or os.environ.get('OPENAI_API_KEY')
         openai.organization = org_id or os.environ.get('OPENAI_ORG_ID')
+        super().__init__(**kwargs)
 
     def generate(self, x, **kwargs) -> Response:
         output = openai.Image.create(

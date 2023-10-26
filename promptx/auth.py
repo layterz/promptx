@@ -1,5 +1,5 @@
 from enum import Enum
-from .utils import Entity
+from .collection import Entity
 
 
 class UserRole(Enum):
