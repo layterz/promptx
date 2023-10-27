@@ -121,7 +121,27 @@ def model_to_json_schema(model):
     output = None
     if isinstance(model, list):
         inner = model[0]
-        if issubclass(inner, BaseModel):
+        if issubclass(inner, Entity):
+            output = {
+                'title': inner.__name__,
+                'type': 'object',
+                'properties': {
+                    inner.__name__.lower(): '#/$defs/Query',
+                },
+                '$defs': {
+                    'Query': {
+                        'type': 'object',
+                        'properties': {
+                            'ids': {'type': 'array', 'items': {'type': 'string'}},
+                            'query': { 'type': 'string' },
+                            'collection': { 'type': 'string' },
+                            'limit': { 'type': 'integer' },
+                        },
+                        'required': [],
+                    },
+                }
+            }
+        elif issubclass(inner, BaseModel):
             schema = inner.model_json_schema()
             output = {
                 'type': 'array',
@@ -141,8 +161,26 @@ def model_to_json_schema(model):
         output = model.model_json_schema()
     elif isinstance(model, type):
         if issubclass(model, Entity):
-            output = model.model_json_schema()
-        if issubclass(model, BaseModel):
+            output = {
+                'title': model.__name__,
+                'type': 'object',
+                'properties': {
+                    model.__name__.lower(): '#/$defs/Query',
+                },
+                '$defs': {
+                    'Query': {
+                        'type': 'object',
+                        'properties': {
+                            'ids': {'type': 'array', 'items': {'type': 'string'}},
+                            'query': { 'type': 'string' },
+                            'collection': { 'type': 'string' },
+                            'limit': { 'type': 'integer' },
+                        },
+                        'required': [],
+                    },
+                }
+            }
+        elif issubclass(model, BaseModel):
             output = model.model_json_schema()
     
     return output
@@ -398,7 +436,7 @@ class Entity(BaseModel):
         return schema, definitions, []
     
     @classmethod
-    def schema(cls, by_alias: bool = True, **kwargs):
+    def __schema(cls, by_alias: bool = True, **kwargs):
         properties = {}
         required = []
         definitions = {}

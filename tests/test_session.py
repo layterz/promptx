@@ -13,7 +13,7 @@ def test_store(session, user):
     assert x.id == user.id
     assert x.name == user.name
     assert x.age == user.age
-    assert x.role == user.role.value
+    assert x.role.value == user.role.value
     assert x.banned == user.banned
     assert x.vigor == user.vigor
 
@@ -48,9 +48,9 @@ def test_store__list_field(session, user):
 
     assert x is not None
     assert len(x.traits) == len(traits)
-    assert x.traits[0] == traits[0].value
-    assert x.traits[1] == traits[1].value
-    assert x.traits[2] == traits[2].value
+    assert x.traits[0].value == traits[0].value
+    assert x.traits[1].value == traits[1].value
+    assert x.traits[2].value == traits[2].value
 
 def test_query__ids(session):
     users = [_user() for _ in range(3)]

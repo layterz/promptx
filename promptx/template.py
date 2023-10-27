@@ -20,6 +20,11 @@ class MaxRetriesExceeded(Exception):
 
 E = TypeVar('E', bound=BaseModel)
 
+
+class Example(Entity):
+    input: str
+    output: str
+
 class Template(Entity):
     
     template: str = """
@@ -78,8 +83,7 @@ class Template(Entity):
     type: str = 'template'
     name: str = None
     instructions: str = None
-    num_examples: int = 1
-    examples: List = None
+    examples: List[Example] = None
     input: str = None
     output: str = None
     context: str = None

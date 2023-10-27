@@ -143,7 +143,7 @@ def test_passthrough_dictionary_with_nested_schema_as_json_schema():
     assert result_schema == schema
 
 
-def test_convert_pydantic_model_with_nested_base_model_to_json_schema():
+def test_convert_pydantic_model_with_nested_entities_to_json_schema():
     schema = model_to_json_schema(Account)
     expected_schema = {
         'title': 'Account',
@@ -156,10 +156,8 @@ def test_convert_pydantic_model_with_nested_base_model_to_json_schema():
                 '$ref': '#/$defs/Query'
             },
         },
-        'required': ['user'],
         '$defs': {
             'Query': {
-                'title': 'User',
                 'type': 'object',
                 'properties': {
                     'ids': {
@@ -180,14 +178,9 @@ def test_convert_pydantic_model_with_nested_base_model_to_json_schema():
                 },
                 'required': []
             }
-        }
+        },
+        'required': ['user'],
     }
-    assert schema == expected_schema
-
-
-def test_convert_pydantic_model_with_nested_list_of_base_models_to_json_schema():
-    schema = model_to_json_schema()
-    expected_schema = {}
     assert schema == expected_schema
 
 
