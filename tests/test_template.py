@@ -191,26 +191,28 @@ def test_format_rendering_with_field_min_max_length(template):
     assert 'minLength: 3' in p
     assert 'maxLength: 20' in p
 
-def test_example_rendering(template):
+def test_example_rendering(session):
     user = User(name="John Wayne", age=64, traits=[Trait.mean])
     runner = TemplateRunner()
-    template.examples = [Example(input='Some test input', output=user)]
+    template = Template(instructions='Some example instructions', output=user.model_dump_json(),
+                        examples=[Example(input='Some test input', output=user.model_dump_json())])
+    session.store(template)
+    template = session.query(ids=[template.id]).first
     p = runner.render(template, {'input': 'Some test input'})
 
     assert 'EXAMPLES' in p
     assert 'John Wayne' in p
     assert '64' in p
     assert 'mean' in p
-    assert 'banned' not in p
+    assert 'banned' in p
 
-def test_example_rendering_multiple(template):
+def test_example_rendering_multiple(session, template):
     user = User(name="John Wayne", age=64, traits=[Trait.mean])
     runner = TemplateRunner()
-    template.examples = [(None, user)] * 5
-    template.num_examples = 3
+    examples = [Example(input='Some test input', output=user.model_dump_json()) for _ in range(3)]
+    template = Template(instructions='Some example instructions', output=user.model_dump_json(), examples=examples)
+    session.store(template)
+    template = session.query(ids=[template.id]).first
     p = runner.render(template, {'input': 'Some test input'})
 
     assert p.count('John Wayne') == 3
-
-def test_loading_templaate_from_store():
-    assert True == False

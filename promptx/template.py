@@ -124,8 +124,7 @@ class TemplateRunner:
         vars = {
             **x,
             'instructions': t.instructions,
-            # TODO: need to fix examples schema
-            #'examples': self.render_examples(t),
+            'examples': self.render_examples(t),
             'format': self.render_format(t, x),
             'input': input,
             'output': output,
@@ -239,10 +238,10 @@ class TemplateRunner:
         
         examples = [
             {
-                'input': json.dumps(self.parse(i), default=serializer),
-                'output': json.dumps(self.parse(o), default=serializer),
+                'input': e.input,
+                'output': e.output,
             }
-            for i, o in random.sample(t.examples, t.num_examples)
+            for e in random.sample(t.examples, min(len(t.examples), 3))
         ]
         example_template = JinjaTemplate(t.example_template)
         return '\n'.join([

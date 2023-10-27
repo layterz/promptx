@@ -342,15 +342,17 @@ class Entity(BaseModel):
     def load(cls, session, **kwargs):
         for name, field in cls.__annotations__.items():
             if field.__name__ == 'Entity':
-                def loader(self, session=session, name=name, field=field, data=kwargs):
+                def loader(self, cls=cls, session=session, name=name, field=field, data=kwargs):
                     # Lazy-loading logic here
                     logger.info(f'Loading {name}')
                     field_data = data.get(name)
-                    ids = field_data.get('ids')
-                    if len(ids) == 1:
-                        return session.query(ids=field_data.get('ids')).first
-                    elif len(ids) > 1:
+                    if field_data is None:
+                        return None
+                    limit = field_data.get('limit')
+                    if limit is None or limit > 1:
                         return session.query(ids=field_data.get('ids')).objects
+                    elif limit == 1:
+                        return session.query(ids=field_data.get('ids')).first
                     return None
                 
                 setattr(cls, name, property(loader))
@@ -739,6 +741,7 @@ class Collection(pd.DataFrame):
                 return {
                     'ids': [obj.id],
                     'collection': self.name,
+                    'limit': 1,
                 }
             elif isinstance(obj, list):
                 if len(obj) and isinstance(obj[0], Entity):
