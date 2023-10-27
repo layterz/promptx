@@ -5730,3 +5730,1605 @@ On instance:
 2023-10-26 16:53:07 | INFO     | Embedded 1 items into templates
 2023-10-26 16:53:07 | INFO     | Found 1 results for query: []
 2023-10-26 16:53:08 | INFO     | Embedded 1 items into logs
+2023-10-27 02:10:17 | INFO     | Log file: ./log/test.log
+2023-10-27 02:10:17 | INFO     | Log level: INFO
+2023-10-27 02:10:20 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:20 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:21 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:21 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:21 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:22 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:22 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:22 | INFO     | Creating session: test_store / None
+2023-10-27 02:10:24 | INFO     | Embedded 1 items into default
+2023-10-27 02:10:24 | INFO     | Found 1 results for query: []
+2023-10-27 02:10:25 | INFO     | Log file: ./log/test.log
+2023-10-27 02:10:25 | INFO     | Log level: INFO
+2023-10-27 02:10:25 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:25 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:26 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:26 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:26 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:26 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:26 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:27 | INFO     | Creating session: test_store / None
+2023-10-27 02:10:27 | INFO     | Embedded 2 items into default
+2023-10-27 02:10:27 | INFO     | Found 2 results for query: []
+2023-10-27 02:10:27 | INFO     | Log file: ./log/test.log
+2023-10-27 02:10:27 | INFO     | Log level: INFO
+2023-10-27 02:10:28 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:28 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:28 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:28 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:29 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:29 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:29 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:29 | INFO     | Creating session: test_store / None
+2023-10-27 02:10:29 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:31 | INFO     | Embedded 1 items into alt-test
+2023-10-27 02:10:31 | ERROR    | Failed to parse query results: 'id'
+2023-10-27 02:10:31 | INFO     | Found 1 results for query: []
+2023-10-27 02:10:32 | INFO     | Log file: ./log/test.log
+2023-10-27 02:10:32 | INFO     | Log level: INFO
+2023-10-27 02:10:32 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:32 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:32 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:32 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:33 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:33 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:33 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:33 | INFO     | Creating session: test_store / None
+2023-10-27 02:10:33 | INFO     | Embedded 1 items into default
+2023-10-27 02:10:33 | INFO     | Found 1 results for query: []
+2023-10-27 02:10:33 | INFO     | Log file: ./log/test.log
+2023-10-27 02:10:33 | INFO     | Log level: INFO
+2023-10-27 02:10:34 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:34 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:34 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:34 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:35 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:35 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:35 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:35 | INFO     | Creating session: test_store / None
+2023-10-27 02:10:36 | INFO     | Embedded 3 items into default
+2023-10-27 02:10:36 | INFO     | Found 3 results for query: []
+2023-10-27 02:10:36 | INFO     | Log file: ./log/test.log
+2023-10-27 02:10:36 | INFO     | Log level: INFO
+2023-10-27 02:10:37 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:37 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:37 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:37 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:37 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:37 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:38 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:38 | INFO     | Creating session: test_store / None
+2023-10-27 02:10:38 | INFO     | Embedded 2 items into default
+2023-10-27 02:10:38 | INFO     | Found 1 results for query: []
+2023-10-27 02:10:38 | INFO     | Found 1 results for query: []
+2023-10-27 02:10:38 | INFO     | Log file: ./log/test.log
+2023-10-27 02:10:38 | INFO     | Log level: INFO
+2023-10-27 02:10:39 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:39 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:39 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:39 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:39 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:40 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:40 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:40 | INFO     | Creating session: test_store / None
+2023-10-27 02:10:40 | INFO     | Embedded 1 items into logs
+2023-10-27 02:10:40 | INFO     | Log file: ./log/test.log
+2023-10-27 02:10:40 | INFO     | Log level: INFO
+2023-10-27 02:10:41 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:41 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:41 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:41 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:42 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:42 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:42 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:42 | INFO     | Creating session: test_store / None
+2023-10-27 02:10:42 | ERROR    | schema field failed
+2023-10-27 02:10:43 | INFO     | Embedded 1 items into templates
+2023-10-27 02:10:43 | INFO     | Found 1 results for query: []
+2023-10-27 02:10:44 | INFO     | Embedded 1 items into logs
+2023-10-27 02:10:44 | INFO     | Log file: ./log/test.log
+2023-10-27 02:10:44 | INFO     | Log level: INFO
+2023-10-27 02:10:44 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:44 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:44 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:45 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:45 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:45 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:45 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:45 | INFO     | Creating session: test_store / None
+2023-10-27 02:10:45 | ERROR    | schema field failed
+2023-10-27 02:10:46 | INFO     | Embedded 1 items into templates
+2023-10-27 02:10:46 | INFO     | Found 1 results for query: []
+2023-10-27 02:10:46 | INFO     | Found 1 results for query: []
+2023-10-27 02:10:46 | INFO     | Embedded 1 items into logs
+2023-10-27 02:10:47 | INFO     | Log file: ./log/test.log
+2023-10-27 02:10:47 | INFO     | Log level: INFO
+2023-10-27 02:10:47 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:47 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:47 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:47 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:48 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:48 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:48 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:48 | INFO     | Creating session: test_store / None
+2023-10-27 02:10:48 | ERROR    | schema field failed
+2023-10-27 02:10:49 | INFO     | Embedded 1 items into templates
+2023-10-27 02:10:49 | INFO     | Found 1 results for query: []
+2023-10-27 02:10:49 | INFO     | Embedded 1 items into logs
+2023-10-27 02:10:49 | INFO     | Log file: ./log/test.log
+2023-10-27 02:10:49 | INFO     | Log level: INFO
+2023-10-27 02:10:50 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:50 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:50 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:50 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:50 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:51 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:51 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:51 | INFO     | Creating session: test_store / None
+2023-10-27 02:10:51 | ERROR    | schema field failed
+2023-10-27 02:10:52 | INFO     | Embedded 1 items into templates
+2023-10-27 02:10:52 | INFO     | Found 1 results for query: []
+2023-10-27 02:10:52 | ERROR    | Output validation failed: 'name' is a required property
+
+Failed validating 'required' in schema:
+    {'$defs': {'Role': {'enum': ['admin', 'user'],
+                        'title': 'Role',
+                        'type': 'string'},
+               'Trait': {'enum': ['nice', 'mean', 'funny', 'smart'],
+                         'title': 'Trait',
+                         'type': 'string'}},
+     'properties': {'age': {'exclusiveMaximum': 100,
+                            'minimum': 18,
+                            'title': 'Age',
+                            'type': 'integer'},
+                    'banned': {'default': False,
+                               'generate': False,
+                               'title': 'Banned',
+                               'type': 'boolean'},
+                    'id': {'default': None,
+                           'title': 'Id',
+                           'type': 'string'},
+                    'name': {'maxLength': 20,
+                             'minLength': 3,
+                             'title': 'Name',
+                             'type': 'string'},
+                    'role': {'allOf': [{'$ref': '#/$defs/Role'}],
+                             'default': 'admin'},
+                    'traits': {'items': {'$ref': '#/$defs/Trait'},
+                               'maxItems': 3,
+                               'minItems': 1,
+                               'title': 'Traits',
+                               'type': 'array'},
+                    'type': {'default': None,
+                             'title': 'Type',
+                             'type': 'string'},
+                    'vigor': {'default': 0,
+                              'maximum': 1.0,
+                              'minimum': 0.0,
+                              'title': 'Vigor',
+                              'type': 'number'}},
+     'required': ['name', 'age', 'traits'],
+     'title': 'User',
+     'type': 'object'}
+
+On instance:
+    {'age': 20, 'id': '09a68e2d-0ea9-4cef-8349-eceac82c33e3'}
+2023-10-27 02:10:52 | ERROR    | Output validation failed: 'name' is a required property
+
+Failed validating 'required' in schema:
+    {'$defs': {'Role': {'enum': ['admin', 'user'],
+                        'title': 'Role',
+                        'type': 'string'},
+               'Trait': {'enum': ['nice', 'mean', 'funny', 'smart'],
+                         'title': 'Trait',
+                         'type': 'string'}},
+     'properties': {'age': {'exclusiveMaximum': 100,
+                            'minimum': 18,
+                            'title': 'Age',
+                            'type': 'integer'},
+                    'banned': {'default': False,
+                               'generate': False,
+                               'title': 'Banned',
+                               'type': 'boolean'},
+                    'id': {'default': None,
+                           'title': 'Id',
+                           'type': 'string'},
+                    'name': {'maxLength': 20,
+                             'minLength': 3,
+                             'title': 'Name',
+                             'type': 'string'},
+                    'role': {'allOf': [{'$ref': '#/$defs/Role'}],
+                             'default': 'admin'},
+                    'traits': {'items': {'$ref': '#/$defs/Trait'},
+                               'maxItems': 3,
+                               'minItems': 1,
+                               'title': 'Traits',
+                               'type': 'array'},
+                    'type': {'default': None,
+                             'title': 'Type',
+                             'type': 'string'},
+                    'vigor': {'default': 0,
+                              'maximum': 1.0,
+                              'minimum': 0.0,
+                              'title': 'Vigor',
+                              'type': 'number'}},
+     'required': ['name', 'age', 'traits'],
+     'title': 'User',
+     'type': 'object'}
+
+On instance:
+    {'age': 20, 'id': '5b043218-ab61-4632-a3db-f7b81075e02b'}
+2023-10-27 02:10:52 | ERROR    | Output validation failed: 'name' is a required property
+
+Failed validating 'required' in schema:
+    {'$defs': {'Role': {'enum': ['admin', 'user'],
+                        'title': 'Role',
+                        'type': 'string'},
+               'Trait': {'enum': ['nice', 'mean', 'funny', 'smart'],
+                         'title': 'Trait',
+                         'type': 'string'}},
+     'properties': {'age': {'exclusiveMaximum': 100,
+                            'minimum': 18,
+                            'title': 'Age',
+                            'type': 'integer'},
+                    'banned': {'default': False,
+                               'generate': False,
+                               'title': 'Banned',
+                               'type': 'boolean'},
+                    'id': {'default': None,
+                           'title': 'Id',
+                           'type': 'string'},
+                    'name': {'maxLength': 20,
+                             'minLength': 3,
+                             'title': 'Name',
+                             'type': 'string'},
+                    'role': {'allOf': [{'$ref': '#/$defs/Role'}],
+                             'default': 'admin'},
+                    'traits': {'items': {'$ref': '#/$defs/Trait'},
+                               'maxItems': 3,
+                               'minItems': 1,
+                               'title': 'Traits',
+                               'type': 'array'},
+                    'type': {'default': None,
+                             'title': 'Type',
+                             'type': 'string'},
+                    'vigor': {'default': 0,
+                              'maximum': 1.0,
+                              'minimum': 0.0,
+                              'title': 'Vigor',
+                              'type': 'number'}},
+     'required': ['name', 'age', 'traits'],
+     'title': 'User',
+     'type': 'object'}
+
+On instance:
+    {'age': 20, 'id': '7ac36c3a-5235-43da-9606-90c633b4c84e'}
+2023-10-27 02:10:52 | ERROR    | Output validation failed: 'name' is a required property
+
+Failed validating 'required' in schema:
+    {'$defs': {'Role': {'enum': ['admin', 'user'],
+                        'title': 'Role',
+                        'type': 'string'},
+               'Trait': {'enum': ['nice', 'mean', 'funny', 'smart'],
+                         'title': 'Trait',
+                         'type': 'string'}},
+     'properties': {'age': {'exclusiveMaximum': 100,
+                            'minimum': 18,
+                            'title': 'Age',
+                            'type': 'integer'},
+                    'banned': {'default': False,
+                               'generate': False,
+                               'title': 'Banned',
+                               'type': 'boolean'},
+                    'id': {'default': None,
+                           'title': 'Id',
+                           'type': 'string'},
+                    'name': {'maxLength': 20,
+                             'minLength': 3,
+                             'title': 'Name',
+                             'type': 'string'},
+                    'role': {'allOf': [{'$ref': '#/$defs/Role'}],
+                             'default': 'admin'},
+                    'traits': {'items': {'$ref': '#/$defs/Trait'},
+                               'maxItems': 3,
+                               'minItems': 1,
+                               'title': 'Traits',
+                               'type': 'array'},
+                    'type': {'default': None,
+                             'title': 'Type',
+                             'type': 'string'},
+                    'vigor': {'default': 0,
+                              'maximum': 1.0,
+                              'minimum': 0.0,
+                              'title': 'Vigor',
+                              'type': 'number'}},
+     'required': ['name', 'age', 'traits'],
+     'title': 'User',
+     'type': 'object'}
+
+On instance:
+    {'age': 20, 'id': 'e8d23832-770b-4052-95ad-def13a9b8077'}
+2023-10-27 02:10:52 | ERROR    | None failed to forward None
+2023-10-27 02:10:52 | ERROR    | Max retries exceeded: None failed to forward None
+2023-10-27 02:10:52 | INFO     | Embedded 1 items into logs
+2023-10-27 02:10:53 | INFO     | Log file: ./log/test.log
+2023-10-27 02:10:53 | INFO     | Log level: INFO
+2023-10-27 02:10:53 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:53 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:53 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:53 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:54 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:54 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:54 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:54 | INFO     | Creating session: test_store / None
+2023-10-27 02:10:54 | ERROR    | schema field failed
+2023-10-27 02:10:55 | INFO     | Embedded 1 items into templates
+2023-10-27 02:10:55 | INFO     | Found 1 results for query: []
+2023-10-27 02:10:55 | WARNING  | Failed to decode JSON from Extra data: line 1 column 7 (char 6)
+2023-10-27 02:10:55 | WARNING  | Failed to decode JSON from Extra data: line 1 column 7 (char 6)
+2023-10-27 02:10:55 | WARNING  | Failed to decode JSON from Extra data: line 1 column 7 (char 6)
+2023-10-27 02:10:55 | WARNING  | Failed to decode JSON from Extra data: line 1 column 7 (char 6)
+2023-10-27 02:10:55 | ERROR    | None failed to forward None
+2023-10-27 02:10:55 | ERROR    | Max retries exceeded: None failed to forward None
+2023-10-27 02:10:55 | INFO     | Embedded 1 items into logs
+2023-10-27 02:10:56 | INFO     | Log file: ./log/test.log
+2023-10-27 02:10:56 | INFO     | Log level: INFO
+2023-10-27 02:10:56 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:56 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:56 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:56 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:56 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:57 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:57 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:57 | INFO     | Creating session: test_store / None
+2023-10-27 02:10:57 | ERROR    | schema field failed
+2023-10-27 02:10:58 | INFO     | Embedded 1 items into templates
+2023-10-27 02:10:58 | INFO     | Found 1 results for query: []
+2023-10-27 02:10:58 | ERROR    | Output validation failed: 'traits' is a required property
+
+Failed validating 'required' in schema:
+    {'$defs': {'Role': {'enum': ['admin', 'user'],
+                        'title': 'Role',
+                        'type': 'string'},
+               'Trait': {'enum': ['nice', 'mean', 'funny', 'smart'],
+                         'title': 'Trait',
+                         'type': 'string'}},
+     'properties': {'age': {'exclusiveMaximum': 100,
+                            'minimum': 18,
+                            'title': 'Age',
+                            'type': 'integer'},
+                    'banned': {'default': False,
+                               'generate': False,
+                               'title': 'Banned',
+                               'type': 'boolean'},
+                    'id': {'default': None,
+                           'title': 'Id',
+                           'type': 'string'},
+                    'name': {'maxLength': 20,
+                             'minLength': 3,
+                             'title': 'Name',
+                             'type': 'string'},
+                    'role': {'allOf': [{'$ref': '#/$defs/Role'}],
+                             'default': 'admin'},
+                    'traits': {'items': {'$ref': '#/$defs/Trait'},
+                               'maxItems': 3,
+                               'minItems': 1,
+                               'title': 'Traits',
+                               'type': 'array'},
+                    'type': {'default': None,
+                             'title': 'Type',
+                             'type': 'string'},
+                    'vigor': {'default': 0,
+                              'maximum': 1.0,
+                              'minimum': 0.0,
+                              'title': 'Vigor',
+                              'type': 'number'}},
+     'required': ['name', 'age', 'traits'],
+     'title': 'User',
+     'type': 'object'}
+
+On instance:
+    {'age': 'young',
+     'id': '59fc0bb1-263a-4396-bb26-48e8869d5545',
+     'name': 'test'}
+2023-10-27 02:10:58 | ERROR    | Output validation failed: 'traits' is a required property
+
+Failed validating 'required' in schema:
+    {'$defs': {'Role': {'enum': ['admin', 'user'],
+                        'title': 'Role',
+                        'type': 'string'},
+               'Trait': {'enum': ['nice', 'mean', 'funny', 'smart'],
+                         'title': 'Trait',
+                         'type': 'string'}},
+     'properties': {'age': {'exclusiveMaximum': 100,
+                            'minimum': 18,
+                            'title': 'Age',
+                            'type': 'integer'},
+                    'banned': {'default': False,
+                               'generate': False,
+                               'title': 'Banned',
+                               'type': 'boolean'},
+                    'id': {'default': None,
+                           'title': 'Id',
+                           'type': 'string'},
+                    'name': {'maxLength': 20,
+                             'minLength': 3,
+                             'title': 'Name',
+                             'type': 'string'},
+                    'role': {'allOf': [{'$ref': '#/$defs/Role'}],
+                             'default': 'admin'},
+                    'traits': {'items': {'$ref': '#/$defs/Trait'},
+                               'maxItems': 3,
+                               'minItems': 1,
+                               'title': 'Traits',
+                               'type': 'array'},
+                    'type': {'default': None,
+                             'title': 'Type',
+                             'type': 'string'},
+                    'vigor': {'default': 0,
+                              'maximum': 1.0,
+                              'minimum': 0.0,
+                              'title': 'Vigor',
+                              'type': 'number'}},
+     'required': ['name', 'age', 'traits'],
+     'title': 'User',
+     'type': 'object'}
+
+On instance:
+    {'age': 'young',
+     'id': 'eb045767-6f05-4865-af2e-59bc21830a97',
+     'name': 'test'}
+2023-10-27 02:10:58 | ERROR    | Output validation failed: 'traits' is a required property
+
+Failed validating 'required' in schema:
+    {'$defs': {'Role': {'enum': ['admin', 'user'],
+                        'title': 'Role',
+                        'type': 'string'},
+               'Trait': {'enum': ['nice', 'mean', 'funny', 'smart'],
+                         'title': 'Trait',
+                         'type': 'string'}},
+     'properties': {'age': {'exclusiveMaximum': 100,
+                            'minimum': 18,
+                            'title': 'Age',
+                            'type': 'integer'},
+                    'banned': {'default': False,
+                               'generate': False,
+                               'title': 'Banned',
+                               'type': 'boolean'},
+                    'id': {'default': None,
+                           'title': 'Id',
+                           'type': 'string'},
+                    'name': {'maxLength': 20,
+                             'minLength': 3,
+                             'title': 'Name',
+                             'type': 'string'},
+                    'role': {'allOf': [{'$ref': '#/$defs/Role'}],
+                             'default': 'admin'},
+                    'traits': {'items': {'$ref': '#/$defs/Trait'},
+                               'maxItems': 3,
+                               'minItems': 1,
+                               'title': 'Traits',
+                               'type': 'array'},
+                    'type': {'default': None,
+                             'title': 'Type',
+                             'type': 'string'},
+                    'vigor': {'default': 0,
+                              'maximum': 1.0,
+                              'minimum': 0.0,
+                              'title': 'Vigor',
+                              'type': 'number'}},
+     'required': ['name', 'age', 'traits'],
+     'title': 'User',
+     'type': 'object'}
+
+On instance:
+    {'age': 'young',
+     'id': 'cc576803-c827-46b1-94e6-247a6e532cdd',
+     'name': 'test'}
+2023-10-27 02:10:58 | ERROR    | Output validation failed: 'traits' is a required property
+
+Failed validating 'required' in schema:
+    {'$defs': {'Role': {'enum': ['admin', 'user'],
+                        'title': 'Role',
+                        'type': 'string'},
+               'Trait': {'enum': ['nice', 'mean', 'funny', 'smart'],
+                         'title': 'Trait',
+                         'type': 'string'}},
+     'properties': {'age': {'exclusiveMaximum': 100,
+                            'minimum': 18,
+                            'title': 'Age',
+                            'type': 'integer'},
+                    'banned': {'default': False,
+                               'generate': False,
+                               'title': 'Banned',
+                               'type': 'boolean'},
+                    'id': {'default': None,
+                           'title': 'Id',
+                           'type': 'string'},
+                    'name': {'maxLength': 20,
+                             'minLength': 3,
+                             'title': 'Name',
+                             'type': 'string'},
+                    'role': {'allOf': [{'$ref': '#/$defs/Role'}],
+                             'default': 'admin'},
+                    'traits': {'items': {'$ref': '#/$defs/Trait'},
+                               'maxItems': 3,
+                               'minItems': 1,
+                               'title': 'Traits',
+                               'type': 'array'},
+                    'type': {'default': None,
+                             'title': 'Type',
+                             'type': 'string'},
+                    'vigor': {'default': 0,
+                              'maximum': 1.0,
+                              'minimum': 0.0,
+                              'title': 'Vigor',
+                              'type': 'number'}},
+     'required': ['name', 'age', 'traits'],
+     'title': 'User',
+     'type': 'object'}
+
+On instance:
+    {'age': 'young',
+     'id': '35b70c6c-8062-419c-912f-21782b84a42a',
+     'name': 'test'}
+2023-10-27 02:10:58 | ERROR    | None failed to forward None
+2023-10-27 02:10:58 | ERROR    | Max retries exceeded: None failed to forward None
+2023-10-27 02:10:58 | INFO     | Embedded 1 items into logs
+2023-10-27 02:10:58 | INFO     | Log file: ./log/test.log
+2023-10-27 02:10:58 | INFO     | Log level: INFO
+2023-10-27 02:10:59 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:59 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:59 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:59 | INFO     | Embedded 1 items into collections
+2023-10-27 02:10:59 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:00 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:00 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:00 | INFO     | Creating session: test_store / None
+2023-10-27 02:11:00 | ERROR    | schema field failed
+2023-10-27 02:11:01 | INFO     | Embedded 1 items into templates
+2023-10-27 02:11:01 | INFO     | Found 1 results for query: []
+2023-10-27 02:11:01 | ERROR    | LLM generation failed: <empty message>
+2023-10-27 02:11:03 | INFO     | Embedded 1 items into logs
+2023-10-27 02:11:04 | INFO     | Log file: ./log/test.log
+2023-10-27 02:11:04 | INFO     | Log level: INFO
+2023-10-27 02:11:04 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:04 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:04 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:05 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:05 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:05 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:05 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:06 | INFO     | Creating session: test_store / None
+2023-10-27 02:11:06 | ERROR    | schema field failed
+2023-10-27 02:11:07 | INFO     | Embedded 1 items into templates
+2023-10-27 02:11:07 | INFO     | Found 1 results for query: []
+2023-10-27 02:11:07 | WARNING  | Failed to decode JSON from test: line 1 column 1 (char 0)
+2023-10-27 02:11:07 | WARNING  | Failed to decode JSON from test: line 1 column 1 (char 0)
+2023-10-27 02:11:07 | WARNING  | Failed to decode JSON from test: line 1 column 1 (char 0)
+2023-10-27 02:11:07 | WARNING  | Failed to decode JSON from test: line 1 column 1 (char 0)
+2023-10-27 02:11:07 | ERROR    | None failed to forward None
+2023-10-27 02:11:07 | WARNING  | Failed to decode JSON from test: line 1 column 1 (char 0)
+2023-10-27 02:11:07 | WARNING  | Failed to decode JSON from test: line 1 column 1 (char 0)
+2023-10-27 02:11:07 | WARNING  | Failed to decode JSON from test: line 1 column 1 (char 0)
+2023-10-27 02:11:07 | INFO     | Log file: ./log/test.log
+2023-10-27 02:11:07 | INFO     | Log level: INFO
+2023-10-27 02:11:07 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:08 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:08 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:08 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:08 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:08 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:09 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:09 | INFO     | Creating session: test_store / None
+2023-10-27 02:11:09 | ERROR    | schema field failed
+2023-10-27 02:11:09 | INFO     | Embedded 1 items into templates
+2023-10-27 02:11:09 | INFO     | Found 1 results for query: []
+2023-10-27 02:11:09 | WARNING  | Failed to decode JSON from Expecting value: line 1 column 1 (char 0)
+2023-10-27 02:11:09 | WARNING  | Failed to decode JSON from Expecting value: line 1 column 1 (char 0)
+2023-10-27 02:11:09 | WARNING  | Failed to decode JSON from Expecting value: line 1 column 1 (char 0)
+2023-10-27 02:11:09 | WARNING  | Failed to decode JSON from Expecting value: line 1 column 1 (char 0)
+2023-10-27 02:11:09 | ERROR    | None failed to forward {'age': 'young'}
+2023-10-27 02:11:09 | ERROR    | Max retries exceeded: None failed to forward {'age': 'young'}
+2023-10-27 02:11:10 | INFO     | Embedded 1 items into logs
+2023-10-27 02:11:10 | INFO     | Log file: ./log/test.log
+2023-10-27 02:11:10 | INFO     | Log level: INFO
+2023-10-27 02:11:10 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:10 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:11 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:11 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:11 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:11 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:11 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:11 | INFO     | Creating session: test_store / None
+2023-10-27 02:11:11 | ERROR    | schema field failed
+2023-10-27 02:11:12 | INFO     | Embedded 1 items into templates
+2023-10-27 02:11:12 | INFO     | Found 1 results for query: []
+2023-10-27 02:11:13 | INFO     | Embedded 1 items into logs
+2023-10-27 02:11:13 | INFO     | Log file: ./log/test.log
+2023-10-27 02:11:13 | INFO     | Log level: INFO
+2023-10-27 02:11:13 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:13 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:14 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:14 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:14 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:14 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:14 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:14 | INFO     | Creating session: test_store / None
+2023-10-27 02:11:14 | ERROR    | schema field failed
+2023-10-27 02:11:15 | INFO     | Embedded 1 items into templates
+2023-10-27 02:11:15 | INFO     | Found 1 results for query: []
+2023-10-27 02:11:15 | INFO     | Log file: ./log/test.log
+2023-10-27 02:11:15 | INFO     | Log level: INFO
+2023-10-27 02:11:15 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:16 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:16 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:16 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:16 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:16 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:17 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:17 | INFO     | Creating session: test_store / None
+2023-10-27 02:11:17 | ERROR    | schema field failed
+2023-10-27 02:11:17 | INFO     | Embedded 1 items into templates
+2023-10-27 02:11:17 | INFO     | Found 1 results for query: []
+2023-10-27 02:11:17 | INFO     | Log file: ./log/test.log
+2023-10-27 02:11:17 | INFO     | Log level: INFO
+2023-10-27 02:11:18 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:18 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:18 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:18 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:18 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:19 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:19 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:19 | INFO     | Creating session: test_store / None
+2023-10-27 02:11:19 | ERROR    | schema field failed
+2023-10-27 02:11:19 | INFO     | Embedded 1 items into templates
+2023-10-27 02:11:19 | INFO     | Found 1 results for query: []
+2023-10-27 02:11:20 | INFO     | Log file: ./log/test.log
+2023-10-27 02:11:20 | INFO     | Log level: INFO
+2023-10-27 02:11:20 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:20 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:20 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:20 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:21 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:21 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:21 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:21 | INFO     | Creating session: test_store / None
+2023-10-27 02:11:21 | ERROR    | schema field failed
+2023-10-27 02:11:22 | INFO     | Embedded 1 items into templates
+2023-10-27 02:11:22 | INFO     | Found 1 results for query: []
+2023-10-27 02:11:22 | INFO     | Log file: ./log/test.log
+2023-10-27 02:11:22 | INFO     | Log level: INFO
+2023-10-27 02:11:22 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:22 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:23 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:23 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:23 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:23 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:23 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:23 | INFO     | Creating session: test_store / None
+2023-10-27 02:11:23 | ERROR    | schema field failed
+2023-10-27 02:11:24 | INFO     | Embedded 1 items into templates
+2023-10-27 02:11:24 | INFO     | Found 1 results for query: []
+2023-10-27 02:11:24 | INFO     | Log file: ./log/test.log
+2023-10-27 02:11:24 | INFO     | Log level: INFO
+2023-10-27 02:11:25 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:25 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:25 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:25 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:25 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:26 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:26 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:26 | INFO     | Creating session: test_store / None
+2023-10-27 02:11:26 | ERROR    | schema field failed
+2023-10-27 02:11:27 | INFO     | Embedded 1 items into templates
+2023-10-27 02:11:27 | INFO     | Found 1 results for query: []
+2023-10-27 02:11:27 | INFO     | Log file: ./log/test.log
+2023-10-27 02:11:27 | INFO     | Log level: INFO
+2023-10-27 02:11:27 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:27 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:28 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:28 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:28 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:29 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:29 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:29 | INFO     | Creating session: test_store / None
+2023-10-27 02:11:29 | ERROR    | schema field failed
+2023-10-27 02:11:31 | INFO     | Embedded 1 items into templates
+2023-10-27 02:11:31 | INFO     | Found 1 results for query: []
+2023-10-27 02:11:31 | INFO     | Log file: ./log/test.log
+2023-10-27 02:11:31 | INFO     | Log level: INFO
+2023-10-27 02:11:32 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:32 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:33 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:33 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:34 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:34 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:35 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:35 | INFO     | Creating session: test_store / None
+2023-10-27 02:11:35 | ERROR    | schema field failed
+2023-10-27 02:11:36 | INFO     | Embedded 1 items into templates
+2023-10-27 02:11:36 | INFO     | Found 1 results for query: []
+2023-10-27 02:11:36 | INFO     | Log file: ./log/test.log
+2023-10-27 02:11:36 | INFO     | Log level: INFO
+2023-10-27 02:11:37 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:37 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:37 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:38 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:38 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:38 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:39 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:39 | INFO     | Creating session: test_store / None
+2023-10-27 02:11:39 | ERROR    | schema field failed
+2023-10-27 02:11:40 | INFO     | Embedded 1 items into templates
+2023-10-27 02:11:40 | INFO     | Found 1 results for query: []
+2023-10-27 02:11:40 | INFO     | Log file: ./log/test.log
+2023-10-27 02:11:40 | INFO     | Log level: INFO
+2023-10-27 02:11:41 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:41 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:42 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:42 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:43 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:43 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:44 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:44 | INFO     | Creating session: test_store / None
+2023-10-27 02:11:44 | ERROR    | schema field failed
+2023-10-27 02:11:45 | INFO     | Embedded 1 items into templates
+2023-10-27 02:11:45 | INFO     | Found 1 results for query: []
+2023-10-27 02:11:45 | INFO     | Log file: ./log/test.log
+2023-10-27 02:11:45 | INFO     | Log level: INFO
+2023-10-27 02:11:46 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:46 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:46 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:47 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:47 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:48 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:48 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:48 | INFO     | Creating session: test_store / None
+2023-10-27 02:11:48 | ERROR    | schema field failed
+2023-10-27 02:11:49 | INFO     | Embedded 1 items into templates
+2023-10-27 02:11:49 | INFO     | Found 1 results for query: []
+2023-10-27 02:11:50 | INFO     | Log file: ./log/test.log
+2023-10-27 02:11:50 | INFO     | Log level: INFO
+2023-10-27 02:11:50 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:50 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:50 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:51 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:51 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:51 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:51 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:51 | INFO     | Creating session: test_store / None
+2023-10-27 02:11:51 | ERROR    | schema field failed
+2023-10-27 02:11:53 | INFO     | Embedded 1 items into templates
+2023-10-27 02:11:53 | INFO     | Found 1 results for query: []
+2023-10-27 02:11:53 | INFO     | Log file: ./log/test.log
+2023-10-27 02:11:53 | INFO     | Log level: INFO
+2023-10-27 02:11:53 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:53 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:54 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:54 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:54 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:54 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:55 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:55 | INFO     | Creating session: test_store / None
+2023-10-27 02:11:55 | ERROR    | schema field failed
+2023-10-27 02:11:56 | INFO     | Embedded 1 items into templates
+2023-10-27 02:11:56 | INFO     | Found 1 results for query: []
+2023-10-27 02:11:56 | INFO     | Log file: ./log/test.log
+2023-10-27 02:11:56 | INFO     | Log level: INFO
+2023-10-27 02:11:56 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:56 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:57 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:57 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:57 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:57 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:58 | INFO     | Embedded 1 items into collections
+2023-10-27 02:11:58 | INFO     | Creating session: test_store / None
+2023-10-27 02:11:58 | ERROR    | schema field failed
+2023-10-27 02:11:59 | INFO     | Embedded 1 items into templates
+2023-10-27 02:11:59 | INFO     | Found 1 results for query: []
+2023-10-27 02:16:00 | INFO     | Log file: ./log/test.log
+2023-10-27 02:16:00 | INFO     | Log level: INFO
+2023-10-27 02:16:02 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:02 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:02 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:02 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:03 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:03 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:03 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:03 | INFO     | Creating session: test_store / None
+2023-10-27 02:16:04 | INFO     | Embedded 1 items into default
+2023-10-27 02:16:04 | INFO     | Found 1 results for query: []
+2023-10-27 02:16:05 | INFO     | Log file: ./log/test.log
+2023-10-27 02:16:05 | INFO     | Log level: INFO
+2023-10-27 02:16:05 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:05 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:05 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:06 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:06 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:06 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:07 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:07 | INFO     | Creating session: test_store / None
+2023-10-27 02:16:08 | INFO     | Embedded 2 items into default
+2023-10-27 02:16:08 | INFO     | Found 2 results for query: []
+2023-10-27 02:16:08 | INFO     | Log file: ./log/test.log
+2023-10-27 02:16:08 | INFO     | Log level: INFO
+2023-10-27 02:16:08 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:08 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:09 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:09 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:09 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:09 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:09 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:09 | INFO     | Creating session: test_store / None
+2023-10-27 02:16:10 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:12 | INFO     | Embedded 1 items into alt-test
+2023-10-27 02:16:12 | ERROR    | Failed to parse query results: 'id'
+2023-10-27 02:16:12 | INFO     | Found 1 results for query: []
+2023-10-27 02:16:12 | INFO     | Log file: ./log/test.log
+2023-10-27 02:16:12 | INFO     | Log level: INFO
+2023-10-27 02:16:12 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:13 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:13 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:13 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:14 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:14 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:14 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:14 | INFO     | Creating session: test_store / None
+2023-10-27 02:16:14 | INFO     | Embedded 1 items into default
+2023-10-27 02:16:14 | INFO     | Found 1 results for query: []
+2023-10-27 02:16:14 | INFO     | Log file: ./log/test.log
+2023-10-27 02:16:14 | INFO     | Log level: INFO
+2023-10-27 02:16:15 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:15 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:15 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:15 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:16 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:16 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:16 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:16 | INFO     | Creating session: test_store / None
+2023-10-27 02:16:17 | INFO     | Embedded 3 items into default
+2023-10-27 02:16:17 | INFO     | Found 3 results for query: []
+2023-10-27 02:16:17 | INFO     | Log file: ./log/test.log
+2023-10-27 02:16:17 | INFO     | Log level: INFO
+2023-10-27 02:16:17 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:17 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:18 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:18 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:18 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:18 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:18 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:18 | INFO     | Creating session: test_store / None
+2023-10-27 02:16:19 | INFO     | Embedded 2 items into default
+2023-10-27 02:16:19 | INFO     | Found 1 results for query: []
+2023-10-27 02:16:19 | INFO     | Found 1 results for query: []
+2023-10-27 02:16:19 | INFO     | Log file: ./log/test.log
+2023-10-27 02:16:19 | INFO     | Log level: INFO
+2023-10-27 02:16:19 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:19 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:20 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:20 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:20 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:20 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:21 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:21 | INFO     | Creating session: test_store / None
+2023-10-27 02:16:21 | INFO     | Embedded 1 items into logs
+2023-10-27 02:16:21 | INFO     | Log file: ./log/test.log
+2023-10-27 02:16:21 | INFO     | Log level: INFO
+2023-10-27 02:16:22 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:22 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:22 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:22 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:23 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:23 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:23 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:23 | INFO     | Creating session: test_store / None
+2023-10-27 02:16:23 | ERROR    | schema field failed
+2023-10-27 02:16:24 | INFO     | Embedded 1 items into templates
+2023-10-27 02:16:24 | INFO     | Found 1 results for query: []
+2023-10-27 02:16:24 | INFO     | Embedded 1 items into logs
+2023-10-27 02:16:24 | INFO     | Log file: ./log/test.log
+2023-10-27 02:16:24 | INFO     | Log level: INFO
+2023-10-27 02:16:25 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:25 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:25 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:25 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:25 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:25 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:26 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:26 | INFO     | Creating session: test_store / None
+2023-10-27 02:16:26 | ERROR    | schema field failed
+2023-10-27 02:16:26 | INFO     | Embedded 1 items into templates
+2023-10-27 02:16:26 | INFO     | Found 1 results for query: []
+2023-10-27 02:16:26 | INFO     | Found 1 results for query: []
+2023-10-27 02:16:27 | INFO     | Embedded 1 items into logs
+2023-10-27 02:16:27 | INFO     | Log file: ./log/test.log
+2023-10-27 02:16:27 | INFO     | Log level: INFO
+2023-10-27 02:16:27 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:27 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:28 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:28 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:28 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:28 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:29 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:29 | INFO     | Creating session: test_store / None
+2023-10-27 02:16:29 | ERROR    | schema field failed
+2023-10-27 02:16:30 | INFO     | Embedded 1 items into templates
+2023-10-27 02:16:30 | INFO     | Found 1 results for query: []
+2023-10-27 02:16:30 | INFO     | Embedded 1 items into logs
+2023-10-27 02:16:30 | INFO     | Log file: ./log/test.log
+2023-10-27 02:16:30 | INFO     | Log level: INFO
+2023-10-27 02:16:30 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:30 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:31 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:31 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:31 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:31 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:31 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:31 | INFO     | Creating session: test_store / None
+2023-10-27 02:16:31 | ERROR    | schema field failed
+2023-10-27 02:16:32 | INFO     | Embedded 1 items into templates
+2023-10-27 02:16:32 | INFO     | Found 1 results for query: []
+2023-10-27 02:16:32 | ERROR    | Output validation failed: 'name' is a required property
+
+Failed validating 'required' in schema:
+    {'$defs': {'Role': {'enum': ['admin', 'user'],
+                        'title': 'Role',
+                        'type': 'string'},
+               'Trait': {'enum': ['nice', 'mean', 'funny', 'smart'],
+                         'title': 'Trait',
+                         'type': 'string'}},
+     'properties': {'age': {'exclusiveMaximum': 100,
+                            'minimum': 18,
+                            'title': 'Age',
+                            'type': 'integer'},
+                    'banned': {'default': False,
+                               'generate': False,
+                               'title': 'Banned',
+                               'type': 'boolean'},
+                    'id': {'default': None,
+                           'title': 'Id',
+                           'type': 'string'},
+                    'name': {'maxLength': 20,
+                             'minLength': 3,
+                             'title': 'Name',
+                             'type': 'string'},
+                    'role': {'allOf': [{'$ref': '#/$defs/Role'}],
+                             'default': 'admin'},
+                    'traits': {'items': {'$ref': '#/$defs/Trait'},
+                               'maxItems': 3,
+                               'minItems': 1,
+                               'title': 'Traits',
+                               'type': 'array'},
+                    'type': {'default': None,
+                             'title': 'Type',
+                             'type': 'string'},
+                    'vigor': {'default': 0,
+                              'maximum': 1.0,
+                              'minimum': 0.0,
+                              'title': 'Vigor',
+                              'type': 'number'}},
+     'required': ['name', 'age', 'traits'],
+     'title': 'User',
+     'type': 'object'}
+
+On instance:
+    {'age': 20, 'id': '69372210-f79c-4aaa-9fe9-291cbc39ff13'}
+2023-10-27 02:16:32 | ERROR    | Output validation failed: 'name' is a required property
+
+Failed validating 'required' in schema:
+    {'$defs': {'Role': {'enum': ['admin', 'user'],
+                        'title': 'Role',
+                        'type': 'string'},
+               'Trait': {'enum': ['nice', 'mean', 'funny', 'smart'],
+                         'title': 'Trait',
+                         'type': 'string'}},
+     'properties': {'age': {'exclusiveMaximum': 100,
+                            'minimum': 18,
+                            'title': 'Age',
+                            'type': 'integer'},
+                    'banned': {'default': False,
+                               'generate': False,
+                               'title': 'Banned',
+                               'type': 'boolean'},
+                    'id': {'default': None,
+                           'title': 'Id',
+                           'type': 'string'},
+                    'name': {'maxLength': 20,
+                             'minLength': 3,
+                             'title': 'Name',
+                             'type': 'string'},
+                    'role': {'allOf': [{'$ref': '#/$defs/Role'}],
+                             'default': 'admin'},
+                    'traits': {'items': {'$ref': '#/$defs/Trait'},
+                               'maxItems': 3,
+                               'minItems': 1,
+                               'title': 'Traits',
+                               'type': 'array'},
+                    'type': {'default': None,
+                             'title': 'Type',
+                             'type': 'string'},
+                    'vigor': {'default': 0,
+                              'maximum': 1.0,
+                              'minimum': 0.0,
+                              'title': 'Vigor',
+                              'type': 'number'}},
+     'required': ['name', 'age', 'traits'],
+     'title': 'User',
+     'type': 'object'}
+
+On instance:
+    {'age': 20, 'id': '05e716cf-4193-409e-ac09-fff90b9cde4d'}
+2023-10-27 02:16:32 | ERROR    | Output validation failed: 'name' is a required property
+
+Failed validating 'required' in schema:
+    {'$defs': {'Role': {'enum': ['admin', 'user'],
+                        'title': 'Role',
+                        'type': 'string'},
+               'Trait': {'enum': ['nice', 'mean', 'funny', 'smart'],
+                         'title': 'Trait',
+                         'type': 'string'}},
+     'properties': {'age': {'exclusiveMaximum': 100,
+                            'minimum': 18,
+                            'title': 'Age',
+                            'type': 'integer'},
+                    'banned': {'default': False,
+                               'generate': False,
+                               'title': 'Banned',
+                               'type': 'boolean'},
+                    'id': {'default': None,
+                           'title': 'Id',
+                           'type': 'string'},
+                    'name': {'maxLength': 20,
+                             'minLength': 3,
+                             'title': 'Name',
+                             'type': 'string'},
+                    'role': {'allOf': [{'$ref': '#/$defs/Role'}],
+                             'default': 'admin'},
+                    'traits': {'items': {'$ref': '#/$defs/Trait'},
+                               'maxItems': 3,
+                               'minItems': 1,
+                               'title': 'Traits',
+                               'type': 'array'},
+                    'type': {'default': None,
+                             'title': 'Type',
+                             'type': 'string'},
+                    'vigor': {'default': 0,
+                              'maximum': 1.0,
+                              'minimum': 0.0,
+                              'title': 'Vigor',
+                              'type': 'number'}},
+     'required': ['name', 'age', 'traits'],
+     'title': 'User',
+     'type': 'object'}
+
+On instance:
+    {'age': 20, 'id': '1e5d7912-f596-46f5-85cc-fc2b4ed3b548'}
+2023-10-27 02:16:32 | ERROR    | Output validation failed: 'name' is a required property
+
+Failed validating 'required' in schema:
+    {'$defs': {'Role': {'enum': ['admin', 'user'],
+                        'title': 'Role',
+                        'type': 'string'},
+               'Trait': {'enum': ['nice', 'mean', 'funny', 'smart'],
+                         'title': 'Trait',
+                         'type': 'string'}},
+     'properties': {'age': {'exclusiveMaximum': 100,
+                            'minimum': 18,
+                            'title': 'Age',
+                            'type': 'integer'},
+                    'banned': {'default': False,
+                               'generate': False,
+                               'title': 'Banned',
+                               'type': 'boolean'},
+                    'id': {'default': None,
+                           'title': 'Id',
+                           'type': 'string'},
+                    'name': {'maxLength': 20,
+                             'minLength': 3,
+                             'title': 'Name',
+                             'type': 'string'},
+                    'role': {'allOf': [{'$ref': '#/$defs/Role'}],
+                             'default': 'admin'},
+                    'traits': {'items': {'$ref': '#/$defs/Trait'},
+                               'maxItems': 3,
+                               'minItems': 1,
+                               'title': 'Traits',
+                               'type': 'array'},
+                    'type': {'default': None,
+                             'title': 'Type',
+                             'type': 'string'},
+                    'vigor': {'default': 0,
+                              'maximum': 1.0,
+                              'minimum': 0.0,
+                              'title': 'Vigor',
+                              'type': 'number'}},
+     'required': ['name', 'age', 'traits'],
+     'title': 'User',
+     'type': 'object'}
+
+On instance:
+    {'age': 20, 'id': 'db632582-f0d7-4b59-bfce-7fdcd5f314e5'}
+2023-10-27 02:16:32 | ERROR    | None failed to forward None
+2023-10-27 02:16:32 | ERROR    | Max retries exceeded: None failed to forward None
+2023-10-27 02:16:33 | INFO     | Embedded 1 items into logs
+2023-10-27 02:16:33 | INFO     | Log file: ./log/test.log
+2023-10-27 02:16:33 | INFO     | Log level: INFO
+2023-10-27 02:16:33 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:33 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:34 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:34 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:34 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:34 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:34 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:34 | INFO     | Creating session: test_store / None
+2023-10-27 02:16:34 | ERROR    | schema field failed
+2023-10-27 02:16:35 | INFO     | Embedded 1 items into templates
+2023-10-27 02:16:35 | INFO     | Found 1 results for query: []
+2023-10-27 02:16:35 | WARNING  | Failed to decode JSON from Extra data: line 1 column 7 (char 6)
+2023-10-27 02:16:35 | WARNING  | Failed to decode JSON from Extra data: line 1 column 7 (char 6)
+2023-10-27 02:16:35 | WARNING  | Failed to decode JSON from Extra data: line 1 column 7 (char 6)
+2023-10-27 02:16:35 | WARNING  | Failed to decode JSON from Extra data: line 1 column 7 (char 6)
+2023-10-27 02:16:35 | ERROR    | None failed to forward None
+2023-10-27 02:16:35 | ERROR    | Max retries exceeded: None failed to forward None
+2023-10-27 02:16:35 | INFO     | Embedded 1 items into logs
+2023-10-27 02:16:36 | INFO     | Log file: ./log/test.log
+2023-10-27 02:16:36 | INFO     | Log level: INFO
+2023-10-27 02:16:36 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:36 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:36 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:36 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:37 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:37 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:37 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:37 | INFO     | Creating session: test_store / None
+2023-10-27 02:16:37 | ERROR    | schema field failed
+2023-10-27 02:16:38 | INFO     | Embedded 1 items into templates
+2023-10-27 02:16:38 | INFO     | Found 1 results for query: []
+2023-10-27 02:16:38 | ERROR    | Output validation failed: 'traits' is a required property
+
+Failed validating 'required' in schema:
+    {'$defs': {'Role': {'enum': ['admin', 'user'],
+                        'title': 'Role',
+                        'type': 'string'},
+               'Trait': {'enum': ['nice', 'mean', 'funny', 'smart'],
+                         'title': 'Trait',
+                         'type': 'string'}},
+     'properties': {'age': {'exclusiveMaximum': 100,
+                            'minimum': 18,
+                            'title': 'Age',
+                            'type': 'integer'},
+                    'banned': {'default': False,
+                               'generate': False,
+                               'title': 'Banned',
+                               'type': 'boolean'},
+                    'id': {'default': None,
+                           'title': 'Id',
+                           'type': 'string'},
+                    'name': {'maxLength': 20,
+                             'minLength': 3,
+                             'title': 'Name',
+                             'type': 'string'},
+                    'role': {'allOf': [{'$ref': '#/$defs/Role'}],
+                             'default': 'admin'},
+                    'traits': {'items': {'$ref': '#/$defs/Trait'},
+                               'maxItems': 3,
+                               'minItems': 1,
+                               'title': 'Traits',
+                               'type': 'array'},
+                    'type': {'default': None,
+                             'title': 'Type',
+                             'type': 'string'},
+                    'vigor': {'default': 0,
+                              'maximum': 1.0,
+                              'minimum': 0.0,
+                              'title': 'Vigor',
+                              'type': 'number'}},
+     'required': ['name', 'age', 'traits'],
+     'title': 'User',
+     'type': 'object'}
+
+On instance:
+    {'age': 'young',
+     'id': '34cac9a2-44ad-44f4-b2d9-2074a41606c3',
+     'name': 'test'}
+2023-10-27 02:16:38 | ERROR    | Output validation failed: 'traits' is a required property
+
+Failed validating 'required' in schema:
+    {'$defs': {'Role': {'enum': ['admin', 'user'],
+                        'title': 'Role',
+                        'type': 'string'},
+               'Trait': {'enum': ['nice', 'mean', 'funny', 'smart'],
+                         'title': 'Trait',
+                         'type': 'string'}},
+     'properties': {'age': {'exclusiveMaximum': 100,
+                            'minimum': 18,
+                            'title': 'Age',
+                            'type': 'integer'},
+                    'banned': {'default': False,
+                               'generate': False,
+                               'title': 'Banned',
+                               'type': 'boolean'},
+                    'id': {'default': None,
+                           'title': 'Id',
+                           'type': 'string'},
+                    'name': {'maxLength': 20,
+                             'minLength': 3,
+                             'title': 'Name',
+                             'type': 'string'},
+                    'role': {'allOf': [{'$ref': '#/$defs/Role'}],
+                             'default': 'admin'},
+                    'traits': {'items': {'$ref': '#/$defs/Trait'},
+                               'maxItems': 3,
+                               'minItems': 1,
+                               'title': 'Traits',
+                               'type': 'array'},
+                    'type': {'default': None,
+                             'title': 'Type',
+                             'type': 'string'},
+                    'vigor': {'default': 0,
+                              'maximum': 1.0,
+                              'minimum': 0.0,
+                              'title': 'Vigor',
+                              'type': 'number'}},
+     'required': ['name', 'age', 'traits'],
+     'title': 'User',
+     'type': 'object'}
+
+On instance:
+    {'age': 'young',
+     'id': '9e9bfa49-3554-485a-b76b-a55317f8f98f',
+     'name': 'test'}
+2023-10-27 02:16:38 | ERROR    | Output validation failed: 'traits' is a required property
+
+Failed validating 'required' in schema:
+    {'$defs': {'Role': {'enum': ['admin', 'user'],
+                        'title': 'Role',
+                        'type': 'string'},
+               'Trait': {'enum': ['nice', 'mean', 'funny', 'smart'],
+                         'title': 'Trait',
+                         'type': 'string'}},
+     'properties': {'age': {'exclusiveMaximum': 100,
+                            'minimum': 18,
+                            'title': 'Age',
+                            'type': 'integer'},
+                    'banned': {'default': False,
+                               'generate': False,
+                               'title': 'Banned',
+                               'type': 'boolean'},
+                    'id': {'default': None,
+                           'title': 'Id',
+                           'type': 'string'},
+                    'name': {'maxLength': 20,
+                             'minLength': 3,
+                             'title': 'Name',
+                             'type': 'string'},
+                    'role': {'allOf': [{'$ref': '#/$defs/Role'}],
+                             'default': 'admin'},
+                    'traits': {'items': {'$ref': '#/$defs/Trait'},
+                               'maxItems': 3,
+                               'minItems': 1,
+                               'title': 'Traits',
+                               'type': 'array'},
+                    'type': {'default': None,
+                             'title': 'Type',
+                             'type': 'string'},
+                    'vigor': {'default': 0,
+                              'maximum': 1.0,
+                              'minimum': 0.0,
+                              'title': 'Vigor',
+                              'type': 'number'}},
+     'required': ['name', 'age', 'traits'],
+     'title': 'User',
+     'type': 'object'}
+
+On instance:
+    {'age': 'young',
+     'id': 'bd0391ee-338b-408c-a97a-2d541e2c3b40',
+     'name': 'test'}
+2023-10-27 02:16:38 | ERROR    | Output validation failed: 'traits' is a required property
+
+Failed validating 'required' in schema:
+    {'$defs': {'Role': {'enum': ['admin', 'user'],
+                        'title': 'Role',
+                        'type': 'string'},
+               'Trait': {'enum': ['nice', 'mean', 'funny', 'smart'],
+                         'title': 'Trait',
+                         'type': 'string'}},
+     'properties': {'age': {'exclusiveMaximum': 100,
+                            'minimum': 18,
+                            'title': 'Age',
+                            'type': 'integer'},
+                    'banned': {'default': False,
+                               'generate': False,
+                               'title': 'Banned',
+                               'type': 'boolean'},
+                    'id': {'default': None,
+                           'title': 'Id',
+                           'type': 'string'},
+                    'name': {'maxLength': 20,
+                             'minLength': 3,
+                             'title': 'Name',
+                             'type': 'string'},
+                    'role': {'allOf': [{'$ref': '#/$defs/Role'}],
+                             'default': 'admin'},
+                    'traits': {'items': {'$ref': '#/$defs/Trait'},
+                               'maxItems': 3,
+                               'minItems': 1,
+                               'title': 'Traits',
+                               'type': 'array'},
+                    'type': {'default': None,
+                             'title': 'Type',
+                             'type': 'string'},
+                    'vigor': {'default': 0,
+                              'maximum': 1.0,
+                              'minimum': 0.0,
+                              'title': 'Vigor',
+                              'type': 'number'}},
+     'required': ['name', 'age', 'traits'],
+     'title': 'User',
+     'type': 'object'}
+
+On instance:
+    {'age': 'young',
+     'id': '6cde7d1f-2491-4f66-adc7-3e1f0f7024ee',
+     'name': 'test'}
+2023-10-27 02:16:38 | ERROR    | None failed to forward None
+2023-10-27 02:16:38 | ERROR    | Max retries exceeded: None failed to forward None
+2023-10-27 02:16:38 | INFO     | Embedded 1 items into logs
+2023-10-27 02:16:39 | INFO     | Log file: ./log/test.log
+2023-10-27 02:16:39 | INFO     | Log level: INFO
+2023-10-27 02:16:39 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:39 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:39 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:39 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:40 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:40 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:40 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:40 | INFO     | Creating session: test_store / None
+2023-10-27 02:16:40 | ERROR    | schema field failed
+2023-10-27 02:16:41 | INFO     | Embedded 1 items into templates
+2023-10-27 02:16:41 | INFO     | Found 1 results for query: []
+2023-10-27 02:16:41 | ERROR    | LLM generation failed: <empty message>
+2023-10-27 02:16:43 | INFO     | Embedded 1 items into logs
+2023-10-27 02:16:44 | INFO     | Log file: ./log/test.log
+2023-10-27 02:16:44 | INFO     | Log level: INFO
+2023-10-27 02:16:44 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:44 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:44 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:45 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:45 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:45 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:45 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:45 | INFO     | Creating session: test_store / None
+2023-10-27 02:16:45 | ERROR    | schema field failed
+2023-10-27 02:16:46 | INFO     | Embedded 1 items into templates
+2023-10-27 02:16:46 | INFO     | Found 1 results for query: []
+2023-10-27 02:16:46 | WARNING  | Failed to decode JSON from test: line 1 column 1 (char 0)
+2023-10-27 02:16:46 | WARNING  | Failed to decode JSON from test: line 1 column 1 (char 0)
+2023-10-27 02:16:46 | WARNING  | Failed to decode JSON from test: line 1 column 1 (char 0)
+2023-10-27 02:16:46 | WARNING  | Failed to decode JSON from test: line 1 column 1 (char 0)
+2023-10-27 02:16:46 | ERROR    | None failed to forward None
+2023-10-27 02:16:46 | WARNING  | Failed to decode JSON from test: line 1 column 1 (char 0)
+2023-10-27 02:16:46 | WARNING  | Failed to decode JSON from test: line 1 column 1 (char 0)
+2023-10-27 02:16:46 | WARNING  | Failed to decode JSON from test: line 1 column 1 (char 0)
+2023-10-27 02:16:47 | INFO     | Log file: ./log/test.log
+2023-10-27 02:16:47 | INFO     | Log level: INFO
+2023-10-27 02:16:47 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:47 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:47 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:47 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:48 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:48 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:48 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:48 | INFO     | Creating session: test_store / None
+2023-10-27 02:16:48 | ERROR    | schema field failed
+2023-10-27 02:16:49 | INFO     | Embedded 1 items into templates
+2023-10-27 02:16:49 | INFO     | Found 1 results for query: []
+2023-10-27 02:16:49 | WARNING  | Failed to decode JSON from Expecting value: line 1 column 1 (char 0)
+2023-10-27 02:16:49 | WARNING  | Failed to decode JSON from Expecting value: line 1 column 1 (char 0)
+2023-10-27 02:16:49 | WARNING  | Failed to decode JSON from Expecting value: line 1 column 1 (char 0)
+2023-10-27 02:16:49 | WARNING  | Failed to decode JSON from Expecting value: line 1 column 1 (char 0)
+2023-10-27 02:16:49 | ERROR    | None failed to forward {'age': 'young'}
+2023-10-27 02:16:49 | ERROR    | Max retries exceeded: None failed to forward {'age': 'young'}
+2023-10-27 02:16:49 | INFO     | Embedded 1 items into logs
+2023-10-27 02:16:50 | INFO     | Log file: ./log/test.log
+2023-10-27 02:16:50 | INFO     | Log level: INFO
+2023-10-27 02:16:50 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:50 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:50 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:50 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:51 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:51 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:51 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:51 | INFO     | Creating session: test_store / None
+2023-10-27 02:16:51 | ERROR    | schema field failed
+2023-10-27 02:16:52 | INFO     | Embedded 1 items into templates
+2023-10-27 02:16:52 | INFO     | Found 1 results for query: []
+2023-10-27 02:16:52 | INFO     | Embedded 1 items into logs
+2023-10-27 02:16:52 | INFO     | Log file: ./log/test.log
+2023-10-27 02:16:52 | INFO     | Log level: INFO
+2023-10-27 02:16:52 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:53 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:53 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:53 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:53 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:53 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:53 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:53 | INFO     | Creating session: test_store / None
+2023-10-27 02:16:53 | ERROR    | schema field failed
+2023-10-27 02:16:54 | INFO     | Embedded 1 items into templates
+2023-10-27 02:16:54 | INFO     | Found 1 results for query: []
+2023-10-27 02:16:54 | INFO     | Log file: ./log/test.log
+2023-10-27 02:16:54 | INFO     | Log level: INFO
+2023-10-27 02:16:54 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:55 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:55 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:55 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:55 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:56 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:56 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:56 | INFO     | Creating session: test_store / None
+2023-10-27 02:16:56 | ERROR    | schema field failed
+2023-10-27 02:16:57 | INFO     | Embedded 1 items into templates
+2023-10-27 02:16:57 | INFO     | Found 1 results for query: []
+2023-10-27 02:16:57 | INFO     | Log file: ./log/test.log
+2023-10-27 02:16:57 | INFO     | Log level: INFO
+2023-10-27 02:16:57 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:58 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:58 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:58 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:58 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:59 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:59 | INFO     | Embedded 1 items into collections
+2023-10-27 02:16:59 | INFO     | Creating session: test_store / None
+2023-10-27 02:16:59 | ERROR    | schema field failed
+2023-10-27 02:17:00 | INFO     | Embedded 1 items into templates
+2023-10-27 02:17:00 | INFO     | Found 1 results for query: []
+2023-10-27 02:17:00 | INFO     | Log file: ./log/test.log
+2023-10-27 02:17:00 | INFO     | Log level: INFO
+2023-10-27 02:17:00 | INFO     | Embedded 1 items into collections
+2023-10-27 02:17:00 | INFO     | Embedded 1 items into collections
+2023-10-27 02:17:00 | INFO     | Embedded 1 items into collections
+2023-10-27 02:17:01 | INFO     | Embedded 1 items into collections
+2023-10-27 02:17:01 | INFO     | Embedded 1 items into collections
+2023-10-27 02:17:01 | INFO     | Embedded 1 items into collections
+2023-10-27 02:17:01 | INFO     | Embedded 1 items into collections
+2023-10-27 02:17:01 | INFO     | Creating session: test_store / None
+2023-10-27 02:17:01 | ERROR    | schema field failed
+2023-10-27 02:17:02 | INFO     | Embedded 1 items into templates
+2023-10-27 02:17:02 | INFO     | Found 1 results for query: []
+2023-10-27 02:17:02 | INFO     | Log file: ./log/test.log
+2023-10-27 02:17:02 | INFO     | Log level: INFO
+2023-10-27 02:17:03 | INFO     | Embedded 1 items into collections
+2023-10-27 02:17:03 | INFO     | Embedded 1 items into collections
+2023-10-27 02:17:03 | INFO     | Embedded 1 items into collections
+2023-10-27 02:17:03 | INFO     | Embedded 1 items into collections
+2023-10-27 02:17:03 | INFO     | Embedded 1 items into collections
+2023-10-27 02:17:03 | INFO     | Embedded 1 items into collections
+2023-10-27 02:17:04 | INFO     | Embedded 1 items into collections
+2023-10-27 02:17:04 | INFO     | Creating session: test_store / None
+2023-10-27 02:17:04 | ERROR    | schema field failed
+2023-10-27 02:17:04 | INFO     | Embedded 1 items into templates
+2023-10-27 02:17:04 | INFO     | Found 1 results for query: []
+2023-10-27 02:17:05 | INFO     | Log file: ./log/test.log
+2023-10-27 02:17:05 | INFO     | Log level: INFO
+2023-10-27 02:17:05 | INFO     | Embedded 1 items into collections
+2023-10-27 02:17:05 | INFO     | Embedded 1 items into collections
+2023-10-27 02:17:05 | INFO     | Embedded 1 items into collections
+2023-10-27 02:17:05 | INFO     | Embedded 1 items into collections
+2023-10-27 02:17:05 | INFO     | Embedded 1 items into collections
+2023-10-27 02:17:06 | INFO     | Embedded 1 items into collections
+2023-10-27 02:17:06 | INFO     | Embedded 1 items into collections
+2023-10-27 02:17:06 | INFO     | Creating session: test_store / None
+2023-10-27 02:17:06 | ERROR    | schema field failed
+2023-10-27 02:17:07 | INFO     | Embedded 1 items into templates
+2023-10-27 02:17:07 | INFO     | Found 1 results for query: []
+2023-10-27 02:17:07 | INFO     | Log file: ./log/test.log
+2023-10-27 02:17:07 | INFO     | Log level: INFO
+2023-10-27 02:17:07 | INFO     | Embedded 1 items into collections
+2023-10-27 02:17:07 | INFO     | Embedded 1 items into collections
+2023-10-27 02:17:07 | INFO     | Embedded 1 items into collections
+2023-10-27 02:17:07 | INFO     | Embedded 1 items into collections
+2023-10-27 02:17:08 | INFO     | Embedded 1 items into collections
+2023-10-27 02:17:08 | INFO     | Embedded 1 items into collections
+2023-10-27 02:17:08 | INFO     | Embedded 1 items into collections
+2023-10-27 02:17:08 | INFO     | Creating session: test_store / None
+2023-10-27 02:17:08 | ERROR    | schema field failed
+2023-10-27 02:17:09 | INFO     | Embedded 1 items into templates
+2023-10-27 02:17:09 | INFO     | Found 1 results for query: []
+2023-10-27 02:17:09 | INFO     | Log file: ./log/test.log
+2023-10-27 02:17:09 | INFO     | Log level: INFO
+2023-10-27 02:17:09 | INFO     | Embedded 1 items into collections
+2023-10-27 02:17:09 | INFO     | Embedded 1 items into collections
+2023-10-27 02:17:09 | INFO     | Embedded 1 items into collections
+2023-10-27 02:17:10 | INFO     | Embedded 1 items into collections
+2023-10-27 02:17:10 | INFO     | Embedded 1 items into collections
+2023-10-27 02:17:10 | INFO     | Embedded 1 items into collections
+2023-10-27 02:17:10 | INFO     | Embedded 1 items into collections
+2023-10-27 02:17:10 | INFO     | Creating session: test_store / None
+2023-10-27 02:17:10 | ERROR    | schema field failed
+2023-10-27 02:17:11 | INFO     | Embedded 1 items into templates
+2023-10-27 02:17:11 | INFO     | Found 1 results for query: []
+2023-10-27 02:17:11 | INFO     | Log file: ./log/test.log
+2023-10-27 02:17:11 | INFO     | Log level: INFO
+2023-10-27 02:17:11 | INFO     | Embedded 1 items into collections
+2023-10-27 02:17:11 | INFO     | Embedded 1 items into collections
+2023-10-27 02:17:12 | INFO     | Embedded 1 items into collections
+2023-10-27 02:17:12 | INFO     | Embedded 1 items into collections
+2023-10-27 02:17:12 | INFO     | Embedded 1 items into collections
+2023-10-27 02:17:12 | INFO     | Embedded 1 items into collections
+2023-10-27 02:17:12 | INFO     | Embedded 1 items into collections
+2023-10-27 02:17:12 | INFO     | Creating session: test_store / None
+2023-10-27 02:17:12 | ERROR    | schema field failed
+2023-10-27 02:17:13 | INFO     | Embedded 1 items into templates
+2023-10-27 02:17:13 | INFO     | Found 1 results for query: []
+2023-10-27 02:17:13 | INFO     | Log file: ./log/test.log
+2023-10-27 02:17:13 | INFO     | Log level: INFO
+2023-10-27 02:17:13 | INFO     | Embedded 1 items into collections
+2023-10-27 02:17:14 | INFO     | Embedded 1 items into collections
+2023-10-27 02:17:14 | INFO     | Embedded 1 items into collections
+2023-10-27 02:17:14 | INFO     | Embedded 1 items into collections
+2023-10-27 02:17:14 | INFO     | Embedded 1 items into collections
+2023-10-27 02:17:15 | INFO     | Embedded 1 items into collections
+2023-10-27 02:17:15 | INFO     | Embedded 1 items into collections
+2023-10-27 02:17:15 | INFO     | Creating session: test_store / None
+2023-10-27 02:17:15 | ERROR    | schema field failed
+2023-10-27 02:17:16 | INFO     | Embedded 1 items into templates
+2023-10-27 02:17:16 | INFO     | Found 1 results for query: []
+2023-10-27 02:17:16 | INFO     | Log file: ./log/test.log
+2023-10-27 02:17:16 | INFO     | Log level: INFO
+2023-10-27 02:17:17 | INFO     | Embedded 1 items into collections
+2023-10-27 02:17:17 | INFO     | Embedded 1 items into collections
+2023-10-27 02:17:18 | INFO     | Embedded 1 items into collections
+2023-10-27 02:17:19 | INFO     | Embedded 1 items into collections
+2023-10-27 02:17:19 | INFO     | Embedded 1 items into collections
+2023-10-27 02:17:19 | INFO     | Embedded 1 items into collections
+2023-10-27 02:17:20 | INFO     | Embedded 1 items into collections
+2023-10-27 02:17:20 | INFO     | Creating session: test_store / None
+2023-10-27 02:17:20 | ERROR    | schema field failed
+2023-10-27 02:17:21 | INFO     | Embedded 1 items into templates
+2023-10-27 02:17:21 | INFO     | Found 1 results for query: []
+2023-10-27 02:17:21 | INFO     | Log file: ./log/test.log
+2023-10-27 02:17:21 | INFO     | Log level: INFO
+2023-10-27 02:17:21 | INFO     | Embedded 1 items into collections
+2023-10-27 02:17:21 | INFO     | Embedded 1 items into collections
+2023-10-27 02:17:22 | INFO     | Embedded 1 items into collections
+2023-10-27 02:17:22 | INFO     | Embedded 1 items into collections
+2023-10-27 02:17:22 | INFO     | Embedded 1 items into collections
+2023-10-27 02:17:23 | INFO     | Embedded 1 items into collections
+2023-10-27 02:17:23 | INFO     | Embedded 1 items into collections
+2023-10-27 02:17:23 | INFO     | Creating session: test_store / None
+2023-10-27 02:17:23 | ERROR    | schema field failed
+2023-10-27 02:17:24 | INFO     | Embedded 1 items into templates
+2023-10-27 02:17:24 | INFO     | Found 1 results for query: []
+2023-10-27 02:17:25 | INFO     | Log file: ./log/test.log
+2023-10-27 02:17:25 | INFO     | Log level: INFO
+2023-10-27 02:17:25 | INFO     | Embedded 1 items into collections
+2023-10-27 02:17:25 | INFO     | Embedded 1 items into collections
+2023-10-27 02:17:25 | INFO     | Embedded 1 items into collections
+2023-10-27 02:17:26 | INFO     | Embedded 1 items into collections
+2023-10-27 02:17:26 | INFO     | Embedded 1 items into collections
+2023-10-27 02:17:26 | INFO     | Embedded 1 items into collections
+2023-10-27 02:17:27 | INFO     | Embedded 1 items into collections
+2023-10-27 02:17:27 | INFO     | Creating session: test_store / None
+2023-10-27 02:17:27 | ERROR    | schema field failed
+2023-10-27 02:17:28 | INFO     | Embedded 1 items into templates
+2023-10-27 02:17:28 | INFO     | Found 1 results for query: []
+2023-10-27 02:17:29 | INFO     | Log file: ./log/test.log
+2023-10-27 02:17:29 | INFO     | Log level: INFO
+2023-10-27 02:17:29 | INFO     | Embedded 1 items into collections
+2023-10-27 02:17:29 | INFO     | Embedded 1 items into collections
+2023-10-27 02:17:30 | INFO     | Embedded 1 items into collections
+2023-10-27 02:17:30 | INFO     | Embedded 1 items into collections
+2023-10-27 02:17:30 | INFO     | Embedded 1 items into collections
+2023-10-27 02:17:31 | INFO     | Embedded 1 items into collections
+2023-10-27 02:17:31 | INFO     | Embedded 1 items into collections
+2023-10-27 02:17:31 | INFO     | Creating session: test_store / None
+2023-10-27 02:17:31 | ERROR    | schema field failed
+2023-10-27 02:17:32 | INFO     | Embedded 1 items into templates
+2023-10-27 02:17:32 | INFO     | Found 1 results for query: []

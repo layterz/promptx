@@ -4,13 +4,11 @@ import numpy as np
 from loguru import logger
 from pydantic import BaseModel
 from typing import Any, Dict, List
-from chromadb.utils import embedding_functions
 
-from .collection import Collection, CollectionEntity, Query, VectorDB
+from .collection import Collection, CollectionEntity, Query, VectorDB, model_to_json_schema
 from .template import Template, TemplateRunner, MaxRetriesExceeded, MockLLM
 from .models import PromptLog, QueryLog
 from .chat import ChatBot
-from .utils import model_to_json_schema
 
 
 class Session:

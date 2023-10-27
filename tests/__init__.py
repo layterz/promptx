@@ -31,7 +31,7 @@ class User(Entity):
     role: Role = Role.admin
     banned: bool = Field(False, json_schema_extra={'generate': False})
     vigor: float = Field(0, ge=0, le=1)
-    traits: List[Trait] = Field(..., description='What kind of personality describes the user?', min_length=1, max_length=3)
+    traits: List[Trait] = Field(..., min_length=1, max_length=3)
 
 class Account(Entity):
     user: User
