@@ -740,6 +740,12 @@ class Collection(pd.DataFrame):
                     'ids': [obj.id],
                     'collection': self.name,
                 }
+            elif isinstance(obj, list):
+                if len(obj) and isinstance(obj[0], Entity):
+                    return {
+                        'ids': [o.id for o in obj],
+                        'collection': self.name,
+                    }
             raise TypeError(f"Type {type(obj)} not serializable")
 
         def _serializer(obj):
@@ -819,6 +825,9 @@ class Collection(pd.DataFrame):
                 if isinstance(f.annotation, type) and issubclass(f.annotation, Entity):
                     doc[k] = _field_serializer(getattr(item, k))
                     records += self._create_records(getattr(item, k))
+                elif getattr(f.annotation, '__origin__', None) == list and isinstance(f.annotation.__args__[0], type) and issubclass(f.annotation.__args__[0], Entity):
+                    doc[k] = _field_serializer(getattr(item, k))
+                    records += self._create_records(*getattr(item, k))
 
             doc_record = {
                 'id': item.id,

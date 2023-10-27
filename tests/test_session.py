@@ -89,3 +89,5 @@ def test_one_to_many(session, user):
     assert _account is not None
     assert len(_account.payees) == len(payees)
     assert _account.payees[0].id == payees[0].id
+    assert _account.payees[0].name == payees[0].name
+    assert _account.payees[1].id == payees[1].id
