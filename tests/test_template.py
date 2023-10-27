@@ -89,16 +89,16 @@ def test_exception_handling(session, template, llm):
     o = session.prompt(template=template, llm=llm)
     assert o == 'Test response'
 
-def test_parse_exception_handling(mocker, template, llm):
+def test_parse_exception_handling(session, mocker, template, llm):
     mocker.patch.object(TemplateRunner, 'process', side_effect=[*[json.JSONDecodeError('test', 'test', 0)] * 4, 'test'])
     runner = TemplateRunner()
 
     with pytest.raises(MaxRetriesExceeded):
-        o = runner(template, None, llm=llm)
+        o = runner(session, template, None, llm=llm)
     
     mocker.patch.object(TemplateRunner, 'process', side_effect=[*[json.JSONDecodeError('test', 'test', 0)] * 3, 'test'])
     runner = TemplateRunner()
-    o = runner(template, None, llm=llm)
+    o = runner(session, template, None, llm=llm)
     
     assert o.content == 'test'
 
@@ -194,7 +194,7 @@ def test_format_rendering_with_field_min_max_length(template):
 def test_example_rendering(template):
     user = User(name="John Wayne", age=64, traits=[Trait.mean])
     runner = TemplateRunner()
-    template.examples = [(None, user)]
+    template.examples = [Example(input='Some test input', output=user)]
     p = runner.render(template, {'input': 'Some test input'})
 
     assert 'EXAMPLES' in p

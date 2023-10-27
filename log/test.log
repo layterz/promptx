@@ -10695,3 +10695,1470 @@ On instance:
 2023-10-27 04:45:06 | INFO     | Embedded 2 items into default
 2023-10-27 04:45:06 | INFO     | Found 1 results for query: []
 2023-10-27 04:45:06 | INFO     | Found 1 results for query: []
+2023-10-27 04:48:10 | INFO     | Log file: ./log/test.log
+2023-10-27 04:48:10 | INFO     | Log level: INFO
+2023-10-27 04:48:11 | INFO     | Embedded 1 items into collections
+2023-10-27 04:48:11 | INFO     | Embedded 1 items into collections
+2023-10-27 04:48:12 | INFO     | Embedded 1 items into collections
+2023-10-27 04:48:12 | INFO     | Embedded 1 items into collections
+2023-10-27 04:48:12 | INFO     | Embedded 1 items into collections
+2023-10-27 04:48:13 | INFO     | Embedded 1 items into collections
+2023-10-27 04:48:13 | INFO     | Embedded 1 items into collections
+2023-10-27 04:48:13 | INFO     | Creating session: test_store / None
+2023-10-27 04:48:17 | INFO     | Embedded 2 items into default
+2023-10-27 04:48:17 | INFO     | Found 0 results for query: []
+2023-10-27 04:48:17 | INFO     | Found 1 results for query: []
+2023-10-27 04:52:29 | INFO     | Log file: ./log/test.log
+2023-10-27 04:52:29 | INFO     | Log level: INFO
+2023-10-27 04:52:30 | INFO     | Embedded 1 items into collections
+2023-10-27 04:52:30 | INFO     | Embedded 1 items into collections
+2023-10-27 04:52:31 | INFO     | Embedded 1 items into collections
+2023-10-27 04:52:31 | INFO     | Embedded 1 items into collections
+2023-10-27 04:52:31 | INFO     | Embedded 1 items into collections
+2023-10-27 04:52:32 | INFO     | Embedded 1 items into collections
+2023-10-27 04:52:32 | INFO     | Embedded 1 items into collections
+2023-10-27 04:52:32 | INFO     | Creating session: test_store / None
+2023-10-27 04:52:34 | INFO     | Embedded 1 items into templates
+2023-10-27 04:52:34 | INFO     | Found 1 results for query: []
+2023-10-27 04:53:10 | INFO     | Log file: ./log/test.log
+2023-10-27 04:53:10 | INFO     | Log level: INFO
+2023-10-27 04:53:11 | INFO     | Embedded 1 items into collections
+2023-10-27 04:53:11 | INFO     | Embedded 1 items into collections
+2023-10-27 04:53:11 | INFO     | Embedded 1 items into collections
+2023-10-27 04:53:12 | INFO     | Embedded 1 items into collections
+2023-10-27 04:53:12 | INFO     | Embedded 1 items into collections
+2023-10-27 04:53:12 | INFO     | Embedded 1 items into collections
+2023-10-27 04:53:13 | INFO     | Embedded 1 items into collections
+2023-10-27 04:53:13 | INFO     | Creating session: test_store / None
+2023-10-27 04:53:13 | INFO     | Embedded 1 items into default
+2023-10-27 04:53:13 | INFO     | Found 1 results for query: []
+2023-10-27 04:53:13 | INFO     | Log file: ./log/test.log
+2023-10-27 04:53:13 | INFO     | Log level: INFO
+2023-10-27 04:53:14 | INFO     | Embedded 1 items into collections
+2023-10-27 04:53:14 | INFO     | Embedded 1 items into collections
+2023-10-27 04:53:14 | INFO     | Embedded 1 items into collections
+2023-10-27 04:53:15 | INFO     | Embedded 1 items into collections
+2023-10-27 04:53:15 | INFO     | Embedded 1 items into collections
+2023-10-27 04:53:15 | INFO     | Embedded 1 items into collections
+2023-10-27 04:53:16 | INFO     | Embedded 1 items into collections
+2023-10-27 04:53:16 | INFO     | Creating session: test_store / None
+2023-10-27 04:53:17 | INFO     | Embedded 2 items into default
+2023-10-27 04:53:17 | INFO     | Found 2 results for query: []
+2023-10-27 04:53:17 | INFO     | Log file: ./log/test.log
+2023-10-27 04:53:17 | INFO     | Log level: INFO
+2023-10-27 04:53:17 | INFO     | Embedded 1 items into collections
+2023-10-27 04:53:17 | INFO     | Embedded 1 items into collections
+2023-10-27 04:53:18 | INFO     | Embedded 1 items into collections
+2023-10-27 04:53:18 | INFO     | Embedded 1 items into collections
+2023-10-27 04:53:18 | INFO     | Embedded 1 items into collections
+2023-10-27 04:53:19 | INFO     | Embedded 1 items into collections
+2023-10-27 04:53:19 | INFO     | Embedded 1 items into collections
+2023-10-27 04:53:19 | INFO     | Creating session: test_store / None
+2023-10-27 04:53:19 | INFO     | Embedded 1 items into collections
+2023-10-27 04:53:21 | INFO     | Embedded 1 items into alt-test
+2023-10-27 04:53:21 | ERROR    | Failed to parse query results: 'id'
+2023-10-27 04:53:21 | INFO     | Found 1 results for query: []
+2023-10-27 04:53:21 | INFO     | Log file: ./log/test.log
+2023-10-27 04:53:21 | INFO     | Log level: INFO
+2023-10-27 04:53:22 | INFO     | Embedded 1 items into collections
+2023-10-27 04:53:22 | INFO     | Embedded 1 items into collections
+2023-10-27 04:53:22 | INFO     | Embedded 1 items into collections
+2023-10-27 04:53:23 | INFO     | Embedded 1 items into collections
+2023-10-27 04:53:23 | INFO     | Embedded 1 items into collections
+2023-10-27 04:53:23 | INFO     | Embedded 1 items into collections
+2023-10-27 04:53:24 | INFO     | Embedded 1 items into collections
+2023-10-27 04:53:24 | INFO     | Creating session: test_store / None
+2023-10-27 04:53:24 | INFO     | Embedded 1 items into default
+2023-10-27 04:53:24 | INFO     | Found 1 results for query: []
+2023-10-27 04:53:25 | INFO     | Log file: ./log/test.log
+2023-10-27 04:53:25 | INFO     | Log level: INFO
+2023-10-27 04:53:25 | INFO     | Embedded 1 items into collections
+2023-10-27 04:53:25 | INFO     | Embedded 1 items into collections
+2023-10-27 04:53:25 | INFO     | Embedded 1 items into collections
+2023-10-27 04:53:26 | INFO     | Embedded 1 items into collections
+2023-10-27 04:53:26 | INFO     | Embedded 1 items into collections
+2023-10-27 04:53:26 | INFO     | Embedded 1 items into collections
+2023-10-27 04:53:27 | INFO     | Embedded 1 items into collections
+2023-10-27 04:53:27 | INFO     | Creating session: test_store / None
+2023-10-27 04:53:28 | INFO     | Embedded 3 items into default
+2023-10-27 04:53:28 | INFO     | Found 3 results for query: []
+2023-10-27 04:53:28 | INFO     | Log file: ./log/test.log
+2023-10-27 04:53:28 | INFO     | Log level: INFO
+2023-10-27 04:53:28 | INFO     | Embedded 1 items into collections
+2023-10-27 04:53:29 | INFO     | Embedded 1 items into collections
+2023-10-27 04:53:29 | INFO     | Embedded 1 items into collections
+2023-10-27 04:53:29 | INFO     | Embedded 1 items into collections
+2023-10-27 04:53:30 | INFO     | Embedded 1 items into collections
+2023-10-27 04:53:30 | INFO     | Embedded 1 items into collections
+2023-10-27 04:53:30 | INFO     | Embedded 1 items into collections
+2023-10-27 04:53:30 | INFO     | Creating session: test_store / None
+2023-10-27 04:53:31 | INFO     | Embedded 2 items into default
+2023-10-27 04:53:31 | INFO     | Found 1 results for query: []
+2023-10-27 04:53:31 | INFO     | Found 1 results for query: []
+2023-10-27 04:53:31 | INFO     | Log file: ./log/test.log
+2023-10-27 04:53:31 | INFO     | Log level: INFO
+2023-10-27 04:53:31 | INFO     | Embedded 1 items into collections
+2023-10-27 04:53:32 | INFO     | Embedded 1 items into collections
+2023-10-27 04:53:32 | INFO     | Embedded 1 items into collections
+2023-10-27 04:53:33 | INFO     | Embedded 1 items into collections
+2023-10-27 04:53:33 | INFO     | Embedded 1 items into collections
+2023-10-27 04:53:33 | INFO     | Embedded 1 items into collections
+2023-10-27 04:53:33 | INFO     | Embedded 1 items into collections
+2023-10-27 04:53:33 | INFO     | Creating session: test_store / None
+2023-10-27 04:53:34 | INFO     | Embedded 2 items into default
+2023-10-27 04:53:34 | INFO     | Found 0 results for query: []
+2023-10-27 04:53:34 | INFO     | Found 1 results for query: []
+2023-10-27 05:42:44 | INFO     | Log file: ./log/test.log
+2023-10-27 05:42:44 | INFO     | Log level: INFO
+2023-10-27 05:42:47 | INFO     | Embedded 1 items into collections
+2023-10-27 05:42:48 | INFO     | Embedded 1 items into collections
+2023-10-27 05:42:48 | INFO     | Embedded 1 items into collections
+2023-10-27 05:42:49 | INFO     | Embedded 1 items into collections
+2023-10-27 05:42:49 | INFO     | Embedded 1 items into collections
+2023-10-27 05:42:49 | INFO     | Embedded 1 items into collections
+2023-10-27 05:42:50 | INFO     | Embedded 1 items into collections
+2023-10-27 05:42:50 | INFO     | Creating session: test_store / None
+2023-10-27 05:42:51 | INFO     | Embedded 2 items into default
+2023-10-27 05:42:51 | INFO     | Found 1 results for query: []
+2023-10-27 05:42:51 | INFO     | Found 1 results for query: []
+2023-10-27 05:56:31 | INFO     | Log file: ./log/test.log
+2023-10-27 05:56:31 | INFO     | Log level: INFO
+2023-10-27 05:56:31 | INFO     | Embedded 1 items into collections
+2023-10-27 05:56:32 | INFO     | Embedded 1 items into collections
+2023-10-27 05:56:32 | INFO     | Embedded 1 items into collections
+2023-10-27 05:56:32 | INFO     | Embedded 1 items into collections
+2023-10-27 05:56:33 | INFO     | Embedded 1 items into collections
+2023-10-27 05:56:33 | INFO     | Embedded 1 items into collections
+2023-10-27 05:56:34 | INFO     | Embedded 1 items into collections
+2023-10-27 05:56:34 | INFO     | Creating session: test_store / None
+2023-10-27 05:56:36 | INFO     | Embedded 2 items into default
+2023-10-27 05:56:36 | INFO     | Found 1 results for query: []
+2023-10-27 05:56:36 | INFO     | Found 1 results for query: []
+2023-10-27 05:57:22 | INFO     | Log file: ./log/test.log
+2023-10-27 05:57:22 | INFO     | Log level: INFO
+2023-10-27 05:57:23 | INFO     | Embedded 1 items into collections
+2023-10-27 05:57:24 | INFO     | Embedded 1 items into collections
+2023-10-27 05:57:24 | INFO     | Embedded 1 items into collections
+2023-10-27 05:57:24 | INFO     | Embedded 1 items into collections
+2023-10-27 05:57:24 | INFO     | Embedded 1 items into collections
+2023-10-27 05:57:25 | INFO     | Embedded 1 items into collections
+2023-10-27 05:57:25 | INFO     | Embedded 1 items into collections
+2023-10-27 05:57:25 | INFO     | Creating session: test_store / None
+2023-10-27 05:57:26 | INFO     | Embedded 2 items into default
+2023-10-27 05:57:26 | INFO     | Found 1 results for query: []
+2023-10-27 05:57:35 | INFO     | Found 1 results for query: []
+2023-10-27 05:58:09 | INFO     | Log file: ./log/test.log
+2023-10-27 05:58:09 | INFO     | Log level: INFO
+2023-10-27 05:58:10 | INFO     | Embedded 1 items into collections
+2023-10-27 05:58:10 | INFO     | Embedded 1 items into collections
+2023-10-27 05:58:10 | INFO     | Embedded 1 items into collections
+2023-10-27 05:58:11 | INFO     | Embedded 1 items into collections
+2023-10-27 05:58:11 | INFO     | Embedded 1 items into collections
+2023-10-27 05:58:11 | INFO     | Embedded 1 items into collections
+2023-10-27 05:58:12 | INFO     | Embedded 1 items into collections
+2023-10-27 05:58:12 | INFO     | Creating session: test_store / None
+2023-10-27 05:58:13 | INFO     | Embedded 2 items into default
+2023-10-27 05:58:13 | INFO     | Found 1 results for query: []
+2023-10-27 05:59:26 | INFO     | Found 1 results for query: []
+2023-10-27 06:06:58 | INFO     | Log file: ./log/test.log
+2023-10-27 06:06:58 | INFO     | Log level: INFO
+2023-10-27 06:07:00 | INFO     | Embedded 1 items into collections
+2023-10-27 06:07:00 | INFO     | Embedded 1 items into collections
+2023-10-27 06:07:01 | INFO     | Embedded 1 items into collections
+2023-10-27 06:07:01 | INFO     | Embedded 1 items into collections
+2023-10-27 06:07:01 | INFO     | Embedded 1 items into collections
+2023-10-27 06:07:02 | INFO     | Embedded 1 items into collections
+2023-10-27 06:07:02 | INFO     | Embedded 1 items into collections
+2023-10-27 06:07:02 | INFO     | Creating session: test_store / None
+2023-10-27 06:07:04 | INFO     | Embedded 2 items into default
+2023-10-27 06:07:04 | INFO     | Found 1 results for query: []
+2023-10-27 06:07:04 | INFO     | Found 1 results for query: []
+2023-10-27 06:07:42 | INFO     | Log file: ./log/test.log
+2023-10-27 06:07:42 | INFO     | Log level: INFO
+2023-10-27 06:07:43 | INFO     | Embedded 1 items into collections
+2023-10-27 06:07:43 | INFO     | Embedded 1 items into collections
+2023-10-27 06:07:43 | INFO     | Embedded 1 items into collections
+2023-10-27 06:07:44 | INFO     | Embedded 1 items into collections
+2023-10-27 06:07:44 | INFO     | Embedded 1 items into collections
+2023-10-27 06:07:44 | INFO     | Embedded 1 items into collections
+2023-10-27 06:07:44 | INFO     | Embedded 1 items into collections
+2023-10-27 06:07:45 | INFO     | Creating session: test_store / None
+2023-10-27 06:07:46 | INFO     | Embedded 2 items into default
+2023-10-27 06:07:46 | INFO     | Found 1 results for query: []
+2023-10-27 06:07:46 | INFO     | Found 1 results for query: []
+2023-10-27 06:08:11 | INFO     | Log file: ./log/test.log
+2023-10-27 06:08:11 | INFO     | Log level: INFO
+2023-10-27 06:08:11 | INFO     | Embedded 1 items into collections
+2023-10-27 06:08:12 | INFO     | Embedded 1 items into collections
+2023-10-27 06:08:12 | INFO     | Embedded 1 items into collections
+2023-10-27 06:08:12 | INFO     | Embedded 1 items into collections
+2023-10-27 06:08:13 | INFO     | Embedded 1 items into collections
+2023-10-27 06:08:13 | INFO     | Embedded 1 items into collections
+2023-10-27 06:08:13 | INFO     | Embedded 1 items into collections
+2023-10-27 06:08:13 | INFO     | Creating session: test_store / None
+2023-10-27 06:08:14 | INFO     | Embedded 2 items into default
+2023-10-27 06:08:14 | INFO     | Found 1 results for query: []
+2023-10-27 06:08:14 | INFO     | Found 1 results for query: []
+2023-10-27 06:18:22 | INFO     | Log file: ./log/test.log
+2023-10-27 06:18:22 | INFO     | Log level: INFO
+2023-10-27 06:18:26 | INFO     | Embedded 1 items into collections
+2023-10-27 06:18:27 | INFO     | Embedded 1 items into collections
+2023-10-27 06:18:27 | INFO     | Embedded 1 items into collections
+2023-10-27 06:18:28 | INFO     | Embedded 1 items into collections
+2023-10-27 06:18:28 | INFO     | Embedded 1 items into collections
+2023-10-27 06:18:28 | INFO     | Embedded 1 items into collections
+2023-10-27 06:18:29 | INFO     | Embedded 1 items into collections
+2023-10-27 06:18:29 | INFO     | Creating session: test_store / None
+2023-10-27 06:18:31 | INFO     | Embedded 2 items into default
+2023-10-27 06:18:31 | INFO     | Found 1 results for query: []
+2023-10-27 06:18:31 | INFO     | Found 1 results for query: []
+2023-10-27 06:20:12 | INFO     | Log file: ./log/test.log
+2023-10-27 06:20:12 | INFO     | Log level: INFO
+2023-10-27 06:20:14 | INFO     | Embedded 1 items into collections
+2023-10-27 06:20:14 | INFO     | Embedded 1 items into collections
+2023-10-27 06:20:15 | INFO     | Embedded 1 items into collections
+2023-10-27 06:20:16 | INFO     | Embedded 1 items into collections
+2023-10-27 06:20:16 | INFO     | Embedded 1 items into collections
+2023-10-27 06:20:16 | INFO     | Embedded 1 items into collections
+2023-10-27 06:20:17 | INFO     | Embedded 1 items into collections
+2023-10-27 06:20:17 | INFO     | Creating session: test_store / None
+2023-10-27 06:20:18 | INFO     | Embedded 2 items into default
+2023-10-27 06:20:19 | INFO     | Found 1 results for query: []
+2023-10-27 06:20:19 | INFO     | Found 1 results for query: []
+2023-10-27 06:21:09 | INFO     | Log file: ./log/test.log
+2023-10-27 06:21:09 | INFO     | Log level: INFO
+2023-10-27 06:21:10 | INFO     | Embedded 1 items into collections
+2023-10-27 06:21:10 | INFO     | Embedded 1 items into collections
+2023-10-27 06:21:11 | INFO     | Embedded 1 items into collections
+2023-10-27 06:21:11 | INFO     | Embedded 1 items into collections
+2023-10-27 06:21:12 | INFO     | Embedded 1 items into collections
+2023-10-27 06:21:12 | INFO     | Embedded 1 items into collections
+2023-10-27 06:21:13 | INFO     | Embedded 1 items into collections
+2023-10-27 06:21:13 | INFO     | Creating session: test_store / None
+2023-10-27 06:21:14 | INFO     | Embedded 2 items into default
+2023-10-27 06:21:14 | INFO     | Found 1 results for query: []
+2023-10-27 06:21:14 | INFO     | Found 1 results for query: []
+2023-10-27 06:21:14 | INFO     | Loading user
+2023-10-27 06:21:32 | INFO     | Log file: ./log/test.log
+2023-10-27 06:21:32 | INFO     | Log level: INFO
+2023-10-27 06:21:34 | INFO     | Embedded 1 items into collections
+2023-10-27 06:21:34 | INFO     | Embedded 1 items into collections
+2023-10-27 06:21:35 | INFO     | Embedded 1 items into collections
+2023-10-27 06:21:35 | INFO     | Embedded 1 items into collections
+2023-10-27 06:21:36 | INFO     | Embedded 1 items into collections
+2023-10-27 06:21:36 | INFO     | Embedded 1 items into collections
+2023-10-27 06:21:37 | INFO     | Embedded 1 items into collections
+2023-10-27 06:21:37 | INFO     | Creating session: test_store / None
+2023-10-27 06:21:38 | INFO     | Embedded 2 items into default
+2023-10-27 06:21:38 | INFO     | Found 1 results for query: []
+2023-10-27 06:21:38 | INFO     | Found 1 results for query: []
+2023-10-27 06:27:46 | INFO     | Log file: ./log/test.log
+2023-10-27 06:27:46 | INFO     | Log level: INFO
+2023-10-27 06:27:48 | INFO     | Embedded 1 items into collections
+2023-10-27 06:27:48 | INFO     | Embedded 1 items into collections
+2023-10-27 06:27:49 | INFO     | Embedded 1 items into collections
+2023-10-27 06:27:49 | INFO     | Embedded 1 items into collections
+2023-10-27 06:27:50 | INFO     | Embedded 1 items into collections
+2023-10-27 06:27:50 | INFO     | Embedded 1 items into collections
+2023-10-27 06:27:51 | INFO     | Embedded 1 items into collections
+2023-10-27 06:27:51 | INFO     | Creating session: test_store / None
+2023-10-27 06:27:52 | INFO     | Embedded 2 items into default
+2023-10-27 06:27:52 | INFO     | Found 1 results for query: []
+2023-10-27 06:27:53 | INFO     | Found 1 results for query: []
+2023-10-27 06:31:19 | INFO     | Log file: ./log/test.log
+2023-10-27 06:31:19 | INFO     | Log level: INFO
+2023-10-27 06:31:20 | INFO     | Embedded 1 items into collections
+2023-10-27 06:31:20 | INFO     | Embedded 1 items into collections
+2023-10-27 06:31:20 | INFO     | Embedded 1 items into collections
+2023-10-27 06:31:21 | INFO     | Embedded 1 items into collections
+2023-10-27 06:31:21 | INFO     | Embedded 1 items into collections
+2023-10-27 06:31:21 | INFO     | Embedded 1 items into collections
+2023-10-27 06:31:22 | INFO     | Embedded 1 items into collections
+2023-10-27 06:31:22 | INFO     | Creating session: test_store / None
+2023-10-27 06:31:23 | INFO     | Embedded 2 items into default
+2023-10-27 06:31:23 | INFO     | Found 1 results for query: []
+2023-10-27 06:31:23 | INFO     | Found 1 results for query: []
+2023-10-27 07:04:13 | INFO     | Log file: ./log/test.log
+2023-10-27 07:04:13 | INFO     | Log level: INFO
+2023-10-27 07:04:13 | INFO     | Creating session: setup / None
+2023-10-27 07:04:14 | INFO     | Embedded 1 items into collections
+2023-10-27 07:04:15 | INFO     | Embedded 1 items into collections
+2023-10-27 07:04:15 | INFO     | Embedded 1 items into collections
+2023-10-27 07:04:15 | INFO     | Embedded 1 items into collections
+2023-10-27 07:04:15 | INFO     | Embedded 1 items into collections
+2023-10-27 07:04:15 | INFO     | Embedded 1 items into collections
+2023-10-27 07:09:19 | INFO     | Log file: ./log/test.log
+2023-10-27 07:09:19 | INFO     | Log level: INFO
+2023-10-27 07:09:19 | INFO     | Creating session: setup / None
+2023-10-27 07:09:28 | INFO     | Embedded 1 items into collections
+2023-10-27 07:09:31 | INFO     | Embedded 1 items into collections
+2023-10-27 07:09:33 | INFO     | Embedded 1 items into collections
+2023-10-27 07:09:34 | INFO     | Embedded 1 items into collections
+2023-10-27 07:09:35 | INFO     | Embedded 1 items into collections
+2023-10-27 07:09:37 | INFO     | Embedded 1 items into collections
+2023-10-27 07:10:20 | INFO     | Log file: ./log/test.log
+2023-10-27 07:10:20 | INFO     | Log level: INFO
+2023-10-27 07:10:20 | INFO     | Creating session: setup / None
+2023-10-27 07:10:21 | INFO     | Embedded 1 items into collections
+2023-10-27 07:10:21 | INFO     | Embedded 1 items into collections
+2023-10-27 07:10:21 | INFO     | Embedded 1 items into collections
+2023-10-27 07:10:21 | INFO     | Embedded 1 items into collections
+2023-10-27 07:10:22 | INFO     | Embedded 1 items into collections
+2023-10-27 07:10:22 | INFO     | Embedded 1 items into collections
+2023-10-27 07:10:22 | INFO     | Embedded 1 items into collections
+2023-10-27 07:10:22 | INFO     | Creating session: test_store / None
+2023-10-27 07:10:23 | INFO     | Embedded 2 items into default
+2023-10-27 07:10:23 | INFO     | Found 1 results for query: []
+2023-10-27 07:10:23 | INFO     | Found 1 results for query: []
+2023-10-27 07:10:23 | INFO     | Loading user
+2023-10-27 07:10:53 | INFO     | Log file: ./log/test.log
+2023-10-27 07:10:53 | INFO     | Log level: INFO
+2023-10-27 07:10:53 | INFO     | Creating session: setup / None
+2023-10-27 07:11:04 | INFO     | Embedded 1 items into collections
+2023-10-27 07:11:06 | INFO     | Embedded 1 items into collections
+2023-10-27 07:11:07 | INFO     | Embedded 1 items into collections
+2023-10-27 07:11:09 | INFO     | Embedded 1 items into collections
+2023-10-27 07:11:10 | INFO     | Embedded 1 items into collections
+2023-10-27 07:11:11 | INFO     | Embedded 1 items into collections
+2023-10-27 07:11:13 | INFO     | Embedded 1 items into collections
+2023-10-27 07:11:13 | INFO     | Creating session: test_store / None
+2023-10-27 07:11:13 | INFO     | Embedded 2 items into default
+2023-10-27 07:11:13 | INFO     | Found 1 results for query: []
+2023-10-27 07:11:14 | INFO     | Found 1 results for query: []
+2023-10-27 07:11:44 | INFO     | Log file: ./log/test.log
+2023-10-27 07:11:44 | INFO     | Log level: INFO
+2023-10-27 07:11:44 | INFO     | Creating session: setup / None
+2023-10-27 07:12:02 | INFO     | Log file: ./log/test.log
+2023-10-27 07:12:02 | INFO     | Log level: INFO
+2023-10-27 07:12:02 | INFO     | Creating session: setup / None
+2023-10-27 07:12:03 | INFO     | Embedded 1 items into collections
+2023-10-27 07:12:03 | INFO     | Embedded 1 items into collections
+2023-10-27 07:12:03 | INFO     | Embedded 1 items into collections
+2023-10-27 07:12:03 | INFO     | Embedded 1 items into collections
+2023-10-27 07:12:04 | INFO     | Embedded 1 items into collections
+2023-10-27 07:12:04 | INFO     | Embedded 1 items into collections
+2023-10-27 07:12:04 | INFO     | Embedded 1 items into collections
+2023-10-27 07:12:04 | INFO     | Creating session: test_store / None
+2023-10-27 07:12:05 | INFO     | Embedded 2 items into default
+2023-10-27 07:12:05 | INFO     | Found 1 results for query: []
+2023-10-27 07:12:05 | INFO     | Found 1 results for query: []
+2023-10-27 07:12:05 | INFO     | Loading user
+2023-10-27 07:12:31 | INFO     | Log file: ./log/test.log
+2023-10-27 07:12:31 | INFO     | Log level: INFO
+2023-10-27 07:12:31 | INFO     | Creating session: setup / None
+2023-10-27 07:12:32 | INFO     | Embedded 1 items into collections
+2023-10-27 07:12:32 | INFO     | Embedded 1 items into collections
+2023-10-27 07:12:32 | INFO     | Embedded 1 items into collections
+2023-10-27 07:12:33 | INFO     | Embedded 1 items into collections
+2023-10-27 07:12:33 | INFO     | Embedded 1 items into collections
+2023-10-27 07:12:33 | INFO     | Embedded 1 items into collections
+2023-10-27 07:12:33 | INFO     | Embedded 1 items into collections
+2023-10-27 07:12:33 | INFO     | Creating session: test_store / None
+2023-10-27 07:12:34 | INFO     | Embedded 2 items into default
+2023-10-27 07:12:34 | INFO     | Found 1 results for query: []
+2023-10-27 07:12:34 | INFO     | Found 1 results for query: []
+2023-10-27 07:12:54 | INFO     | Log file: ./log/test.log
+2023-10-27 07:12:54 | INFO     | Log level: INFO
+2023-10-27 07:12:54 | INFO     | Creating session: setup / None
+2023-10-27 07:12:54 | INFO     | Embedded 1 items into collections
+2023-10-27 07:12:54 | INFO     | Embedded 1 items into collections
+2023-10-27 07:12:55 | INFO     | Embedded 1 items into collections
+2023-10-27 07:12:55 | INFO     | Embedded 1 items into collections
+2023-10-27 07:12:55 | INFO     | Embedded 1 items into collections
+2023-10-27 07:12:55 | INFO     | Embedded 1 items into collections
+2023-10-27 07:12:55 | INFO     | Embedded 1 items into collections
+2023-10-27 07:12:55 | INFO     | Creating session: test_store / None
+2023-10-27 07:12:56 | INFO     | Embedded 2 items into default
+2023-10-27 07:12:56 | INFO     | Found 1 results for query: []
+2023-10-27 07:12:56 | INFO     | Found 1 results for query: []
+2023-10-27 07:18:58 | INFO     | Log file: ./log/test.log
+2023-10-27 07:18:58 | INFO     | Log level: INFO
+2023-10-27 07:18:58 | INFO     | Creating session: setup / None
+2023-10-27 07:18:58 | INFO     | Embedded 1 items into collections
+2023-10-27 07:18:58 | INFO     | Embedded 1 items into collections
+2023-10-27 07:18:59 | INFO     | Embedded 1 items into collections
+2023-10-27 07:18:59 | INFO     | Embedded 1 items into collections
+2023-10-27 07:18:59 | INFO     | Embedded 1 items into collections
+2023-10-27 07:18:59 | INFO     | Embedded 1 items into collections
+2023-10-27 07:18:59 | INFO     | Embedded 1 items into collections
+2023-10-27 07:18:59 | INFO     | Creating session: test_store / None
+2023-10-27 07:19:00 | INFO     | Embedded 2 items into default
+2023-10-27 07:19:00 | INFO     | Found 1 results for query: []
+2023-10-27 07:19:25 | INFO     | Log file: ./log/test.log
+2023-10-27 07:19:25 | INFO     | Log level: INFO
+2023-10-27 07:19:25 | INFO     | Creating session: setup / None
+2023-10-27 07:19:25 | INFO     | Embedded 1 items into collections
+2023-10-27 07:19:26 | INFO     | Embedded 1 items into collections
+2023-10-27 07:19:26 | INFO     | Embedded 1 items into collections
+2023-10-27 07:19:26 | INFO     | Embedded 1 items into collections
+2023-10-27 07:19:26 | INFO     | Embedded 1 items into collections
+2023-10-27 07:19:26 | INFO     | Embedded 1 items into collections
+2023-10-27 07:19:27 | INFO     | Embedded 1 items into collections
+2023-10-27 07:19:27 | INFO     | Creating session: test_store / None
+2023-10-27 07:19:27 | INFO     | Embedded 2 items into default
+2023-10-27 07:19:27 | INFO     | Found 1 results for query: []
+2023-10-27 07:19:43 | INFO     | Log file: ./log/test.log
+2023-10-27 07:19:43 | INFO     | Log level: INFO
+2023-10-27 07:19:43 | INFO     | Creating session: setup / None
+2023-10-27 07:19:44 | INFO     | Embedded 1 items into collections
+2023-10-27 07:19:44 | INFO     | Embedded 1 items into collections
+2023-10-27 07:19:44 | INFO     | Embedded 1 items into collections
+2023-10-27 07:19:44 | INFO     | Embedded 1 items into collections
+2023-10-27 07:19:45 | INFO     | Embedded 1 items into collections
+2023-10-27 07:19:45 | INFO     | Embedded 1 items into collections
+2023-10-27 07:19:45 | INFO     | Embedded 1 items into collections
+2023-10-27 07:19:45 | INFO     | Creating session: test_store / None
+2023-10-27 07:19:46 | INFO     | Embedded 2 items into default
+2023-10-27 07:19:46 | INFO     | Found 1 results for query: []
+2023-10-27 07:22:13 | INFO     | Log file: ./log/test.log
+2023-10-27 07:22:13 | INFO     | Log level: INFO
+2023-10-27 07:22:13 | INFO     | Creating session: setup / None
+2023-10-27 07:22:13 | INFO     | Embedded 1 items into collections
+2023-10-27 07:22:14 | INFO     | Embedded 1 items into collections
+2023-10-27 07:22:14 | INFO     | Embedded 1 items into collections
+2023-10-27 07:22:14 | INFO     | Embedded 1 items into collections
+2023-10-27 07:22:14 | INFO     | Embedded 1 items into collections
+2023-10-27 07:22:14 | INFO     | Embedded 1 items into collections
+2023-10-27 07:22:14 | INFO     | Embedded 1 items into collections
+2023-10-27 07:22:14 | INFO     | Creating session: test_store / None
+2023-10-27 07:22:15 | INFO     | Embedded 2 items into default
+2023-10-27 07:22:15 | INFO     | Found 1 results for query: []
+2023-10-27 07:23:20 | INFO     | Log file: ./log/test.log
+2023-10-27 07:23:20 | INFO     | Log level: INFO
+2023-10-27 07:23:20 | INFO     | Creating session: setup / None
+2023-10-27 07:23:21 | INFO     | Embedded 1 items into collections
+2023-10-27 07:23:21 | INFO     | Embedded 1 items into collections
+2023-10-27 07:23:21 | INFO     | Embedded 1 items into collections
+2023-10-27 07:23:21 | INFO     | Embedded 1 items into collections
+2023-10-27 07:23:21 | INFO     | Embedded 1 items into collections
+2023-10-27 07:23:21 | INFO     | Embedded 1 items into collections
+2023-10-27 07:23:22 | INFO     | Embedded 1 items into collections
+2023-10-27 07:23:22 | INFO     | Creating session: test_store / None
+2023-10-27 07:23:22 | INFO     | Embedded 2 items into default
+2023-10-27 07:23:22 | INFO     | Found 1 results for query: []
+2023-10-27 07:27:04 | INFO     | Log file: ./log/test.log
+2023-10-27 07:27:04 | INFO     | Log level: INFO
+2023-10-27 07:27:04 | INFO     | Creating session: setup / None
+2023-10-27 07:27:04 | INFO     | Embedded 1 items into collections
+2023-10-27 07:27:05 | INFO     | Embedded 1 items into collections
+2023-10-27 07:27:05 | INFO     | Embedded 1 items into collections
+2023-10-27 07:27:05 | INFO     | Embedded 1 items into collections
+2023-10-27 07:27:05 | INFO     | Embedded 1 items into collections
+2023-10-27 07:27:05 | INFO     | Embedded 1 items into collections
+2023-10-27 07:27:05 | INFO     | Embedded 1 items into collections
+2023-10-27 07:27:05 | INFO     | Creating session: test_store / None
+2023-10-27 07:27:06 | INFO     | Embedded 2 items into default
+2023-10-27 07:27:06 | INFO     | Found 1 results for query: []
+2023-10-27 07:27:58 | INFO     | Log file: ./log/test.log
+2023-10-27 07:27:58 | INFO     | Log level: INFO
+2023-10-27 07:27:58 | INFO     | Creating session: setup / None
+2023-10-27 07:27:59 | INFO     | Embedded 1 items into collections
+2023-10-27 07:27:59 | INFO     | Embedded 1 items into collections
+2023-10-27 07:27:59 | INFO     | Embedded 1 items into collections
+2023-10-27 07:27:59 | INFO     | Embedded 1 items into collections
+2023-10-27 07:27:59 | INFO     | Embedded 1 items into collections
+2023-10-27 07:27:59 | INFO     | Embedded 1 items into collections
+2023-10-27 07:28:00 | INFO     | Embedded 1 items into collections
+2023-10-27 07:28:00 | INFO     | Creating session: test_store / None
+2023-10-27 07:28:00 | INFO     | Embedded 2 items into default
+2023-10-27 07:28:00 | INFO     | Found 1 results for query: []
+2023-10-27 07:28:25 | INFO     | Log file: ./log/test.log
+2023-10-27 07:28:25 | INFO     | Log level: INFO
+2023-10-27 07:28:25 | INFO     | Creating session: setup / None
+2023-10-27 07:28:25 | INFO     | Embedded 1 items into collections
+2023-10-27 07:28:26 | INFO     | Embedded 1 items into collections
+2023-10-27 07:28:26 | INFO     | Embedded 1 items into collections
+2023-10-27 07:28:26 | INFO     | Embedded 1 items into collections
+2023-10-27 07:28:26 | INFO     | Embedded 1 items into collections
+2023-10-27 07:28:26 | INFO     | Embedded 1 items into collections
+2023-10-27 07:28:26 | INFO     | Embedded 1 items into collections
+2023-10-27 07:28:26 | INFO     | Creating session: test_store / None
+2023-10-27 07:28:27 | INFO     | Embedded 2 items into default
+2023-10-27 07:28:27 | INFO     | Found 1 results for query: []
+2023-10-27 07:28:27 | INFO     | Found 1 results for query: []
+2023-10-27 07:31:14 | INFO     | Log file: ./log/test.log
+2023-10-27 07:31:14 | INFO     | Log level: INFO
+2023-10-27 07:31:14 | INFO     | Creating session: setup / None
+2023-10-27 07:31:15 | INFO     | Embedded 1 items into collections
+2023-10-27 07:31:15 | INFO     | Embedded 1 items into collections
+2023-10-27 07:31:15 | INFO     | Embedded 1 items into collections
+2023-10-27 07:31:15 | INFO     | Embedded 1 items into collections
+2023-10-27 07:31:15 | INFO     | Embedded 1 items into collections
+2023-10-27 07:31:15 | INFO     | Embedded 1 items into collections
+2023-10-27 07:31:16 | INFO     | Embedded 1 items into collections
+2023-10-27 07:31:16 | INFO     | Creating session: test_store / None
+2023-10-27 07:31:16 | INFO     | Embedded 2 items into default
+2023-10-27 07:31:16 | INFO     | Found 1 results for query: []
+2023-10-27 07:31:16 | INFO     | Found 1 results for query: []
+2023-10-27 07:33:16 | INFO     | Log file: ./log/test.log
+2023-10-27 07:33:16 | INFO     | Log level: INFO
+2023-10-27 07:33:16 | INFO     | Creating session: setup / None
+2023-10-27 07:33:17 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:17 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:17 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:17 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:17 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:17 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:18 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:18 | INFO     | Creating session: test_store / None
+2023-10-27 07:33:18 | INFO     | Embedded 1 items into default
+2023-10-27 07:33:18 | INFO     | Found 1 results for query: []
+2023-10-27 07:33:18 | INFO     | Log file: ./log/test.log
+2023-10-27 07:33:18 | INFO     | Log level: INFO
+2023-10-27 07:33:18 | INFO     | Creating session: setup / None
+2023-10-27 07:33:19 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:19 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:19 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:19 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:19 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:19 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:20 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:20 | INFO     | Creating session: test_store / None
+2023-10-27 07:33:20 | INFO     | Embedded 2 items into default
+2023-10-27 07:33:20 | INFO     | Found 2 results for query: []
+2023-10-27 07:33:20 | INFO     | Log file: ./log/test.log
+2023-10-27 07:33:20 | INFO     | Log level: INFO
+2023-10-27 07:33:20 | INFO     | Creating session: setup / None
+2023-10-27 07:33:20 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:21 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:21 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:21 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:21 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:21 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:21 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:21 | INFO     | Creating session: test_store / None
+2023-10-27 07:33:21 | INFO     | Log file: ./log/test.log
+2023-10-27 07:33:21 | INFO     | Log level: INFO
+2023-10-27 07:33:21 | INFO     | Creating session: setup / None
+2023-10-27 07:33:22 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:22 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:22 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:22 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:22 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:23 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:23 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:23 | INFO     | Creating session: test_store / None
+2023-10-27 07:33:23 | INFO     | Embedded 1 items into default
+2023-10-27 07:33:23 | INFO     | Found 1 results for query: []
+2023-10-27 07:33:23 | INFO     | Log file: ./log/test.log
+2023-10-27 07:33:23 | INFO     | Log level: INFO
+2023-10-27 07:33:23 | INFO     | Creating session: setup / None
+2023-10-27 07:33:23 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:23 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:23 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:24 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:24 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:24 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:24 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:24 | INFO     | Creating session: test_store / None
+2023-10-27 07:33:25 | INFO     | Embedded 3 items into default
+2023-10-27 07:33:25 | INFO     | Found 3 results for query: []
+2023-10-27 07:33:25 | INFO     | Log file: ./log/test.log
+2023-10-27 07:33:25 | INFO     | Log level: INFO
+2023-10-27 07:33:25 | INFO     | Creating session: setup / None
+2023-10-27 07:33:25 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:25 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:25 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:26 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:26 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:26 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:26 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:26 | INFO     | Creating session: test_store / None
+2023-10-27 07:33:26 | INFO     | Embedded 2 items into default
+2023-10-27 07:33:26 | INFO     | Found 1 results for query: []
+2023-10-27 07:33:26 | INFO     | Found 1 results for query: []
+2023-10-27 07:33:26 | INFO     | Loading user
+2023-10-27 07:33:26 | INFO     | Log file: ./log/test.log
+2023-10-27 07:33:26 | INFO     | Log level: INFO
+2023-10-27 07:33:26 | INFO     | Creating session: setup / None
+2023-10-27 07:33:27 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:27 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:27 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:27 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:27 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:28 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:28 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:28 | INFO     | Creating session: test_store / None
+2023-10-27 07:33:28 | INFO     | Embedded 2 items into default
+2023-10-27 07:33:28 | INFO     | Found 0 results for query: []
+2023-10-27 07:33:28 | INFO     | Found 1 results for query: []
+2023-10-27 07:33:28 | INFO     | Log file: ./log/test.log
+2023-10-27 07:33:28 | INFO     | Log level: INFO
+2023-10-27 07:33:28 | INFO     | Creating session: setup / None
+2023-10-27 07:33:28 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:28 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:29 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:29 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:29 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:29 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:29 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:29 | INFO     | Creating session: test_store / None
+2023-10-27 07:33:30 | INFO     | Embedded 1 items into logs
+2023-10-27 07:33:30 | INFO     | Log file: ./log/test.log
+2023-10-27 07:33:30 | INFO     | Log level: INFO
+2023-10-27 07:33:30 | INFO     | Creating session: setup / None
+2023-10-27 07:33:30 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:30 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:30 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:30 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:31 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:31 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:31 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:31 | INFO     | Creating session: test_store / None
+2023-10-27 07:33:32 | INFO     | Embedded 1 items into templates
+2023-10-27 07:33:32 | INFO     | Found 1 results for query: []
+2023-10-27 07:33:32 | INFO     | Embedded 1 items into logs
+2023-10-27 07:33:32 | INFO     | Log file: ./log/test.log
+2023-10-27 07:33:32 | INFO     | Log level: INFO
+2023-10-27 07:33:32 | INFO     | Creating session: setup / None
+2023-10-27 07:33:32 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:32 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:33 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:33 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:33 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:33 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:33 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:33 | INFO     | Creating session: test_store / None
+2023-10-27 07:33:34 | INFO     | Embedded 1 items into templates
+2023-10-27 07:33:34 | INFO     | Found 1 results for query: []
+2023-10-27 07:33:34 | INFO     | Found 1 results for query: []
+2023-10-27 07:33:34 | INFO     | Embedded 1 items into logs
+2023-10-27 07:33:34 | INFO     | Log file: ./log/test.log
+2023-10-27 07:33:34 | INFO     | Log level: INFO
+2023-10-27 07:33:34 | INFO     | Creating session: setup / None
+2023-10-27 07:33:35 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:35 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:35 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:35 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:35 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:36 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:36 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:36 | INFO     | Creating session: test_store / None
+2023-10-27 07:33:36 | INFO     | Embedded 1 items into templates
+2023-10-27 07:33:36 | INFO     | Found 1 results for query: []
+2023-10-27 07:33:37 | INFO     | Embedded 1 items into logs
+2023-10-27 07:33:37 | INFO     | Log file: ./log/test.log
+2023-10-27 07:33:37 | INFO     | Log level: INFO
+2023-10-27 07:33:37 | INFO     | Creating session: setup / None
+2023-10-27 07:33:37 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:37 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:37 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:37 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:38 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:38 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:38 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:38 | INFO     | Creating session: test_store / None
+2023-10-27 07:33:39 | INFO     | Embedded 1 items into templates
+2023-10-27 07:33:39 | INFO     | Found 1 results for query: []
+2023-10-27 07:33:39 | ERROR    | Output validation failed: 'name' is a required property
+
+Failed validating 'required' in schema:
+    {'$defs': {'Role': {'enum': ['admin', 'user'],
+                        'title': 'Role',
+                        'type': 'string'},
+               'Trait': {'enum': ['nice', 'mean', 'funny', 'smart'],
+                         'title': 'Trait',
+                         'type': 'string'}},
+     'properties': {'age': {'exclusiveMaximum': 100,
+                            'minimum': 18,
+                            'title': 'Age',
+                            'type': 'integer'},
+                    'banned': {'default': False,
+                               'generate': False,
+                               'title': 'Banned',
+                               'type': 'boolean'},
+                    'id': {'default': None,
+                           'title': 'Id',
+                           'type': 'string'},
+                    'name': {'maxLength': 20,
+                             'minLength': 3,
+                             'title': 'Name',
+                             'type': 'string'},
+                    'role': {'allOf': [{'$ref': '#/$defs/Role'}],
+                             'default': 'admin'},
+                    'traits': {'items': {'$ref': '#/$defs/Trait'},
+                               'maxItems': 3,
+                               'minItems': 1,
+                               'title': 'Traits',
+                               'type': 'array'},
+                    'type': {'default': None,
+                             'title': 'Type',
+                             'type': 'string'},
+                    'vigor': {'default': 0,
+                              'maximum': 1.0,
+                              'minimum': 0.0,
+                              'title': 'Vigor',
+                              'type': 'number'}},
+     'required': ['name', 'age', 'traits'],
+     'title': 'User',
+     'type': 'object'}
+
+On instance:
+    {'age': 20, 'id': '968f8b1b-02d5-4052-83dd-bc9a0e246d41'}
+2023-10-27 07:33:39 | ERROR    | Output validation failed: 'name' is a required property
+
+Failed validating 'required' in schema:
+    {'$defs': {'Role': {'enum': ['admin', 'user'],
+                        'title': 'Role',
+                        'type': 'string'},
+               'Trait': {'enum': ['nice', 'mean', 'funny', 'smart'],
+                         'title': 'Trait',
+                         'type': 'string'}},
+     'properties': {'age': {'exclusiveMaximum': 100,
+                            'minimum': 18,
+                            'title': 'Age',
+                            'type': 'integer'},
+                    'banned': {'default': False,
+                               'generate': False,
+                               'title': 'Banned',
+                               'type': 'boolean'},
+                    'id': {'default': None,
+                           'title': 'Id',
+                           'type': 'string'},
+                    'name': {'maxLength': 20,
+                             'minLength': 3,
+                             'title': 'Name',
+                             'type': 'string'},
+                    'role': {'allOf': [{'$ref': '#/$defs/Role'}],
+                             'default': 'admin'},
+                    'traits': {'items': {'$ref': '#/$defs/Trait'},
+                               'maxItems': 3,
+                               'minItems': 1,
+                               'title': 'Traits',
+                               'type': 'array'},
+                    'type': {'default': None,
+                             'title': 'Type',
+                             'type': 'string'},
+                    'vigor': {'default': 0,
+                              'maximum': 1.0,
+                              'minimum': 0.0,
+                              'title': 'Vigor',
+                              'type': 'number'}},
+     'required': ['name', 'age', 'traits'],
+     'title': 'User',
+     'type': 'object'}
+
+On instance:
+    {'age': 20, 'id': '9178ff91-4dda-4fba-9510-c268bc17fe4d'}
+2023-10-27 07:33:39 | ERROR    | Output validation failed: 'name' is a required property
+
+Failed validating 'required' in schema:
+    {'$defs': {'Role': {'enum': ['admin', 'user'],
+                        'title': 'Role',
+                        'type': 'string'},
+               'Trait': {'enum': ['nice', 'mean', 'funny', 'smart'],
+                         'title': 'Trait',
+                         'type': 'string'}},
+     'properties': {'age': {'exclusiveMaximum': 100,
+                            'minimum': 18,
+                            'title': 'Age',
+                            'type': 'integer'},
+                    'banned': {'default': False,
+                               'generate': False,
+                               'title': 'Banned',
+                               'type': 'boolean'},
+                    'id': {'default': None,
+                           'title': 'Id',
+                           'type': 'string'},
+                    'name': {'maxLength': 20,
+                             'minLength': 3,
+                             'title': 'Name',
+                             'type': 'string'},
+                    'role': {'allOf': [{'$ref': '#/$defs/Role'}],
+                             'default': 'admin'},
+                    'traits': {'items': {'$ref': '#/$defs/Trait'},
+                               'maxItems': 3,
+                               'minItems': 1,
+                               'title': 'Traits',
+                               'type': 'array'},
+                    'type': {'default': None,
+                             'title': 'Type',
+                             'type': 'string'},
+                    'vigor': {'default': 0,
+                              'maximum': 1.0,
+                              'minimum': 0.0,
+                              'title': 'Vigor',
+                              'type': 'number'}},
+     'required': ['name', 'age', 'traits'],
+     'title': 'User',
+     'type': 'object'}
+
+On instance:
+    {'age': 20, 'id': '8ae36bef-318d-4417-9bf2-c73bd2be0b16'}
+2023-10-27 07:33:39 | ERROR    | Output validation failed: 'name' is a required property
+
+Failed validating 'required' in schema:
+    {'$defs': {'Role': {'enum': ['admin', 'user'],
+                        'title': 'Role',
+                        'type': 'string'},
+               'Trait': {'enum': ['nice', 'mean', 'funny', 'smart'],
+                         'title': 'Trait',
+                         'type': 'string'}},
+     'properties': {'age': {'exclusiveMaximum': 100,
+                            'minimum': 18,
+                            'title': 'Age',
+                            'type': 'integer'},
+                    'banned': {'default': False,
+                               'generate': False,
+                               'title': 'Banned',
+                               'type': 'boolean'},
+                    'id': {'default': None,
+                           'title': 'Id',
+                           'type': 'string'},
+                    'name': {'maxLength': 20,
+                             'minLength': 3,
+                             'title': 'Name',
+                             'type': 'string'},
+                    'role': {'allOf': [{'$ref': '#/$defs/Role'}],
+                             'default': 'admin'},
+                    'traits': {'items': {'$ref': '#/$defs/Trait'},
+                               'maxItems': 3,
+                               'minItems': 1,
+                               'title': 'Traits',
+                               'type': 'array'},
+                    'type': {'default': None,
+                             'title': 'Type',
+                             'type': 'string'},
+                    'vigor': {'default': 0,
+                              'maximum': 1.0,
+                              'minimum': 0.0,
+                              'title': 'Vigor',
+                              'type': 'number'}},
+     'required': ['name', 'age', 'traits'],
+     'title': 'User',
+     'type': 'object'}
+
+On instance:
+    {'age': 20, 'id': 'bc5c0bf8-dee3-478e-81c2-2c6eb69a6594'}
+2023-10-27 07:33:39 | ERROR    | None failed to forward None
+2023-10-27 07:33:39 | ERROR    | Max retries exceeded: None failed to forward None
+2023-10-27 07:33:39 | INFO     | Embedded 1 items into logs
+2023-10-27 07:33:39 | INFO     | Log file: ./log/test.log
+2023-10-27 07:33:39 | INFO     | Log level: INFO
+2023-10-27 07:33:39 | INFO     | Creating session: setup / None
+2023-10-27 07:33:39 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:39 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:40 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:40 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:40 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:40 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:40 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:40 | INFO     | Creating session: test_store / None
+2023-10-27 07:33:41 | INFO     | Embedded 1 items into templates
+2023-10-27 07:33:41 | INFO     | Found 1 results for query: []
+2023-10-27 07:33:41 | WARNING  | Failed to decode JSON from Extra data: line 1 column 7 (char 6)
+2023-10-27 07:33:41 | WARNING  | Failed to decode JSON from Extra data: line 1 column 7 (char 6)
+2023-10-27 07:33:41 | WARNING  | Failed to decode JSON from Extra data: line 1 column 7 (char 6)
+2023-10-27 07:33:41 | WARNING  | Failed to decode JSON from Extra data: line 1 column 7 (char 6)
+2023-10-27 07:33:41 | ERROR    | None failed to forward None
+2023-10-27 07:33:41 | ERROR    | Max retries exceeded: None failed to forward None
+2023-10-27 07:33:41 | INFO     | Embedded 1 items into logs
+2023-10-27 07:33:41 | INFO     | Log file: ./log/test.log
+2023-10-27 07:33:41 | INFO     | Log level: INFO
+2023-10-27 07:33:41 | INFO     | Creating session: setup / None
+2023-10-27 07:33:41 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:42 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:42 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:42 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:42 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:42 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:42 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:42 | INFO     | Creating session: test_store / None
+2023-10-27 07:33:43 | INFO     | Embedded 1 items into templates
+2023-10-27 07:33:43 | INFO     | Found 1 results for query: []
+2023-10-27 07:33:43 | ERROR    | Output validation failed: 'traits' is a required property
+
+Failed validating 'required' in schema:
+    {'$defs': {'Role': {'enum': ['admin', 'user'],
+                        'title': 'Role',
+                        'type': 'string'},
+               'Trait': {'enum': ['nice', 'mean', 'funny', 'smart'],
+                         'title': 'Trait',
+                         'type': 'string'}},
+     'properties': {'age': {'exclusiveMaximum': 100,
+                            'minimum': 18,
+                            'title': 'Age',
+                            'type': 'integer'},
+                    'banned': {'default': False,
+                               'generate': False,
+                               'title': 'Banned',
+                               'type': 'boolean'},
+                    'id': {'default': None,
+                           'title': 'Id',
+                           'type': 'string'},
+                    'name': {'maxLength': 20,
+                             'minLength': 3,
+                             'title': 'Name',
+                             'type': 'string'},
+                    'role': {'allOf': [{'$ref': '#/$defs/Role'}],
+                             'default': 'admin'},
+                    'traits': {'items': {'$ref': '#/$defs/Trait'},
+                               'maxItems': 3,
+                               'minItems': 1,
+                               'title': 'Traits',
+                               'type': 'array'},
+                    'type': {'default': None,
+                             'title': 'Type',
+                             'type': 'string'},
+                    'vigor': {'default': 0,
+                              'maximum': 1.0,
+                              'minimum': 0.0,
+                              'title': 'Vigor',
+                              'type': 'number'}},
+     'required': ['name', 'age', 'traits'],
+     'title': 'User',
+     'type': 'object'}
+
+On instance:
+    {'age': 'young',
+     'id': '988fe90f-9515-4d61-8083-3f7e5596a816',
+     'name': 'test'}
+2023-10-27 07:33:43 | ERROR    | Output validation failed: 'traits' is a required property
+
+Failed validating 'required' in schema:
+    {'$defs': {'Role': {'enum': ['admin', 'user'],
+                        'title': 'Role',
+                        'type': 'string'},
+               'Trait': {'enum': ['nice', 'mean', 'funny', 'smart'],
+                         'title': 'Trait',
+                         'type': 'string'}},
+     'properties': {'age': {'exclusiveMaximum': 100,
+                            'minimum': 18,
+                            'title': 'Age',
+                            'type': 'integer'},
+                    'banned': {'default': False,
+                               'generate': False,
+                               'title': 'Banned',
+                               'type': 'boolean'},
+                    'id': {'default': None,
+                           'title': 'Id',
+                           'type': 'string'},
+                    'name': {'maxLength': 20,
+                             'minLength': 3,
+                             'title': 'Name',
+                             'type': 'string'},
+                    'role': {'allOf': [{'$ref': '#/$defs/Role'}],
+                             'default': 'admin'},
+                    'traits': {'items': {'$ref': '#/$defs/Trait'},
+                               'maxItems': 3,
+                               'minItems': 1,
+                               'title': 'Traits',
+                               'type': 'array'},
+                    'type': {'default': None,
+                             'title': 'Type',
+                             'type': 'string'},
+                    'vigor': {'default': 0,
+                              'maximum': 1.0,
+                              'minimum': 0.0,
+                              'title': 'Vigor',
+                              'type': 'number'}},
+     'required': ['name', 'age', 'traits'],
+     'title': 'User',
+     'type': 'object'}
+
+On instance:
+    {'age': 'young',
+     'id': '87f790d6-e44b-44fe-9a61-8c7525fd2c59',
+     'name': 'test'}
+2023-10-27 07:33:43 | ERROR    | Output validation failed: 'traits' is a required property
+
+Failed validating 'required' in schema:
+    {'$defs': {'Role': {'enum': ['admin', 'user'],
+                        'title': 'Role',
+                        'type': 'string'},
+               'Trait': {'enum': ['nice', 'mean', 'funny', 'smart'],
+                         'title': 'Trait',
+                         'type': 'string'}},
+     'properties': {'age': {'exclusiveMaximum': 100,
+                            'minimum': 18,
+                            'title': 'Age',
+                            'type': 'integer'},
+                    'banned': {'default': False,
+                               'generate': False,
+                               'title': 'Banned',
+                               'type': 'boolean'},
+                    'id': {'default': None,
+                           'title': 'Id',
+                           'type': 'string'},
+                    'name': {'maxLength': 20,
+                             'minLength': 3,
+                             'title': 'Name',
+                             'type': 'string'},
+                    'role': {'allOf': [{'$ref': '#/$defs/Role'}],
+                             'default': 'admin'},
+                    'traits': {'items': {'$ref': '#/$defs/Trait'},
+                               'maxItems': 3,
+                               'minItems': 1,
+                               'title': 'Traits',
+                               'type': 'array'},
+                    'type': {'default': None,
+                             'title': 'Type',
+                             'type': 'string'},
+                    'vigor': {'default': 0,
+                              'maximum': 1.0,
+                              'minimum': 0.0,
+                              'title': 'Vigor',
+                              'type': 'number'}},
+     'required': ['name', 'age', 'traits'],
+     'title': 'User',
+     'type': 'object'}
+
+On instance:
+    {'age': 'young',
+     'id': 'fb4aef72-60a4-4016-8c03-76af4aefe048',
+     'name': 'test'}
+2023-10-27 07:33:43 | ERROR    | Output validation failed: 'traits' is a required property
+
+Failed validating 'required' in schema:
+    {'$defs': {'Role': {'enum': ['admin', 'user'],
+                        'title': 'Role',
+                        'type': 'string'},
+               'Trait': {'enum': ['nice', 'mean', 'funny', 'smart'],
+                         'title': 'Trait',
+                         'type': 'string'}},
+     'properties': {'age': {'exclusiveMaximum': 100,
+                            'minimum': 18,
+                            'title': 'Age',
+                            'type': 'integer'},
+                    'banned': {'default': False,
+                               'generate': False,
+                               'title': 'Banned',
+                               'type': 'boolean'},
+                    'id': {'default': None,
+                           'title': 'Id',
+                           'type': 'string'},
+                    'name': {'maxLength': 20,
+                             'minLength': 3,
+                             'title': 'Name',
+                             'type': 'string'},
+                    'role': {'allOf': [{'$ref': '#/$defs/Role'}],
+                             'default': 'admin'},
+                    'traits': {'items': {'$ref': '#/$defs/Trait'},
+                               'maxItems': 3,
+                               'minItems': 1,
+                               'title': 'Traits',
+                               'type': 'array'},
+                    'type': {'default': None,
+                             'title': 'Type',
+                             'type': 'string'},
+                    'vigor': {'default': 0,
+                              'maximum': 1.0,
+                              'minimum': 0.0,
+                              'title': 'Vigor',
+                              'type': 'number'}},
+     'required': ['name', 'age', 'traits'],
+     'title': 'User',
+     'type': 'object'}
+
+On instance:
+    {'age': 'young',
+     'id': '919504f6-223b-487c-8cc4-ef9ce4153c03',
+     'name': 'test'}
+2023-10-27 07:33:43 | ERROR    | None failed to forward None
+2023-10-27 07:33:43 | ERROR    | Max retries exceeded: None failed to forward None
+2023-10-27 07:33:43 | INFO     | Embedded 1 items into logs
+2023-10-27 07:33:43 | INFO     | Log file: ./log/test.log
+2023-10-27 07:33:43 | INFO     | Log level: INFO
+2023-10-27 07:33:43 | INFO     | Creating session: setup / None
+2023-10-27 07:33:44 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:44 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:44 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:44 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:44 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:44 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:45 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:45 | INFO     | Creating session: test_store / None
+2023-10-27 07:33:45 | INFO     | Embedded 1 items into templates
+2023-10-27 07:33:45 | INFO     | Found 1 results for query: []
+2023-10-27 07:33:45 | ERROR    | LLM generation failed: <empty message>
+2023-10-27 07:33:48 | INFO     | Embedded 1 items into logs
+2023-10-27 07:33:48 | INFO     | Log file: ./log/test.log
+2023-10-27 07:33:48 | INFO     | Log level: INFO
+2023-10-27 07:33:48 | INFO     | Creating session: setup / None
+2023-10-27 07:33:48 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:48 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:48 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:49 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:49 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:49 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:49 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:49 | INFO     | Creating session: test_store / None
+2023-10-27 07:33:50 | INFO     | Embedded 1 items into templates
+2023-10-27 07:33:50 | INFO     | Found 1 results for query: []
+2023-10-27 07:33:50 | INFO     | Log file: ./log/test.log
+2023-10-27 07:33:50 | INFO     | Log level: INFO
+2023-10-27 07:33:50 | INFO     | Creating session: setup / None
+2023-10-27 07:33:50 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:50 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:51 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:51 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:51 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:51 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:51 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:51 | INFO     | Creating session: test_store / None
+2023-10-27 07:33:52 | INFO     | Embedded 1 items into templates
+2023-10-27 07:33:52 | INFO     | Found 1 results for query: []
+2023-10-27 07:33:52 | WARNING  | Failed to decode JSON from Expecting value: line 1 column 1 (char 0)
+2023-10-27 07:33:52 | WARNING  | Failed to decode JSON from Expecting value: line 1 column 1 (char 0)
+2023-10-27 07:33:52 | WARNING  | Failed to decode JSON from Expecting value: line 1 column 1 (char 0)
+2023-10-27 07:33:52 | WARNING  | Failed to decode JSON from Expecting value: line 1 column 1 (char 0)
+2023-10-27 07:33:52 | ERROR    | None failed to forward {'age': 'young'}
+2023-10-27 07:33:52 | ERROR    | Max retries exceeded: None failed to forward {'age': 'young'}
+2023-10-27 07:33:52 | INFO     | Embedded 1 items into logs
+2023-10-27 07:33:53 | INFO     | Log file: ./log/test.log
+2023-10-27 07:33:53 | INFO     | Log level: INFO
+2023-10-27 07:33:53 | INFO     | Creating session: setup / None
+2023-10-27 07:33:53 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:53 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:53 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:53 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:53 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:54 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:54 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:54 | INFO     | Creating session: test_store / None
+2023-10-27 07:33:54 | INFO     | Embedded 1 items into templates
+2023-10-27 07:33:54 | INFO     | Found 1 results for query: []
+2023-10-27 07:33:55 | INFO     | Embedded 1 items into logs
+2023-10-27 07:33:55 | INFO     | Log file: ./log/test.log
+2023-10-27 07:33:55 | INFO     | Log level: INFO
+2023-10-27 07:33:55 | INFO     | Creating session: setup / None
+2023-10-27 07:33:55 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:55 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:55 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:56 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:56 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:56 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:56 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:56 | INFO     | Creating session: test_store / None
+2023-10-27 07:33:57 | INFO     | Embedded 1 items into templates
+2023-10-27 07:33:57 | INFO     | Found 1 results for query: []
+2023-10-27 07:33:57 | INFO     | Log file: ./log/test.log
+2023-10-27 07:33:57 | INFO     | Log level: INFO
+2023-10-27 07:33:57 | INFO     | Creating session: setup / None
+2023-10-27 07:33:57 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:57 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:58 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:58 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:58 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:58 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:58 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:58 | INFO     | Creating session: test_store / None
+2023-10-27 07:33:59 | INFO     | Embedded 1 items into templates
+2023-10-27 07:33:59 | INFO     | Found 1 results for query: []
+2023-10-27 07:33:59 | INFO     | Log file: ./log/test.log
+2023-10-27 07:33:59 | INFO     | Log level: INFO
+2023-10-27 07:33:59 | INFO     | Creating session: setup / None
+2023-10-27 07:33:59 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:59 | INFO     | Embedded 1 items into collections
+2023-10-27 07:33:59 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:00 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:00 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:00 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:00 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:00 | INFO     | Creating session: test_store / None
+2023-10-27 07:34:01 | INFO     | Embedded 1 items into templates
+2023-10-27 07:34:01 | INFO     | Found 1 results for query: []
+2023-10-27 07:34:01 | INFO     | Log file: ./log/test.log
+2023-10-27 07:34:01 | INFO     | Log level: INFO
+2023-10-27 07:34:01 | INFO     | Creating session: setup / None
+2023-10-27 07:34:01 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:01 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:01 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:02 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:02 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:02 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:02 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:02 | INFO     | Creating session: test_store / None
+2023-10-27 07:34:03 | INFO     | Embedded 1 items into templates
+2023-10-27 07:34:03 | INFO     | Found 1 results for query: []
+2023-10-27 07:34:03 | INFO     | Log file: ./log/test.log
+2023-10-27 07:34:03 | INFO     | Log level: INFO
+2023-10-27 07:34:03 | INFO     | Creating session: setup / None
+2023-10-27 07:34:03 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:03 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:03 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:04 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:04 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:04 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:04 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:04 | INFO     | Creating session: test_store / None
+2023-10-27 07:34:05 | INFO     | Embedded 1 items into templates
+2023-10-27 07:34:05 | INFO     | Found 1 results for query: []
+2023-10-27 07:34:05 | INFO     | Log file: ./log/test.log
+2023-10-27 07:34:05 | INFO     | Log level: INFO
+2023-10-27 07:34:05 | INFO     | Creating session: setup / None
+2023-10-27 07:34:05 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:05 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:05 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:05 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:06 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:06 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:06 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:06 | INFO     | Creating session: test_store / None
+2023-10-27 07:34:07 | INFO     | Embedded 1 items into templates
+2023-10-27 07:34:07 | INFO     | Found 1 results for query: []
+2023-10-27 07:34:07 | INFO     | Log file: ./log/test.log
+2023-10-27 07:34:07 | INFO     | Log level: INFO
+2023-10-27 07:34:07 | INFO     | Creating session: setup / None
+2023-10-27 07:34:07 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:07 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:07 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:07 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:07 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:08 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:08 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:08 | INFO     | Creating session: test_store / None
+2023-10-27 07:34:09 | INFO     | Embedded 1 items into templates
+2023-10-27 07:34:09 | INFO     | Found 1 results for query: []
+2023-10-27 07:34:09 | INFO     | Log file: ./log/test.log
+2023-10-27 07:34:09 | INFO     | Log level: INFO
+2023-10-27 07:34:09 | INFO     | Creating session: setup / None
+2023-10-27 07:34:09 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:09 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:09 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:09 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:10 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:10 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:10 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:10 | INFO     | Creating session: test_store / None
+2023-10-27 07:34:11 | INFO     | Embedded 1 items into templates
+2023-10-27 07:34:11 | INFO     | Found 1 results for query: []
+2023-10-27 07:34:11 | INFO     | Log file: ./log/test.log
+2023-10-27 07:34:11 | INFO     | Log level: INFO
+2023-10-27 07:34:11 | INFO     | Creating session: setup / None
+2023-10-27 07:34:11 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:11 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:12 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:12 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:12 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:12 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:12 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:12 | INFO     | Creating session: test_store / None
+2023-10-27 07:34:13 | INFO     | Embedded 1 items into templates
+2023-10-27 07:34:13 | INFO     | Found 1 results for query: []
+2023-10-27 07:34:13 | INFO     | Log file: ./log/test.log
+2023-10-27 07:34:13 | INFO     | Log level: INFO
+2023-10-27 07:34:13 | INFO     | Creating session: setup / None
+2023-10-27 07:34:13 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:13 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:14 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:14 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:14 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:14 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:14 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:14 | INFO     | Creating session: test_store / None
+2023-10-27 07:34:15 | INFO     | Embedded 1 items into templates
+2023-10-27 07:34:15 | INFO     | Found 1 results for query: []
+2023-10-27 07:34:15 | INFO     | Log file: ./log/test.log
+2023-10-27 07:34:15 | INFO     | Log level: INFO
+2023-10-27 07:34:15 | INFO     | Creating session: setup / None
+2023-10-27 07:34:15 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:15 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:16 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:16 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:16 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:16 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:16 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:16 | INFO     | Creating session: test_store / None
+2023-10-27 07:34:17 | INFO     | Embedded 1 items into templates
+2023-10-27 07:34:17 | INFO     | Found 1 results for query: []
+2023-10-27 07:34:17 | INFO     | Log file: ./log/test.log
+2023-10-27 07:34:17 | INFO     | Log level: INFO
+2023-10-27 07:34:17 | INFO     | Creating session: setup / None
+2023-10-27 07:34:17 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:17 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:17 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:18 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:18 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:18 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:18 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:18 | INFO     | Creating session: test_store / None
+2023-10-27 07:34:19 | INFO     | Embedded 1 items into templates
+2023-10-27 07:34:19 | INFO     | Found 1 results for query: []
+2023-10-27 07:34:19 | INFO     | Log file: ./log/test.log
+2023-10-27 07:34:19 | INFO     | Log level: INFO
+2023-10-27 07:34:19 | INFO     | Creating session: setup / None
+2023-10-27 07:34:19 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:19 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:20 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:20 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:20 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:20 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:20 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:20 | INFO     | Creating session: test_store / None
+2023-10-27 07:34:21 | INFO     | Embedded 1 items into templates
+2023-10-27 07:34:21 | INFO     | Found 1 results for query: []
+2023-10-27 07:34:45 | INFO     | Log file: ./log/test.log
+2023-10-27 07:34:45 | INFO     | Log level: INFO
+2023-10-27 07:34:45 | INFO     | Creating session: setup / None
+2023-10-27 07:34:45 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:45 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:45 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:46 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:46 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:46 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:46 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:46 | INFO     | Creating session: test_store / None
+2023-10-27 07:34:46 | INFO     | Embedded 0 items into test
+2023-10-27 07:34:50 | INFO     | Log file: ./log/test.log
+2023-10-27 07:34:50 | INFO     | Log level: INFO
+2023-10-27 07:34:50 | INFO     | Creating session: setup / None
+2023-10-27 07:34:50 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:50 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:51 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:51 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:51 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:51 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:51 | INFO     | Embedded 1 items into collections
+2023-10-27 07:34:51 | INFO     | Creating session: test_store / None
+2023-10-27 07:34:51 | INFO     | Embedded 0 items into test
+2023-10-27 07:35:55 | INFO     | Log file: ./log/test.log
+2023-10-27 07:35:55 | INFO     | Log level: INFO
+2023-10-27 07:35:55 | INFO     | Creating session: setup / None
+2023-10-27 07:35:56 | INFO     | Embedded 1 items into collections
+2023-10-27 07:35:56 | INFO     | Embedded 1 items into collections
+2023-10-27 07:35:56 | INFO     | Embedded 1 items into collections
+2023-10-27 07:35:56 | INFO     | Embedded 1 items into collections
+2023-10-27 07:35:56 | INFO     | Embedded 1 items into collections
+2023-10-27 07:35:57 | INFO     | Embedded 1 items into collections
+2023-10-27 07:35:57 | INFO     | Embedded 1 items into collections
+2023-10-27 07:35:57 | INFO     | Creating session: test_store / None
+2023-10-27 07:35:57 | INFO     | Embedded 0 items into test
+2023-10-27 07:35:57 | INFO     | Log file: ./log/test.log
+2023-10-27 07:35:57 | INFO     | Log level: INFO
+2023-10-27 07:35:57 | INFO     | Creating session: setup / None
+2023-10-27 07:35:57 | INFO     | Embedded 1 items into collections
+2023-10-27 07:35:57 | INFO     | Embedded 1 items into collections
+2023-10-27 07:35:57 | INFO     | Embedded 1 items into collections
+2023-10-27 07:35:58 | INFO     | Embedded 1 items into collections
+2023-10-27 07:35:58 | INFO     | Embedded 1 items into collections
+2023-10-27 07:35:58 | INFO     | Embedded 1 items into collections
+2023-10-27 07:35:58 | INFO     | Embedded 1 items into collections
+2023-10-27 07:35:58 | INFO     | Creating session: test_store / None
+2023-10-27 07:35:58 | INFO     | Embedded 0 items into test
+2023-10-27 07:35:58 | INFO     | Log file: ./log/test.log
+2023-10-27 07:35:58 | INFO     | Log level: INFO
+2023-10-27 07:35:58 | INFO     | Creating session: setup / None
+2023-10-27 07:35:59 | INFO     | Embedded 1 items into collections
+2023-10-27 07:35:59 | INFO     | Embedded 1 items into collections
+2023-10-27 07:35:59 | INFO     | Embedded 1 items into collections
+2023-10-27 07:35:59 | INFO     | Embedded 1 items into collections
+2023-10-27 07:35:59 | INFO     | Embedded 1 items into collections
+2023-10-27 07:35:59 | INFO     | Embedded 1 items into collections
+2023-10-27 07:35:59 | INFO     | Embedded 1 items into collections
+2023-10-27 07:35:59 | INFO     | Creating session: test_store / None
+2023-10-27 07:36:00 | INFO     | Log file: ./log/test.log
+2023-10-27 07:36:00 | INFO     | Log level: INFO
+2023-10-27 07:36:00 | INFO     | Creating session: setup / None
+2023-10-27 07:36:00 | INFO     | Embedded 1 items into collections
+2023-10-27 07:36:00 | INFO     | Embedded 1 items into collections
+2023-10-27 07:36:00 | INFO     | Embedded 1 items into collections
+2023-10-27 07:36:00 | INFO     | Embedded 1 items into collections
+2023-10-27 07:36:00 | INFO     | Embedded 1 items into collections
+2023-10-27 07:36:01 | INFO     | Embedded 1 items into collections
+2023-10-27 07:36:01 | INFO     | Embedded 1 items into collections
+2023-10-27 07:36:01 | INFO     | Creating session: test_store / None
+2023-10-27 07:36:01 | INFO     | Log file: ./log/test.log
+2023-10-27 07:36:01 | INFO     | Log level: INFO
+2023-10-27 07:36:01 | INFO     | Creating session: setup / None
+2023-10-27 07:36:01 | INFO     | Embedded 1 items into collections
+2023-10-27 07:36:01 | INFO     | Embedded 1 items into collections
+2023-10-27 07:36:01 | INFO     | Embedded 1 items into collections
+2023-10-27 07:36:02 | INFO     | Embedded 1 items into collections
+2023-10-27 07:36:02 | INFO     | Embedded 1 items into collections
+2023-10-27 07:36:02 | INFO     | Embedded 1 items into collections
+2023-10-27 07:36:02 | INFO     | Embedded 1 items into collections
+2023-10-27 07:36:02 | INFO     | Creating session: test_store / None
+2023-10-27 07:36:02 | INFO     | Log file: ./log/test.log
+2023-10-27 07:36:02 | INFO     | Log level: INFO
+2023-10-27 07:36:02 | INFO     | Creating session: setup / None
+2023-10-27 07:36:02 | INFO     | Embedded 1 items into collections
+2023-10-27 07:36:02 | INFO     | Embedded 1 items into collections
+2023-10-27 07:36:03 | INFO     | Embedded 1 items into collections
+2023-10-27 07:36:03 | INFO     | Embedded 1 items into collections
+2023-10-27 07:36:03 | INFO     | Embedded 1 items into collections
+2023-10-27 07:36:03 | INFO     | Embedded 1 items into collections
+2023-10-27 07:36:03 | INFO     | Embedded 1 items into collections
+2023-10-27 07:36:03 | INFO     | Creating session: test_store / None
+2023-10-27 07:36:03 | INFO     | Log file: ./log/test.log
+2023-10-27 07:36:03 | INFO     | Log level: INFO
+2023-10-27 07:36:03 | INFO     | Creating session: setup / None
+2023-10-27 07:36:04 | INFO     | Embedded 1 items into collections
+2023-10-27 07:36:04 | INFO     | Embedded 1 items into collections
+2023-10-27 07:36:04 | INFO     | Embedded 1 items into collections
+2023-10-27 07:36:04 | INFO     | Embedded 1 items into collections
+2023-10-27 07:36:04 | INFO     | Embedded 1 items into collections
+2023-10-27 07:36:04 | INFO     | Embedded 1 items into collections
+2023-10-27 07:36:04 | INFO     | Embedded 1 items into collections
+2023-10-27 07:36:04 | INFO     | Creating session: test_store / None
+2023-10-27 07:36:28 | INFO     | Log file: ./log/test.log
+2023-10-27 07:36:28 | INFO     | Log level: INFO
+2023-10-27 07:36:28 | INFO     | Creating session: setup / None
+2023-10-27 07:36:28 | INFO     | Embedded 1 items into collections
+2023-10-27 07:36:28 | INFO     | Embedded 1 items into collections
+2023-10-27 07:36:28 | INFO     | Embedded 1 items into collections
+2023-10-27 07:36:29 | INFO     | Embedded 1 items into collections
+2023-10-27 07:36:29 | INFO     | Embedded 1 items into collections
+2023-10-27 07:36:29 | INFO     | Embedded 1 items into collections
+2023-10-27 07:36:29 | INFO     | Embedded 1 items into collections
+2023-10-27 07:36:29 | INFO     | Creating session: test_store / None
+2023-10-27 07:38:00 | INFO     | Log file: ./log/test.log
+2023-10-27 07:38:00 | INFO     | Log level: INFO
+2023-10-27 07:38:00 | INFO     | Creating session: setup / None
+2023-10-27 07:38:00 | INFO     | Embedded 1 items into collections
+2023-10-27 07:38:00 | INFO     | Embedded 1 items into collections
+2023-10-27 07:38:00 | INFO     | Embedded 1 items into collections
+2023-10-27 07:38:01 | INFO     | Embedded 1 items into collections
+2023-10-27 07:38:01 | INFO     | Embedded 1 items into collections
+2023-10-27 07:38:01 | INFO     | Embedded 1 items into collections
+2023-10-27 07:38:01 | INFO     | Embedded 1 items into collections
+2023-10-27 07:38:01 | INFO     | Creating session: test_store / None
+2023-10-27 07:38:09 | INFO     | Log file: ./log/test.log
+2023-10-27 07:38:09 | INFO     | Log level: INFO
+2023-10-27 07:38:09 | INFO     | Creating session: setup / None
+2023-10-27 07:38:09 | INFO     | Embedded 1 items into collections
+2023-10-27 07:38:09 | INFO     | Embedded 1 items into collections
+2023-10-27 07:38:09 | INFO     | Embedded 1 items into collections
+2023-10-27 07:38:10 | INFO     | Embedded 1 items into collections
+2023-10-27 07:38:10 | INFO     | Embedded 1 items into collections
+2023-10-27 07:38:10 | INFO     | Embedded 1 items into collections
+2023-10-27 07:38:10 | INFO     | Embedded 1 items into collections
+2023-10-27 07:38:10 | INFO     | Creating session: test_store / None
+2023-10-27 07:38:11 | INFO     | Embedded 1 items into templates
+2023-10-27 07:38:11 | INFO     | Found 1 results for query: []
+2023-10-27 07:38:45 | INFO     | Log file: ./log/test.log
+2023-10-27 07:38:45 | INFO     | Log level: INFO
+2023-10-27 07:38:45 | INFO     | Creating session: setup / None
+2023-10-27 07:38:45 | INFO     | Embedded 1 items into collections
+2023-10-27 07:38:45 | INFO     | Embedded 1 items into collections
+2023-10-27 07:38:46 | INFO     | Embedded 1 items into collections
+2023-10-27 07:38:46 | INFO     | Embedded 1 items into collections
+2023-10-27 07:38:46 | INFO     | Embedded 1 items into collections
+2023-10-27 07:38:46 | INFO     | Embedded 1 items into collections
+2023-10-27 07:38:47 | INFO     | Embedded 1 items into collections
+2023-10-27 07:38:47 | INFO     | Creating session: test_store / None
+2023-10-27 07:38:47 | INFO     | Embedded 1 items into collections
+2023-10-27 07:38:47 | INFO     | Embedded 1 items into alt-test
+2023-10-27 07:38:47 | ERROR    | Failed to parse query results: 'id'
+2023-10-27 07:38:47 | INFO     | Found 1 results for query: []
+2023-10-27 07:39:50 | INFO     | Log file: ./log/test.log
+2023-10-27 07:39:50 | INFO     | Log level: INFO
+2023-10-27 07:39:50 | INFO     | Creating session: setup / None
+2023-10-27 07:39:51 | INFO     | Embedded 1 items into collections
+2023-10-27 07:39:51 | INFO     | Embedded 1 items into collections
+2023-10-27 07:39:51 | INFO     | Embedded 1 items into collections
+2023-10-27 07:39:51 | INFO     | Embedded 1 items into collections
+2023-10-27 07:39:51 | INFO     | Embedded 1 items into collections
+2023-10-27 07:39:52 | INFO     | Embedded 1 items into collections
+2023-10-27 07:39:52 | INFO     | Embedded 1 items into collections
+2023-10-27 07:39:52 | INFO     | Creating session: test_store / None
+2023-10-27 07:39:53 | INFO     | Embedded 1 items into templates
+2023-10-27 07:39:53 | INFO     | Found 1 results for query: []
+2023-10-27 07:39:53 | WARNING  | Failed to decode JSON from test: line 1 column 1 (char 0)
+2023-10-27 07:39:53 | WARNING  | Failed to decode JSON from test: line 1 column 1 (char 0)
+2023-10-27 07:39:53 | WARNING  | Failed to decode JSON from test: line 1 column 1 (char 0)
+2023-10-27 07:39:53 | WARNING  | Failed to decode JSON from test: line 1 column 1 (char 0)
+2023-10-27 07:39:53 | ERROR    | None failed to forward None
+2023-10-27 07:39:53 | WARNING  | Failed to decode JSON from test: line 1 column 1 (char 0)
+2023-10-27 07:39:53 | WARNING  | Failed to decode JSON from test: line 1 column 1 (char 0)
+2023-10-27 07:39:53 | WARNING  | Failed to decode JSON from test: line 1 column 1 (char 0)

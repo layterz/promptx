@@ -68,14 +68,24 @@ def test_foriegn_key(session, user):
     _user = session.query(ids=[user.id]).first
     assert _user is not None
     assert _user.id == user.id
+    assert _user.name == user.name
 
     _account = session.query(ids=[account.id]).first
     assert _account is not None
     assert _account.id == account.id
     assert _account.user.id == user.id
+    assert _account.user.name == user.name
 
-def test_one_to_many():
-    pass
+def test_one_to_many(session, user):
+    payees = [_user() for _ in range(3)]
+    account = Account(user=user, payees=payees)
+    session.store(account)
 
-def test_many_to_many():
-    pass
+    for user in session.query(ids=[u.id for u in payees]).objects:
+        assert user is not None
+        assert user.id in [u.id for u in payees]
+
+    _account = session.query(ids=[account.id]).first
+    assert _account is not None
+    assert len(_account.payees) == len(payees)
+    assert _account.payees[0].id == payees[0].id

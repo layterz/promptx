@@ -249,14 +249,14 @@ class TemplateRunner:
             example_template.render(**e) for e in examples
         ])
     
-    def process(self, t, x, output, **kwargs):
+    def process(self, session, t, x, output, **kwargs):
         if t.output is None:
             return output
         out = json.loads(output)
         schema = model_to_json_schema(json.loads(t.output))
         if schema.get('type', None) == 'string' or (schema.get('type', None) == 'array' and schema.get('items', {}).get('type', None) == 'string'):
             return out
-        entities = create_entity_from_schema(schema, out, base=Entity)
+        entities = create_entity_from_schema(session, schema, out, base=Entity)
         return entities
     
     def dict(self):
@@ -269,10 +269,10 @@ class TemplateRunner:
             'output': self.output,
         }
     
-    def __call__(self, t, x, llm, **kwargs):
-        return self.forward(t, x, llm, **kwargs)
+    def __call__(self, session, t, x, llm, **kwargs):
+        return self.forward(session, t, x, llm, **kwargs)
     
-    def forward(self, t, x, llm, context=None, history=None, retries=3, dryrun=False, **kwargs):
+    def forward(self, session, t, x, llm, context=None, history=None, retries=3, dryrun=False, **kwargs):
         if retries and retries <= 0:
             e = MaxRetriesExceeded(f'{t.name} failed to forward {x}')
             logger.error(e)
@@ -293,27 +293,27 @@ class TemplateRunner:
                 urllib3.exceptions.NewConnectionError) as e:
             logger.error(f'LLM generation failed: {e}')
             time.sleep(2)
-            return self.forward(t, x, llm, retries=retries, **kwargs)
+            return self.forward(session, t, x, llm, retries=retries, **kwargs)
         except (openai.error.APIError,
                 openai.error.Timeout,
                 openai.error.ServiceUnavailableError) as e:
             logger.error(f'LLM generation failed: {e}')
             time.sleep(2)
-            return self.forward(t, x, llm, retries=retries, **kwargs)
+            return self.forward(session, t, x, llm, retries=retries, **kwargs)
         except openai.error.RateLimitError as e:
             logger.error(f'Hit rate limit for {self}: {e}')
             time.sleep(10)
-            return self.forward(t, x, llm, retries=retries, **kwargs)
+            return self.forward(session, t, x, llm, retries=retries, **kwargs)
 
         try:
-            response.content = self.process(t, px, response.raw, **kwargs)
+            response.content = self.process(session, t, px, response.raw, **kwargs)
         except jsonschema.exceptions.ValidationError as e:
             logger.error(f'Output validation failed: {e}')
-            return self.forward(t, x, llm, retries=retries-1, **kwargs)
+            return self.forward(session, t, x, llm, retries=retries-1, **kwargs)
         except json.JSONDecodeError as e:
             logger.warning(f'Failed to decode JSON from {e}')
-            return self.forward(t, x, llm, retries=retries-1, **kwargs)
+            return self.forward(session, t, x, llm, retries=retries-1, **kwargs)
         except Exception as e:
             logger.error(f'Failed to forward {x}: {e}')
-            return self.forward(t, x, llm, retries=retries-1, **kwargs)
+            return self.forward(session, t, x, llm, retries=retries-1, **kwargs)
         return response

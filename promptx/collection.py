@@ -221,7 +221,7 @@ def create_model_from_schema(schema, base=None):
     return create_model(schema.get('title', 'Entity').capitalize(), **fields, __base__=base)
 
 
-def create_entity_from_schema(schema, data, base=None):
+def create_entity_from_schema(session, schema, data, base=None):
     """
     Create a Pydantic data entity from a JSON schema and input data.
 
@@ -255,7 +255,7 @@ def create_entity_from_schema(schema, data, base=None):
     ...     'required': ['name']
     ... }
     >>> data = {'name': 'Alice', 'age': 30}
-    >>> person = create_entity_from_schema(schema, data)
+    >>> person = create_entity_from_schema(session, schema, data)
     >>> person.name
     'Alice'
     >>> person.age
@@ -274,7 +274,7 @@ def create_entity_from_schema(schema, data, base=None):
     ...     }
     ... }
     >>> data_list = [{'name': 'Alice', 'age': 30}, {'name': 'Bob', 'age': 25}]
-    >>> people = create_entity_from_schema(schema_list, data_list)
+    >>> people = create_entity_from_schema(session, schema_list, data_list)
     >>> len(people)
     2
     >>> people[0].name
@@ -312,9 +312,9 @@ def create_entity_from_schema(schema, data, base=None):
         'type': _get_title(schema).lower(),
     }
     if _is_list(schema):
-        return [m.load(**{**defaults, **o}) for o in data]
+        return [m.load(session, **{**defaults, **o}) for o in data]
     else:
-        return m.load(**{**defaults, **data})
+        return m.load(session, **{**defaults, **data})
 
 
 def serializer(obj):
@@ -330,23 +330,26 @@ class Entity(BaseModel):
     type: str = None
     model_config = ConfigDict(arbitrary_types_allowed=True)
     
-    def __init__(self, id=None, **data):
+    def __init__(self, **data):
         if 'type' not in data:
             data['type'] = self.__class__.__name__.lower()
+        if 'id' not in data:
+            data['id'] = str(uuid.uuid4())
         
-        super().__init__(**{'id': id or str(uuid.uuid4()), **data})
+        super().__init__(**data)
     
     @classmethod
-    def load(cls, id=None, **kwargs):
+    def load(cls, session, **kwargs):
         for name, field in cls.__annotations__.items():
-            if isinstance(field, type) and issubclass(field, Entity):
-                def loader():
+            if field.__name__ == 'Entity':
+                def loader(self, session=session, name=name, field=field, data=kwargs):
                     # Lazy-loading logic here
                     logger.info(f'Loading {name}')
                     return None
                 
                 setattr(cls, name, property(loader))
-        return cls(id=id, **kwargs)
+            
+        return cls(**kwargs)
     
     @classmethod
     def generate_schema_for_field(cls, name, field_type: Any, field: Field):
@@ -572,7 +575,7 @@ class EntitySeries(pd.Series):
 
 
 class Collection(pd.DataFrame):
-    _metadata = ['db', 'schema']
+    _metadata = ['db', 'schema', 'session']
 
     @property
     def _constructor(self, *args, **kwargs):
@@ -583,7 +586,7 @@ class Collection(pd.DataFrame):
         return EntitySeries
     
     @classmethod
-    def load(cls, db):
+    def load(cls, session, db):
         records = db.get(where={'item': 1})
         docs = [
             {
@@ -594,6 +597,7 @@ class Collection(pd.DataFrame):
         ]
         c = Collection(docs)
         c.db = db
+        c.session = session
         return c
     
     def embedding_query(self, *texts, ids=None, where=None, threshold=0.1, limit=None, **kwargs):
@@ -654,6 +658,7 @@ class Collection(pd.DataFrame):
             }
             return [
                 create_entity_from_schema(
+                    self.session,
                     schemas.get(r['id']),
                     {
                         k: v for k, v in r.items() if (len(v) if isinstance(v, list) else pd.notnull(v))
@@ -665,6 +670,7 @@ class Collection(pd.DataFrame):
         else:
             return [
                 create_entity_from_schema(
+                    self.session,
                     self.schema or {},
                     {
                         k: v for k, v in r.items() if (len(v) if isinstance(v, list) else pd.notnull(v))

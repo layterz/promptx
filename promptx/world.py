@@ -24,7 +24,7 @@ class Session:
         s = self.world.template_system
         rendered = s.render(t, {'input': s.parse(input)})
         try:
-            r = s(t, input, context=context, llm=llm, history=history, dryrun=dryrun, retries=retries, **kwargs)
+            r = s(self, t, input, context=context, llm=llm, history=history, dryrun=dryrun, retries=retries, **kwargs)
             log = PromptLog(template=t.id, raw_input=rendered, raw_output=r.raw)
             self.store(log, collection='logs')
             if isinstance(r.content, list):
@@ -188,7 +188,7 @@ class Session:
         
         c = self.collection(collection)
         if c is None:
-            self.world.create_collection(collection)
+            self.create_collection(collection)
             c = self.collection(collection)
         c.embed(*[item for item in items if item is not None])
     
@@ -203,7 +203,7 @@ class Session:
         self.world.delete_collection(collection)
     
     def create_collection(self, collection):
-        self.world.create_collection(collection)
+        self.world.create_collection(self, collection)
     
     def collections(self):
         return self.world.db.collections()
@@ -284,21 +284,22 @@ class World:
         self.ef = ef or (lambda x: [0] * len(x))
         self.db = db
         
+        session = self.create_session('setup')
         collection = self.db.get_or_create_collection('collections')
-        self.collections = Collection.load(collection)
-        self.create_collection('default', 'Default collection used when calling store()')
-        self.create_collection('logs', 'Stores a log of all prompts and their outputs')
-        self.create_collection('queries', 'Query stored objects in collections')
-        self.create_collection('subscriptions', 'Subscriptions to queries')
-        self.create_collection('agents', 'Configurations for interactive and autonomous AI agents')
-        self.create_collection('models', 'Configurations for AI models')
+        self.collections = Collection.load(session, collection)
+        self.create_collection(session, 'default', 'Default collection used when calling store()')
+        self.create_collection(session, 'logs', 'Stores a log of all prompts and their outputs')
+        self.create_collection(session, 'queries', 'Query stored objects in collections')
+        self.create_collection(session, 'subscriptions', 'Subscriptions to queries')
+        self.create_collection(session, 'agents', 'Configurations for interactive and autonomous AI agents')
+        self.create_collection(session, 'models', 'Configurations for AI models')
 
-        self.create_collection('templates', 'Prompt templates used to interact with AI models')
+        self.create_collection(session, 'templates', 'Prompt templates used to interact with AI models')
         for template in (templates or []):
             self.create_template(template)
         
         for collection in self.db.collections():
-            self.create_collection(collection.name)
+            self.create_collection(session, collection.name)
         
         # TODO: hack, should register as normal system
         self.template_system = TemplateRunner()
@@ -309,7 +310,7 @@ class World:
         self.sessions.append(session)
         return session
     
-    def create_collection(self, name, description=None, metadata=None):
+    def create_collection(self, session, name, description=None, metadata=None):
         collection = self.db.get_collection(name)
         if collection is None:
             if metadata is None:
@@ -317,7 +318,7 @@ class World:
             collection = self.db.create_collection(name, metadata=metadata)
             r = CollectionEntity(name=name, description=description or '')
             self.collections.embed(r)
-        c = Collection.load(collection)
+        c = Collection.load(session, collection)
         self._collections[name] = c
         return collection
     

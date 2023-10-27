@@ -6,23 +6,23 @@ from promptx.collection import *
 from . import User, Account, _user, user, session
 
 
-def test_objects_are_returned_with_correct_schema(mocker):
+def test_objects_are_returned_with_correct_schema(session, mocker):
     user = User(name="test", age=20, traits=['nice', 'mean'])
     db = mocker.Mock(spec=VectorDB)
     db.name = 'test'
     db.get.return_value = {'ids': [user.id], 'documents': [user.model_dump_json()], 'metadatas': [{'schema': json.dumps(user.model_json_schema())}]}
-    collection = Collection.load(db)
+    collection = Collection.load(session, db)
     collection.embed(user)
 
     assert len(collection.objects) == 1
     assert collection.first.name == "test"
 
-def test_embedding_an_entity(mocker):
+def test_embedding_an_entity(session, mocker):
     user = User(name="test", age=20, traits=['nice', 'mean'])
     db = mocker.Mock(spec=VectorDB)
     db.name = 'test'
     db.get.return_value = {'ids': [user.id], 'documents': [user.model_dump_json()], 'metadatas': [{'schema': json.dumps(user.model_json_schema())}]}
-    collection = Collection.load(db)
+    collection = Collection.load(session, db)
     collection.embed(user)
 
     assert len(collection.objects) == 1
@@ -276,44 +276,44 @@ person_schema = {
     'required': ['name']
 }
 
-def test_create_entity_from_schema_with_single_entity():
+def test_create_entity_from_schema_with_single_entity(session):
     data = {'name': 'Alice', 'age': 30}
-    person = create_entity_from_schema(person_schema, data, base=Entity)
+    person = create_entity_from_schema(session, person_schema, data, base=Entity)
     assert isinstance(person, BaseModel)
     assert person.name == 'Alice'
     assert person.age == 30
 
-def test_create_entity_from_schema_with_single_entity_missing_required_field():
+def test_create_entity_from_schema_with_single_entity_missing_required_field(session):
     # Missing 'name' field, which is required
     data = {'age': 30}
     with pytest.raises(jsonschema.ValidationError):
-        create_entity_from_schema(person_schema, data, base=Entity)
+        create_entity_from_schema(session, person_schema, data, base=Entity)
 
-def test_create_entity_from_schema_with_single_entity_and_generated_id_and_type():
+def test_create_entity_from_schema_with_single_entity_and_generated_id_and_type(session):
     data = {'name': 'Alice', 'age': 30}
-    person = create_entity_from_schema(person_schema, data, base=Entity)
+    person = create_entity_from_schema(session, person_schema, data, base=Entity)
     assert hasattr(person, 'id')
     assert hasattr(person, 'type')
     assert person.type == 'person'
 
-def test_create_entity_from_schema_with_list_of_entities():
+def test_create_entity_from_schema_with_list_of_entities(session):
     data_list = [{'name': 'Alice', 'age': 30}, {'name': 'Bob', 'age': 25}]
     people_schema = {
         'type': 'array',
         'items': person_schema
     }
-    people = create_entity_from_schema(people_schema, data_list, base=Entity)
+    people = create_entity_from_schema(session, people_schema, data_list, base=Entity)
     assert isinstance(people, list)
     assert len(people) == 2
     assert all(isinstance(person, BaseModel) for person in people)
     assert people[0].name == 'Alice'
     assert people[1].age == 25
 
-def test_create_entity_from_schema_with_list_of_entities_and_generated_ids():
+def test_create_entity_from_schema_with_list_of_entities_and_generated_ids(session):
     data_list = [{'name': 'Alice', 'age': 30}, {'name': 'Bob', 'age': 25}]
     people_schema = {
         'type': 'array',
         'items': person_schema
     }
-    people = create_entity_from_schema(people_schema, data_list, base=Entity)
+    people = create_entity_from_schema(session, people_schema, data_list, base=Entity)
     assert all(hasattr(person, 'id') for person in people)  # 'id' should be generated for each entity
