@@ -121,27 +121,7 @@ def model_to_json_schema(model):
     output = None
     if isinstance(model, list):
         inner = model[0]
-        if issubclass(inner, Entity):
-            output = {
-                'title': inner.__name__,
-                'type': 'object',
-                'properties': {
-                    inner.__name__.lower(): '#/$defs/Query',
-                },
-                '$defs': {
-                    'Query': {
-                        'type': 'object',
-                        'properties': {
-                            'ids': {'type': 'array', 'items': {'type': 'string'}},
-                            'query': { 'type': 'string' },
-                            'collection': { 'type': 'string' },
-                            'limit': { 'type': 'integer' },
-                        },
-                        'required': [],
-                    },
-                }
-            }
-        elif issubclass(inner, BaseModel):
+        if issubclass(inner, BaseModel):
             schema = inner.model_json_schema()
             output = {
                 'type': 'array',
@@ -161,14 +141,12 @@ def model_to_json_schema(model):
         output = model.model_json_schema()
     elif isinstance(model, type):
         if issubclass(model, Entity):
-            output = {
-                'title': model.__name__,
-                'type': 'object',
-                'properties': {
-                    model.__name__.lower(): '#/$defs/Query',
-                },
-                '$defs': {
-                    'Query': {
+            output = model.model_json_schema()
+
+            for name, field in model.__annotations__.items():
+                if isinstance(field, type) and issubclass(field, Entity):
+                    output['properties'][name] = {'$ref': '#/$defs/Query'}
+                    output['$defs']['Query'] = {
                         'type': 'object',
                         'properties': {
                             'ids': {'type': 'array', 'items': {'type': 'string'}},
@@ -177,9 +155,19 @@ def model_to_json_schema(model):
                             'limit': { 'type': 'integer' },
                         },
                         'required': [],
-                    },
-                }
-            }
+                    }
+                elif getattr(field, '__origin__', None) == list and isinstance(field.__args__[0], type) and issubclass(field.__args__[0], Entity):
+                    output['properties'][name] = {'$ref': '#/$defs/Query'}
+                    output['$defs']['Query'] = {
+                        'type': 'object',
+                        'properties': {
+                            'ids': {'type': 'array', 'items': {'type': 'string'}},
+                            'query': { 'type': 'string' },
+                            'collection': { 'type': 'string' },
+                            'limit': { 'type': 'integer' },
+                        },
+                        'required': [],
+                    }
         elif issubclass(model, BaseModel):
             output = model.model_json_schema()
     
@@ -773,9 +761,6 @@ class Collection(pd.DataFrame):
             if isinstance(item, str):
                 item = Entity(type='string', value=item)
             
-            if isinstance(item, dict):
-                pass
-
             for name, field in item.model_dump().items():
                 if name in ['id', 'type']:
                     continue
@@ -784,15 +769,15 @@ class Collection(pd.DataFrame):
                 if f is None:
                     continue
 
+                document = json.dumps({name: field}, default=_serializer)
                 if isinstance(f.annotation, type) and issubclass(f.annotation, Entity):
+                    # TODO: Handle nested fields
                     logger.debug(f'Field {name} is an Entity')
+                    continue
                 if f.json_schema_extra and f.json_schema_extra.get('embed', True) == False:
                     continue
                 if isinstance(field, int) or isinstance(field, float) or isinstance(field, bool):
                     continue
-
-                # TODO: Handle nested fields
-                document = json.dumps({name: field}, default=_serializer)
 
                 field_record = {
                     'id': f'{item.id}_{name}',
@@ -827,7 +812,7 @@ class Collection(pd.DataFrame):
                     'collection': self.name,
                     'type': item.type,
                     'item': 1,
-                    'schema': json.dumps(item.schema(), default=_schema_serializer),
+                    'schema': json.dumps(model_to_json_schema(item.__class__)),
                     'created_at': now,
                 },
             }

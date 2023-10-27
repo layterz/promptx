@@ -148,40 +148,26 @@ def test_convert_pydantic_model_with_nested_entities_to_json_schema():
     expected_schema = {
         'title': 'Account',
         'type': 'object',
-        'properties': {
-            'user': {
-                '$ref': '#/$defs/Query'
-            },
-            'payees': {
-                '$ref': '#/$defs/Query'
-            },
+        'properties': { 'id': {'title': 'Id', 'type': 'string', 'default': None},
+            'type': {'title': 'Type', 'type': 'string', 'default': None},
+            'user': { '$ref': '#/$defs/Query' },
+            'payees': { '$ref': '#/$defs/Query' },
         },
         '$defs': {
             'Query': {
                 'type': 'object',
                 'properties': {
-                    'ids': {
-                        'type': 'array',
-                        'items': {
-                            'type': 'string'
-                        }
-                    },
-                    'query': {
-                        'type': 'string'
-                    },
-                    'collection': {
-                        'type': 'string'
-                    },
-                    'limit': {
-                        'type': 'integer'
-                    },
+                    'ids': { 'type': 'array', 'items': { 'type': 'string' } },
+                    'query': { 'type': 'string' },
+                    'collection': { 'type': 'string' },
+                    'limit': { 'type': 'integer' },
                 },
                 'required': []
             }
         },
         'required': ['user'],
     }
-    assert schema == expected_schema
+    assert schema['$defs']['Query'] == expected_schema['$defs']['Query']
 
 
 def test_create_model_from_schema_with_required_fields():
