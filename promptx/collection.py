@@ -345,6 +345,12 @@ class Entity(BaseModel):
                 def loader(self, session=session, name=name, field=field, data=kwargs):
                     # Lazy-loading logic here
                     logger.info(f'Loading {name}')
+                    field_data = data.get(name)
+                    ids = field_data.get('ids')
+                    if len(ids) == 1:
+                        return session.query(ids=field_data.get('ids')).first
+                    elif len(ids) > 1:
+                        return session.query(ids=field_data.get('ids')).objects
                     return None
                 
                 setattr(cls, name, property(loader))
@@ -730,7 +736,10 @@ class Collection(pd.DataFrame):
             if isinstance(obj, Enum):
                 return obj.value
             elif isinstance(obj, Entity):
-                return { 'id': obj.id, 'type': obj.type }
+                return {
+                    'ids': [obj.id],
+                    'collection': self.name,
+                }
             raise TypeError(f"Type {type(obj)} not serializable")
 
         def _serializer(obj):
@@ -747,7 +756,7 @@ class Collection(pd.DataFrame):
                         continue
                     if isinstance(f.annotation, type) and issubclass(f.annotation, Entity):
                         field = _field_serializer(getattr(obj, name))
-                    if f.field_info.extra.get('embed', True) == False:
+                    if f.json_schema_extra and f.json_schema_extra.get('embed', True) == False:
                         continue
                     record[name] = field
             raise TypeError(f"Type {type(obj)} is not serializable")
