@@ -4,7 +4,7 @@ with open('requirements.txt') as f:
     requirements = f.read().splitlines()
 
 setup(
-    name='promptx',
+    name='pxx',
     version='0.0.1',
     description='An AI framework',
     packages=['promptx'],
