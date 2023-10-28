@@ -1,24 +1,28 @@
 # promptx
 
-A lightweight library, built on top of Pandas and Pydantic, that lets you interact intuitively with language models and embed the output in a vector store.
+A framework for building AI systems.
 
-## Getting starting
-
-To follow along and run the examples interactively you can use [./getting-started.ipynb](https://github.com/layterz/promptx/blob/main/getting-started.ipynb) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/layterz/promptx/blob/main/getting-started.ipynb)
-
-```python
+```bash
 pip install pxx
 ```
 
-First, you need to initialize the library, specifying the language model and embedding function to use.
+First, we need to create a project, which defines the embedding database that's being used.
 
-```python
-import promptx as px
-
-px.load()
+```bash
+px init .
 ```
 
-Now we can use the `prompt` helper to make a request to the initialised language model.
+*This will create a project in the current directory. Replace `.` with a path to create a project in a different directory.*
+
+A project is defined by a hidden `.px/` directory that `promptx` uses to store data and discover the project.
+
+```python
+from promptx import load
+
+load()
+```
+
+Now that `promptx` is loaded, we can call `prompt` to generate some data with the default model.
 
 ```python
 from promptx import prompt
@@ -27,244 +31,194 @@ character = 'Batman'
 prompt(f'Write a character profile for {character}')
 ```
 
-Output will vary depending on the model, but using ChatGPT we get something like:
-
 ```
-Name: Bruce Wayne (Batman)                                                      
-                                                                                
-Age: 35                                                                         
-                                                                                
-Occupation: Vigilante, CEO of Wayne Enterprises                                 
-                                                                                
-Physical Appearance: Tall and muscular build, with a dark and brooding presence.
-Wears a black batsuit with a cape, utility belt, and a bat symbol on his chest.
-His face is covered by a mask, leaving only his piercing blue eyes visible.
-                                                                                
-Personality: Intense, determined, and highly disciplined. Bruce Wayne is known
-for his relentless pursuit of justice and his unwavering commitment to
-protecting Gotham City. He is intensely focused, often seen as aloof and...
+'Name: Batman\nOccupation: Superhero/Vigilante\nAlias: The Dark Knight, The Caped Crusader\nReal Name: Bruce Wayne\nAge: Late 30s to early 40s\nHeight: 6\'2"\nWeight: 210 lbs\nEthnicity: Caucasian\nNationality: American\nPlace of Birth: Gotham City\nParents: Thomas and Martha Wayne (deceased)\nAffiliations: Justice League, Bat-Family, Gotham City Police Department (unofficially)\nSkills/Abilities: Exceptionally skilled detective, master martial artist and hand-to-hand combatant, peak human physical condition, proficient in various forms of weaponry and gadgets, expert in stealth and espionage, genius-level intellect and deductive reasoning\nCostume: Black bat-themed bodysuit, utility belt with various gadgets, protective body armor, cape with bat-like wingspan\nVehicle: Batmobile...
 ```
 
-The response is a raw string from the model output. This might be what you want if you're writing an email or asking a question, but other times you'll need to convert the response into structured data.
+By default, this returns a plain string response, but to generate complex data you can pass in the expected schema along with the prompt input.
 
-To do that, you can pass a `pydantic.BaseModel` as `output=` when calling `prompt`. This will add format instructions, based on the pydantic schema and field annotations, and return an instance of the output model using the generated data.
+*Note: `Entity` is a thin layer on top of `pydantic.BaseModel` that allows the object to be stored as an embedding. You can use `pydantic.BaseModel` directly if you don't need to store the object as an embedding and just want to use it as the prompt output schema.*
 
 ```python
-from typing import List
-from pydantic import BaseModel, Field
-from promptx import prompt
+from pydantic import Field
+from promptx.collection import Entity
 
-class Character(BaseModel):
-    name: str = Field(..., unique=True, embed=False),
-    description: str = Field(
-        ..., description='Describe the character in a few sentences')
-    age: int = Field(..., min=1, max=120)
+class Character(Entity):
+    name: str = Field(..., embed=False),
+    description: str = Field(..., description='Describe the character in a few sentences')
+    age: int = Field(..., ge=0, le=120)
 
+batman = prompt('Generate a character profile for Batman', output=Character)
+batman
+```
+
+```
+Character(
+    id='dd740305-737a-4bde-8596-3525490d2f6f',
+    type='character',
+    name='Bruce Wayne',
+    description='Batman is a superhero who operates in Gotham City. He is known for his detective skills, martial arts training, and use of high-tech gadgets to fight crime. Bruce Wayne, his alter ego, is a billionaire philanthropist and the owner of Wayne Enterprises.',
+    age=35
+)
+```
+
+This returns an instance of the specified schema using the generated response as the input data. Let's create a list of instead.
+
+```python
 characters = prompt(
     'Generate some characters from the Batman universe',
     output=[Character],
 )
-```
-```
-        type      name                                        description  age
-0  character    Batman  Batman, also known as Bruce Wayne, is a billio...   35
-1  character     Joker  The Joker, also known as Arthur Fleck, is the ...   40
-2  character  Catwoman  Catwoman, also known as Selina Kyle, is a skil...   30
+
+characters
 ```
 
-This example defines the output as `List[Character]` so a `pd.Dataframe` will be returned with multiple characters. If we used `output=Character` a single `Character` object would be returned instead.
-
-```python
-batman = prompt('Generate a character profile for Batman', ouput=Character)
 ```
-```
-{"age": 35, "type": "character", "name": "Batman", "id": "ee49c4e5-4c7d-4790-ba1b-80ebff4c43d7", "description": "Batman, also known as Bruce Wayne, is a wealthy philanthropist and vigilant crime-fighter who operates in Gotham City. Driven by the tragic murder of his parents, Batman uses his intelligence, strength, and gadgets to protect his city from chaos and corruption."}
+id	type	name	description	age
+0	7ec67bd1-0626-4293-ab0a-509cee7f5b66	character	Batman	Bruce Wayne is a billionaire philanthropist by...	35
+1	7d7e53e6-f1dd-4f0a-bda7-6533ba385960	character	Joker	The Joker is a deranged and unpredictable crim...	40
+2	45157783-7006-476e-a492-2f6881d2410d	character	Catwoman	Selina Kyle is a skilled thief with a complica...	30
 ```
 
-You can further guide the model output by providing few shot examples. Here, we first generate some new descriptions for the characters and update the existing objects.
+If the output is a list, `prompt` returns a `Collection`, which extends `pd.DataFrame`. To extract the `Entity` representations, use the `objects` property.
 
-```python
-descriptions = prompt(
-    'Write some 2-3 sentence character descriptions in the style of Alan Moore',
-    input={'characters': [c.name for c in characters.objects]},
-    output=[str],
-)
-
-characters['description'] = descriptions['output']
-```
-```
-    type	    name	    description	                                        age
-0	character	Batman	    'Batman' is a brooding figure, his cape flowin...	35
-1	character	Joker	    'Joker' is a chaotic force, his face twisted i...	40
-2	character	Catwoman	'Catwoman' is a seductive thief, her lithe for...	30
-```
-
-Run the above until it's generated some output you're happy with and then we can use them as examples to guide future output.
-
-```python
-import pandas as pd
-from promptx import Prompt
-
-p = Prompt(
-    '''
-    Generate a list of new characters from the Batman universe.
-    Don't use any of the existing characters.
-    ''',
-    examples=[
-        (
-            { 'existing_characters': characters['name'][:2].to_list() },
-            characters[2:].objects,
-        ),
-    ],
-    output=[Character],
-)
-
-for _ in range(5):
-    existing_characters = characters['name'].to_list()
-    cs = prompt(prompt=p, input={'existing_characters': existing_characters})
-    characters = pd.concat([characters, cs]).reset_index(drop=True)
-```
-
-Here we iterate 5 times, on each iteration the existing character names are passed to the prompt and are used to prevent duplicates from being generated. The initial characters generated above are used as examples to demonstrate avoiding duplicates as well as guideing the description style.
-
-Running this for 5 iterations on ChatGPT generates something like this.
-```
-	type	    name	        description	                                        age
-0	character	Batman	        'Batman' is a brooding figure, his cape flowin...	35
-1	character	Joker	        'Joker' is a chaotic force, his face twisted i...	40
-2	character	Catwoman	    'Catwoman' is a seductive thief, her lithe for...	30
-3	character	Two-Face	    Once a respected district attorney, Two-Face's...	42
-4	character	Harley Quinn	Harley Quinn, formerly known as Dr. Harleen Qu...	29
-5	character	Riddler	        The Riddler, also known as Edward Nygma, is ob...	35
-6	character	Scarecrow	    Dr. Jonathan Crane, better known as the Scarec...	37
-7	character	Poison Ivy	    Pamela Isley, also known as Poison Ivy, posses...	28
-8	character	Firefly	        Firefly is a pyromaniac and an expert in fire ...	35
-9	character	Man-Bat	        Man-Bat is a scientist who accidentally turns ...	45
-10	character	Mad Hatter	    Mad Hatter is a deranged inventor who uses min...	50
-11	character	Black Mask	    Black Mask is a ruthless crime lord who wears ...	40
-12	character	Mr. Freeze	    Mr. Freeze is a scientist who, after a lab acc...	55
-13	character	Red Hood	    Formerly the second Robin, Jason Todd, the Red...	25
-14	character	Nightwing	    Dick Grayson, the original Robin, now patrols ...	27
-15	character	Batwoman	    Kate Kane, the cousin of Bruce Wayne, took up ...	28
-16	character	Hush	        Dr. Thomas Elliot, a childhood friend of Bruce...	35
-17	character	Oracle	        Formerly known as Batgirl, Barbara Gordon now ...	31
-18	character	Azrael	        Jean-Paul Valley, an assassin trained by a sec...	30
-19	character	Ace             Ace is a highly intelligent and agile dog that...	5
-20	character	Echo	        Echo is a skilled thief with the ability to di...	25
-21	character	Siren	        Siren is a seductive and dangerous femme fatal...	28
-22	character	Talon	        Talon is a highly trained assassin who serves ...	35
-23	character	Shadow	        Shadow is a mysterious vigilante who operates ...	30
-24	character	Batgirl	        Batgirl is the female counterpart to Batman. S...	25
-25	character	Penguin	        The Penguin is a cunning and manipulative crim...	45
-26	character	Black Canary	Black Canary is a highly trained martial artis...	28
-27	character	Killer Croc     Killer Croc is a mutated crocodile-human hybri...	35
-28	character	Professor Pyg	Professor Pyg is a deranged surgeon and sadist...	40
-```
-
-You can store any generated output in a `Collection` using the `store` helper.  Collections are dataframes that also support querying using embeddings by using vector space modelling to convert each field into an embedding.
+We can now store these generated objects as embeddings in a collection.
 
 ```python
 from promptx import store
 
-store(characters)
-```
-```
-    id	                                    description	                                        type	    name	            age
-0	646c1d45-f5d1-45b6-b9a7-ca029df51d8f	Batman is a brooding vigilante with a traumati...	character	Batman	            32
-1	d22ce125-2d4d-4b84-b447-c63f648820c2	Joker is the embodiment of chaos and unpredict...	character	Joker	            36
-2	c3501a5a-9d40-40d2-8d68-76aa3f3cd9f3	Catwoman is a skilled thief and a master of di...	character	Catwoman	        29
-3	282d4ae3-da39-4203-b71b-a249ef2d8f81	Robin is Batman's steadfast and loyal sidekick...	character	Robin	            18
-4	94092fa7-51c1-4120-804c-413a3ab6df9a	Batgirl is a highly skilled martial artist and...	character	Batgirl	            25
-5	5cac4b09-7f27-421e-9e94-985eab41b4b6	The Riddler is a cunning and intelligent crimi...	character	The Riddler	        35
-...
+store(*characters.objects)
 ```
 
-For example, `[{name: 'Batman'}, {description: 'Batman, also known as...'}, {age: 35}]` would be converted into 3 embeddings for the first item. You can then query collections using those field embeddings.
+This stores the object as an embedding, along with some metadata, in a vector database (ChromaDB by default). The process is quite simple, it embeds the whole object as a JSON string and each field individually. This allows us to query the database using any field in the object.
 
 ```python
 from promptx import query
 
-villains = query('they are a villain')
-```
-```
-    id	                                    description	                                        type	    name	            age
-26	7143239c-9a6a-4dc3-84a6-f4c53faf8dda	Nightstrike is a former Gotham City Police off...	character	Nightstrike	        35
-27	03f387bd-3264-4add-a296-fa74a7e9fa5d	Crimson Shade is a master of deception and ill...	character	Crimson Shade	    29
-17	1bad4da4-a6d1-408e-a785-61649fbe7a8e	The Enforcer is a highly trained martial artis...	character	The Enforcer	    28
-6	61896717-f5f5-4d79-9f46-268232b2a1b0	Nightshade is a mysterious vigilante who uses ...	character	Nightshade	        34
-1	d22ce125-2d4d-4b84-b447-c63f648820c2	Joker is the embodiment of chaos and unpredict...	character	Joker	            36
-11	8a883f0c-323b-4ae9-b920-ea5f9a0a51b2	Two-Face is the alter ego of Harvey Dent, a fo...	character	Two-Face	        41
-8	094b9b13-eaf3-43ea-97aa-35eb2251e504	Gotham Guardian is an armored warrior who patr...	character	Gotham Guardian	    40
-20	88a6e9e6-900b-4754-8802-0518720b0cdf	Oracle is the superhero identity of Barbara Go...	character	Oracle	            30
-18	ffc823ef-43b8-40a9-89c3-7f2879080295	The Nightwatcher is a skilled acrobat and park...	character	The Nightwatcher    25
-5	5cac4b09-7f27-421e-9e94-985eab41b4b6	The Riddler is a cunning and intelligent crimi...	character	The Riddler	        35
+query()
 ```
 
-Data can be updated by transforming the collection data using standard pandas methods and passing the result back to `store`.
+```
+from promptx import query
+
+query()
+```
+
+Now let's generate some more characters and add them to the collection. We'll first get any existing characters and extract their names, which we can pass to the prompt to avoid generating duplicates. Any characters generated will be added the list during iteration. Finally, we'll store all the generated characters in the collection.
 
 ```python
-villains['evil'] = True
-store(villains)
-```
-```
-	id	                                    description	                                        type	    name	    age	evil
-0	646c1d45-f5d1-45b6-b9a7-ca029df51d8f	Batman is a brooding vigilante with a traumati...	character	Batman	    32	NaN
-1	d22ce125-2d4d-4b84-b447-c63f648820c2	Joker is the embodiment of chaos and unpredict...	character	Joker	    36	True
-2	c3501a5a-9d40-40d2-8d68-76aa3f3cd9f3	Catwoman is a skilled thief and a master of di...	character	Catwoman	29	NaN
-3	282d4ae3-da39-4203-b71b-a249ef2d8f81	Robin is Batman's steadfast and loyal sidekick...	character	Robin	    18	NaN
-4	94092fa7-51c1-4120-804c-413a3ab6df9a	Batgirl is a highly skilled martial artist and...	character	Batgirl	    25	NaN
-5	5cac4b09-7f27-421e-9e94-985eab41b4b6	The Riddler is a cunning and intelligent crimi...	character	The Riddler	35	True
-6	61896717-f5f5-4d79-9f46-268232b2a1b0	Nightshade is a mysterious vigilante who uses ...	character	Nightshade	34	True
-...
+n = 3
+characters = query().objects
+
+for _ in range(n):
+    characters += prompt(
+        '''
+        Generate a list of new characters from the Batman universe.
+        Don't use any of the existing characters.
+        ''',
+        input = {
+            'existing_characters': [c.name for c in characters],
+        },
+        output=[Character],
+    ).objects
+
+store(*characters)
+query()
 ```
 
-Queries return a collection of results meaning it can be further filtered or queried.
+```
+id	type	name	description	age
+0	7ec67bd1-0626-4293-ab0a-509cee7f5b66	character	Batman	Bruce Wayne is a billionaire philanthropist by...	35
+1	7d7e53e6-f1dd-4f0a-bda7-6533ba385960	character	Joker	The Joker is a deranged and unpredictable crim...	40
+2	45157783-7006-476e-a492-2f6881d2410d	character	Catwoman	Selina Kyle is a skilled thief with a complica...	30
+3	2ad9eb88-406a-4d55-8e19-a5cb0dc7035f	character	Nightshade	Nightshade is a highly skilled acrobat and thi...	28
+4	63472046-2be4-40a0-a4b0-ba918e5a7ad4	character	Shadowstrike	Shadowstrike is a master of stealth and weapon...	33
+5	97fd9c56-9531-4444-b7d6-246070b98405	character	Twilight	Twilight is a vigilante who fights for justice...	25
+6	b40dfcbf-107e-4867-adad-1de2c1260fef	character	Gotham Girl	Gotham Girl is a young superhuman who gained h...	18
+7	97c965d9-2669-49c1-8817-1ab53f1f97ff	character	Midnight	Midnight is a master of stealth and prefers to...	28
+8	16c569fe-18ee-4b18-8c86-428c05cfbd2d	character	Raven	Raven is a sorceress who possesses the ability...	25
+9	dc555573-05f5-4aae-babe-16ece0c401f8	character	Harbinger	Harbinger is a mysterious and enigmatic vigila...	35
+10	c8945846-4cf0-4e6f-ab25-82ec8fbdb8c8	character	Silverwolf	Silverwolf is a skilled martial artist with a ...	28
+11	56e0004f-a656-41fb-902a-9b46522c4e23	character	Luna	Luna is a master of illusions and deception. S...	27
+```
+
+This compares the query text with the stored objects, returning results that are closest in vector space.
+
+*Note: the effectiveness of embedding queries will depend on what data has been embedded. In this case, ChatGPT will know some details about the generated characters and so does a decent job on this data. For other data, you may find generating synthetic intermediary data to be helpful. E.g. generating `thoughts` and/or `quotes` about a set of documents.*
+
+Because `Collection` extends `pd.DataFrame`, we can use all the usual Pandas methods to filter and sort the results.
 
 ```python
-old_and_masked = villains('they wear a mask')[villains['age'] > 40]
-```
-```
-	id	                                    description	                                        type	    name	    age	evil
-11	8a883f0c-323b-4ae9-b920-ea5f9a0a51b2	Two-Face is the alter ego of Harvey Dent, a fo...	character	Two-Face	41	True
+villains[villains.age < 30]
 ```
 
-Now lets pull them together to generate some story ideas.
+```
+	id	type	name	description	age
+0	c8945846-4cf0-4e6f-ab25-82ec8fbdb8c8	character	Silverwolf	Silverwolf is a skilled martial artist with a ...	28
+3	97fd9c56-9531-4444-b7d6-246070b98405	character	Twilight	Twilight is a vigilante who fights for justice...	25
+4	97c965d9-2669-49c1-8817-1ab53f1f97ff	character	Midnight	Midnight is a master of stealth and prefers to...	28
+5	56e0004f-a656-41fb-902a-9b46522c4e23	character	Luna	Luna is a master of illusions and deception. S...	27
+```
+
+Relationships can be defined by setting the field to a type which subclasses `Entity` (or a list of that type). Internally, this is stored as a query and then loaded when the field is accessed from the database.
 
 ```python
-class StoryIdea(BaseModel):
+class StoryIdea(Entity):
     title: str
     description: str = None
-    characters: List[str] = []
+    characters: list[Character] = None
 
-batman = query('Bruce Wayne').first
-villains = query('they are a villain').sample(3)
+characters = query('they are a villain').sample(3).objects
 
 ideas = prompt(
     'Generate some story ideas',
     input={
-        'characters': [batman] + villains.objects,
+        'characters': characters,
     },
-    output=List[StoryIdea],
-)
-```
-```
-	type	    title	                description	                                        characters
-0	storyidea	The Dark Knight Rises	Batman must face off against the combined forc...	[Batman, Two-Face, Joker, Crimson Shade]
-1	storyidea	Gotham's Shadows	    Batman and Crimson Shade form an unlikely alli...	[Batman, Crimson Shade, Two-Face, Joker]
-2	storyidea	Unmasked Truth	        As Batman fights against the chaos unleashed b...	[Batman, Joker, Two-Face]
-3	storyidea	Illusions of Justice	Crimson Shade's illusions lead Batman to quest...	[Batman, Crimson Shade, Two-Face, Joker]
+    output=[StoryIdea],
+).objects
+
+for idea in ideas:
+    idea.characters = characters
+
+store(*ideas, collection='story-ideas')
+query(collection='story-ideas')
 ```
 
-Finally, let's store those ideas, but instead of using the default collection we'll add them to a new `story_ideas` collection.
+```
+id	type	title	description	characters
+0	886bc464-7b4a-4e4e-b228-e3791c6d7f77	storyidea	The Revenge of Silverwolf	After years of training and honing his skills,...	[{'id': 'c8945846-4cf0-4e6f-ab25-82ec8fbdb8c8'...
+1	63668f1a-8a1f-4d68-9926-7b6cb83147fb	storyidea	The Shadow's Game	Midnight finds herself caught in a deadly game...	[{'id': 'c8945846-4cf0-4e6f-ab25-82ec8fbdb8c8'...
+2	cedc978b-463f-43e1-9898-690aada5b832	storyidea	The Illusionist's Gambit	Luna finds herself lured into a dangerous game...	[{'id': 'c8945846-4cf0-4e6f-ab25-82ec8fbdb8c8'...
+```
+
+Note that the output is being stored in a collection called `story-ideas`, which is created if it doesn't exist. Previously, all the data we've stored has been in the 'default' collection.
+
+*Collections are widely used internally to represent stored models, templates, prompt history, etc. This provides a consistent interface for accessing and manipulating data.*
+
+So far we've used the default model (GPT-3.5) when generating data, but you can specify a custom model using the `llm=` parameter.
 
 ```python
-store(*ideas, collection='story_ideas')
-collection('story_ideas')
+from promptx.models.openai import ChatGPT
+
+gpt4 = ChatGPT(id='gpt4', model='gpt4')
+
+characters = prompt(
+    'Generate some characters from the Batman universe',
+    output=[Character],
+    llm=gpt4,
+)
 ```
-```
-    id	                                    description	                                        type	    characters	                                title
-0	4fad21db-014d-4b6f-ba69-ab5b83d440a6	Batman must face off against the combined forc...	storyidea	[Batman, Two-Face, Joker, Crimson Shade]	The Dark Knight Rises
-1	11578c9f-037e-45eb-8c49-9fa2d4a61245	Batman and Crimson Shade form an unlikely alli...	storyidea	[Batman, Crimson Shade, Two-Face, Joker]	Gotham's Shadows
-2	d0b171f4-2f6d-4477-a6a8-47f872af4bd3	As Batman fights against the chaos unleashed b...	storyidea	[Batman, Joker, Two-Face]	                Unmasked Truth
-3	9f16b44c-6f50-4ac0-b669-fd2dcd75c5d1	Crimson Shade's illusions lead Batman to quest...	storyidea	[Batman, Crimson Shade, Two-Face, Joker]	Illusions of Justice
+
+You can define any commonly used models, templates, etc, along with defining other settings, by creating a `config.py` file in the root of the project (i.e. adjacent to the `.px/` directory). This file is loaded when the project is initialized and a `setup` function is expected. Here's a simple example that defines a few custom models and a template.
+
+```python
+# ./config.py
+
+from promptx.models.openai import ChatGPT
+
+gpt4 = ChatGPT(id='gpt4', model='gpt4')
+
+def setup(session):
+    session.store(gpt4, collection='models')
 ```

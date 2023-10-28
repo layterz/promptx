@@ -31,5 +31,10 @@ Thumbs.db
 # chromadb
 .chroma
 
+# promptx
+.env
+.px/
+log/
+
 # temp workspace
 scratch/
