@@ -8,16 +8,14 @@ from typing import Any, Dict, List
 from .collection import Collection, CollectionEntity, Query, VectorDB, model_to_json_schema
 from .template import Template, TemplateRunner, MaxRetriesExceeded, MockLLM
 from .models import PromptLog, QueryLog
-from .chat import ChatBot
+from .models.openai import ChatGPT
 
 
 class Session:
-    _chat_history: List[PromptLog] = None
 
     def __init__(self, world, default_collection='default'):
         self.world = world
         self._collection = default_collection
-        self._chat_history = []
     
     def _run_prompt(self, t, input, llm, context=None, history=None, dryrun=False, retries=3, to_json=False, **kwargs):
         e = None
@@ -69,17 +67,18 @@ class Session:
                 output = json.dumps(output)
 
         if template is None:
-           template = Template(
+            tvars = dict(
                 id=id,
                 output=output,
                 instructions=instructions,
-                context=context or '',
-                examples=examples or [],
+                context=context,
+                examples=examples,
                 logs=logs,
                 tools=tools,
                 debug=debug,
                 silent=silent,
             )
+            template = Template(**{k: v for k, v in tvars.items() if v is not None})
         elif isinstance(template, str):
             template = self.query(ids=[template], collection='templates').first
         
@@ -136,41 +135,7 @@ class Session:
         return r
     
     def chat(self, message, context=None, agent=None, **kwargs):
-        if agent is None:
-            agent = ChatBot('default')
-        
-        _context = []
-        
-        if isinstance(context, Collection):
-            try:
-                for item in context(message, limit=3).objects:
-                    try:
-                        _context.append(item.text)
-                    except AttributeError:
-                        _context.append(item.value)
-            except Exception as e:
-                logger.error(f'Error getting context: {e}')
-
-        if len(_context):
-            _context = [
-                '''
-                The following is some additional context to the question being asked.
-                You can use other information from your training data as well, but the answer should be focused on the information provided.
-                ''',
-                *_context,
-            ]
-
-        # TODO history should be stored in a collection
-        history = self._chat_history[-5:]
-        output = self._run_prompt(
-            agent.template, {'message': message }, context='\n'.join(_context), history=history,
-        )
-        self._chat_history.append(PromptLog(
-            template=agent.template.id,
-            input=message,
-            output=output,
-        ))
-        return output
+        raise NotImplementedError()
 
     def store(self, *items, collection=None):
         def flatten(lst):
@@ -269,19 +234,16 @@ class Session:
         return self.collection('logs')
 
 
-# TODO: rename World to Space
 class World:
     name: str
     sessions: List[Session]
     _collections: Dict[str, Collection]
     db: VectorDB
 
-    def __init__(self, name, db, llm=None, ef=None, templates=None):
+    def __init__(self, name, db):
         self.name = name
         self.sessions = []
         self._collections = {}
-        self.llm = llm or MockLLM()
-        self.ef = ef or (lambda x: [0] * len(x))
         self.db = db
         
         session = self.create_session('setup')
@@ -293,16 +255,16 @@ class World:
         self.create_collection(session, 'subscriptions', 'Subscriptions to queries')
         self.create_collection(session, 'agents', 'Configurations for interactive and autonomous AI agents')
         self.create_collection(session, 'models', 'Configurations for AI models')
-
         self.create_collection(session, 'templates', 'Prompt templates used to interact with AI models')
-        for template in (templates or []):
-            self.create_template(template)
         
         for collection in self.db.collections():
             self.create_collection(session, collection.name)
         
         # TODO: hack, should register as normal system
         self.template_system = TemplateRunner()
+
+        default_llm = ChatGPT(id='default')
+        session.store(default_llm, collection='models')
     
     def create_session(self, name=None, user=None):
         logger.info(f'Creating session: {name} / {user}')
@@ -327,9 +289,6 @@ class World:
         if name in self._collections:
             del self._collections[name]
 
-    def create_template(self, template: Template):
-        return self.templates.embed(template)
-    
     @property
     def templates(self):
         return self._collections['templates']

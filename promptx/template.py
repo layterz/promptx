@@ -9,7 +9,7 @@ from pydantic import BaseModel
 import openai
 from jinja2 import Template as JinjaTemplate
 
-from .collection import Collection, Entity, Query, model_to_json_schema, create_entity_from_schema, serializer
+from .collection import Collection, Entity, Query, model_to_json_schema, create_entity_from_schema, serializer, REGISTERED_ENTITIES
 from .logging import *
 from .models import MockLLM
 
@@ -255,7 +255,7 @@ class TemplateRunner:
         schema = model_to_json_schema(json.loads(t.output))
         if schema.get('type', None) == 'string' or (schema.get('type', None) == 'array' and schema.get('items', {}).get('type', None) == 'string'):
             return out
-        entities = create_entity_from_schema(session, schema, out, base=Entity)
+        entities = create_entity_from_schema(schema, out, session=session, base=Entity)
         return entities
     
     def dict(self):

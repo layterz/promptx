@@ -29,7 +29,6 @@ class App:
             'db': db,
         }
 
-        #logger.configure(handlers=[{"sink":RichHandler(), "format":"{message}"}])
         pretty.install()
 
         env = env or os.environ

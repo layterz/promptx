@@ -13,6 +13,8 @@ from IPython.display import display, HTML
 import chromadb
 
 
+REGISTERED_ENTITIES = {}
+
 JSON_TYPE_MAP: Dict[str, Type[Union[str, int, float, bool, Any]]] = {
     "string": str,
     "integer": int,
@@ -221,7 +223,7 @@ def create_model_from_schema(schema, base=None):
     return create_model(schema.get('title', 'Entity').capitalize(), **fields, __base__=base)
 
 
-def create_entity_from_schema(session, schema, data, base=None):
+def create_entity_from_schema(schema, data, session=None, base=None):
     """
     Create a Pydantic data entity from a JSON schema and input data.
 
@@ -302,19 +304,30 @@ def create_entity_from_schema(session, schema, data, base=None):
             if data.get(name):
                 data[name] = [d.name.lower() for d in data[name]]
     
-    # TODO: need to somehow handle nested entities which should be stored as IDs
-    # currently the schema is correct in that it defines the desired type as a string
-    # however, the entity needs to be loaded when the parent entity is loaded
+    def _field_serializer(obj):
+        if isinstance(obj, Enum):
+            return obj.value
+        elif hasattr(obj, 'model_dump'):
+            return {k: v for k, v in obj.model_dump().items() if v is not None}
+        elif isinstance(obj, list):
+            if all(hasattr(o, 'model_dump') for o in obj):
+                return [{k: v for k, v in e.model_dump().items() if v is not None} for e in obj]
+        return obj
     
+    if _is_list(schema):
+        data = [{k: _field_serializer(v) for k, v in item.items()} for item in data]
+    else:
+        data = {k: _field_serializer(v) for k, v in data.items()}
+
     jsonschema.validate(data, schema)
     m = create_model_from_schema(schema, base=base)
     defaults = {
         'type': _get_title(schema).lower(),
     }
     if _is_list(schema):
-        return [m.load(session, **{**defaults, **o}) for o in data]
+        return [m.load(session=session, **{**defaults, **o}) for o in data]
     else:
-        return m.load(session, **{**defaults, **data})
+        return m.load(session=session, **{**defaults, **data})
 
 
 def serializer(obj):
@@ -339,7 +352,7 @@ class Entity(BaseModel):
         super().__init__(**data)
     
     @classmethod
-    def load(cls, session, **kwargs):
+    def load(cls, session=None, **kwargs):
         for name, field in cls.__annotations__.items():
             if field.__name__ == 'Entity':
                 def loader(self, cls=cls, session=session, name=name, field=field, data=kwargs):
@@ -666,24 +679,23 @@ class Collection(pd.DataFrame):
             }
             return [
                 create_entity_from_schema(
-                    self.session,
                     schemas.get(r['id']),
                     {
                         k: v for k, v in r.items() if (len(v) if isinstance(v, list) else pd.notnull(v))
                     },
-                    base=Entity,
+                    session=self.session,
+                    base=REGISTERED_ENTITIES.get(r['type'], Entity),
                 ) 
                 for r in self.to_dict('records')
             ]
         else:
             return [
                 create_entity_from_schema(
-                    self.session,
                     self.schema or {},
                     {
                         k: v for k, v in r.items() if (len(v) if isinstance(v, list) else pd.notnull(v))
                     },
-                    base=Entity,
+                    base=REGISTERED_ENTITIES.get(r['type'], Entity),
                 ) 
                 for r in self.to_dict('records')
             ]
@@ -729,6 +741,10 @@ class Collection(pd.DataFrame):
         for column in df.columns:
             self[column] = df[column]
         logger.info(f'Embedded {len(new_items)} items into {self.name}')
+
+        for item in items:
+            if item.type not in REGISTERED_ENTITIES:
+                REGISTERED_ENTITIES[item.type] = item.__class__
         return self
 
     def _create_records(self, *items, **kwargs):

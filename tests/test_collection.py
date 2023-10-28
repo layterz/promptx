@@ -278,7 +278,7 @@ person_schema = {
 
 def test_create_entity_from_schema_with_single_entity(session):
     data = {'name': 'Alice', 'age': 30}
-    person = create_entity_from_schema(session, person_schema, data, base=Entity)
+    person = create_entity_from_schema(person_schema, data, session=session, base=Entity)
     assert isinstance(person, BaseModel)
     assert person.name == 'Alice'
     assert person.age == 30
@@ -287,11 +287,11 @@ def test_create_entity_from_schema_with_single_entity_missing_required_field(ses
     # Missing 'name' field, which is required
     data = {'age': 30}
     with pytest.raises(jsonschema.ValidationError):
-        create_entity_from_schema(session, person_schema, data, base=Entity)
+        create_entity_from_schema(person_schema, data, session=session, base=Entity)
 
 def test_create_entity_from_schema_with_single_entity_and_generated_id_and_type(session):
     data = {'name': 'Alice', 'age': 30}
-    person = create_entity_from_schema(session, person_schema, data, base=Entity)
+    person = create_entity_from_schema(person_schema, data, session=session, base=Entity)
     assert hasattr(person, 'id')
     assert hasattr(person, 'type')
     assert person.type == 'person'
@@ -302,7 +302,7 @@ def test_create_entity_from_schema_with_list_of_entities(session):
         'type': 'array',
         'items': person_schema
     }
-    people = create_entity_from_schema(session, people_schema, data_list, base=Entity)
+    people = create_entity_from_schema(people_schema, data_list, session=session, base=Entity)
     assert isinstance(people, list)
     assert len(people) == 2
     assert all(isinstance(person, BaseModel) for person in people)
@@ -315,5 +315,5 @@ def test_create_entity_from_schema_with_list_of_entities_and_generated_ids(sessi
         'type': 'array',
         'items': person_schema
     }
-    people = create_entity_from_schema(session, people_schema, data_list, base=Entity)
+    people = create_entity_from_schema(people_schema, data_list, session=session, base=Entity)
     assert all(hasattr(person, 'id') for person in people)  # 'id' should be generated for each entity

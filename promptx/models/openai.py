@@ -63,7 +63,6 @@ class ChatGPT(LLM):
         
         message = output.choices[0].message
         function_call = message.get('function_call')
-        callback = None
         if function_call is not None:
             callback = Callback(
                 name=function_call.get('name'),
@@ -71,7 +70,6 @@ class ChatGPT(LLM):
             )
         return Response(
             raw=message.get('content'),
-            callback=callback,
             metrics=Metrics(
                 model=f'{self.__class__.__name__}.{self.version}',
                 input_tokens=output.usage.get('prompt_tokens'),
