@@ -82,7 +82,6 @@ plotly==5.17.0
 pluggy==1.3.0
 posthog==3.0.2
 prompt-toolkit==3.0.39
--e git+https://github.com/layterz/promptz.git@ed15b6b1a3c89eab94bd34cd31c5cfbea0935e2b#egg=promptx
 protobuf==4.24.4
 psutil==5.9.6
 ptyprocess==0.7.0

@@ -348,6 +348,12 @@ class Entity(BaseModel):
             data['type'] = self.__class__.__name__.lower()
         if 'id' not in data:
             data['id'] = str(uuid.uuid4())
+
+        for k, v in data.items():
+            if isinstance(v, Enum):
+                data[k] = v.value
+            elif isinstance(v, list) and all(isinstance(e, Enum) for e in v):
+                data[k] = [e.value for e in v]
         
         super().__init__(**data)
     
@@ -362,10 +368,14 @@ class Entity(BaseModel):
                     if field_data is None:
                         return None
                     limit = field_data.get('limit')
+                    collection = field_data.get('collection')
+                    response = session.query(ids=field_data.get('ids'), limit=limit, collection=collection)
+                    if response is None:
+                        return None
                     if limit is None or limit > 1:
-                        return session.query(ids=field_data.get('ids')).objects
+                        return response.objects
                     elif limit == 1:
-                        return session.query(ids=field_data.get('ids')).first
+                        return response.first
                     return None
                 
                 setattr(cls, name, property(loader))
@@ -719,6 +729,9 @@ class Collection(pd.DataFrame):
         records = self._create_records(*items, **kwargs)
         if len(records) == 0:
             raise ValueError('No items to embed')
+        
+        # dedupe the records based on id
+        records = {r['id']: r for r in records}.values()
 
         ids = [r['id'] for r in records]
         self.db.upsert(
