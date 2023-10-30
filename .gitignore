@@ -16,6 +16,7 @@ build/
 venv/
 env/
 ENV/
+venv-*/
 
 # IDE and editor files
 .vscode/
@@ -35,6 +36,7 @@ Thumbs.db
 .env
 .px/
 log/
+data/
 
 # temp workspace
 scratch/
