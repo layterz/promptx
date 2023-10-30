@@ -17,12 +17,12 @@ class Session:
         self.world = world
         self._collection = default_collection
     
-    def _run_prompt(self, t, input, llm, context=None, history=None, dryrun=False, retries=3, to_json=False, **kwargs):
+    def _run_prompt(self, t, input, llm, context=None, history=None, dryrun=False, retries=3, to_json=False, allow_none=False, **kwargs):
         e = None
         s = self.world.template_system
         rendered = s.render(t, {'input': s.parse(input)})
         try:
-            r = s(self, t, input, context=context, llm=llm, history=history, dryrun=dryrun, retries=retries, **kwargs)
+            r = s(self, t, input, context=context, llm=llm, history=history, dryrun=dryrun, retries=retries, allow_none=allow_none,**kwargs)
             log = PromptLog(template=t.id, raw_input=rendered, raw_output=r.raw)
             self.store(log, collection='logs')
             if isinstance(r.content, list):
@@ -60,7 +60,7 @@ class Session:
                 o.append(r.content)
         return o
 
-    def prompt(self, instructions=None, input=None, output=None, id=None, context=None, template=None, llm=None, examples=None, num_examples=1, logs=None, tools=None, dryrun=False, retries=3, debug=False, silent=False, to_json=False, **kwargs):
+    def prompt(self, instructions=None, input=None, output=None, id=None, context=None, template=None, llm=None, examples=None, allow_none=False, logs=None, tools=None, dryrun=False, retries=3, debug=False, silent=False, to_json=False, **kwargs):
         if output is not None:
             output = model_to_json_schema(output)
             if output is not None:
@@ -93,10 +93,7 @@ class Session:
         if llm is None:
             raise ValueError(f'No model found')
 
-        if isinstance(input, list):
-            return self._run_batch(template, input, llm, dryrun=dryrun, retries=retries, to_json=to_json, **kwargs)
-        else:
-            return self._run_prompt(template, input, llm, dryrun=dryrun, retries=retries, to_json=to_json, **kwargs)
+        return self._run_prompt(template, input, llm, dryrun=dryrun, retries=retries, to_json=to_json, allow_none=allow_none, **kwargs)
     
     def embed(self, item, field=None):
         if isinstance(item, str):

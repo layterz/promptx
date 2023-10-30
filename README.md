@@ -99,9 +99,10 @@ query()
 ```
 
 ```
-from promptx import query
-
-query()
+id	type	name	description	age
+0	7ec67bd1-0626-4293-ab0a-509cee7f5b66	character	Batman	Bruce Wayne is a billionaire philanthropist by...	35
+1	7d7e53e6-f1dd-4f0a-bda7-6533ba385960	character	Joker	The Joker is a deranged and unpredictable crim...	40
+2	45157783-7006-476e-a492-2f6881d2410d	character	Catwoman	Selina Kyle is a skilled thief with a complica...	30
 ```
 
 Now let's generate some more characters and add them to the collection. We'll first get any existing characters and extract their names, which we can pass to the prompt to avoid generating duplicates. Any characters generated will be added the list during iteration. Finally, we'll store all the generated characters in the collection.

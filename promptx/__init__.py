@@ -1,6 +1,7 @@
 import os
 import time
 from typing import Callable, List
+from loguru import logger
 
 from .collection import Collection 
 from .world import Session
@@ -8,7 +9,7 @@ from .application import App
 from .auth import DefaultUser 
 
 
-def prompt(instructions=None, input=None, output=None, prompt=None, context=None, template=None, llm=None, examples=None, num_examples=1, history=None, tools=None, dryrun=False, retries=3, debug=False, silent=False, **kwargs):
+def prompt(instructions=None, input=None, output=None, prompt=None, context=None, template=None, llm=None, examples=None, allow_none=False, history=None, tools=None, dryrun=False, retries=3, debug=False, silent=False, **kwargs):
     kwargs = dict(
         instructions=instructions,
         input=input,
@@ -17,7 +18,7 @@ def prompt(instructions=None, input=None, output=None, prompt=None, context=None
         llm=llm,
         context=context,
         examples=examples,
-        num_examples=num_examples,
+        allow_none=allow_none,
         history=history,
         tools=tools,
         template=template,
@@ -133,8 +134,11 @@ def load(path='local'):
         print('loading remote app from', path)
         raise NotImplementedError
     else:
+        logger.info(f'loading local app from {path}')
         from dotenv import load_dotenv
-        load_dotenv(os.path.join(path, '.env'))
+        load_dotenv(os.path.join(path, '.env'), override=True)
+        logger.info(f'loaded environment variables from {os.path.join(path, ".env")}')
+        logger.info(f'API KEY {os.environ.get("OPENAI_API_KEY")[-5:]}')
         app = App.load(path)
 
         # look for a config.py file and execute it

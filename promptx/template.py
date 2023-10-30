@@ -25,6 +25,9 @@ class Example(Entity):
     input: str
     output: str
 
+    def __init__(self, input, output, **kwargs):
+        super().__init__(input=input, output=output, **kwargs)
+
 class Template(Entity):
     
     template: str = """
@@ -248,9 +251,11 @@ class TemplateRunner:
             example_template.render(**e) for e in examples
         ])
     
-    def process(self, session, t, x, output, **kwargs):
+    def process(self, session, t, x, output, allow_none=False, **kwargs):
         if t.output is None:
             return output
+        if allow_none and output is None:
+            return None
         out = json.loads(output)
         schema = model_to_json_schema(json.loads(t.output))
         if schema.get('type', None) == 'string' or (schema.get('type', None) == 'array' and schema.get('items', {}).get('type', None) == 'string'):
@@ -271,7 +276,7 @@ class TemplateRunner:
     def __call__(self, session, t, x, llm, **kwargs):
         return self.forward(session, t, x, llm, **kwargs)
     
-    def forward(self, session, t, x, llm, context=None, history=None, retries=3, dryrun=False, **kwargs):
+    def forward(self, session, t, x, llm, context=None, history=None, retries=3, dryrun=False, allow_none=False, **kwargs):
         if retries and retries <= 0:
             e = MaxRetriesExceeded(f'{t.name} failed to forward {x}')
             logger.error(e)
@@ -305,7 +310,7 @@ class TemplateRunner:
             return self.forward(session, t, x, llm, retries=retries, **kwargs)
 
         try:
-            response.content = self.process(session, t, px, response.raw, **kwargs)
+            response.content = self.process(session, t, px, response.raw, allow_none=allow_none, **kwargs)
         except jsonschema.exceptions.ValidationError as e:
             logger.error(f'Output validation failed: {e}')
             return self.forward(session, t, x, llm, retries=retries-1, **kwargs)
