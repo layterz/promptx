@@ -87,7 +87,6 @@ psutil==5.9.6
 ptyprocess==0.7.0
 pulsar-client==3.3.0
 pure-eval==0.2.2
-pxx==0.0.1
 pycparser==2.21
 pydantic==2.4.2
 pydantic_core==2.10.1

@@ -705,7 +705,7 @@ class Collection(pd.DataFrame):
                     {
                         k: v for k, v in r.items() if (len(v) if isinstance(v, list) else pd.notnull(v))
                     },
-                    base=REGISTERED_ENTITIES.get(r['type'], Entity),
+                    base=REGISTERED_ENTITIES.get(r.get('type'), Entity),
                 ) 
                 for r in self.to_dict('records')
             ]

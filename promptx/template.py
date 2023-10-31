@@ -44,7 +44,15 @@ class Template(Entity):
     ---
     {{instructions}}
     {{format}}
+    {% if examples %}
+        EXAMPLES
+        ---
+    {% endif %}
     {{examples}}
+    {% if examples %}
+        END_EXAMPLES
+        ---
+    {% endif %}
     {{input}}
     {{output}}
     """
@@ -63,11 +71,8 @@ class Template(Entity):
     """
 
     example_template: str = f"""
-    EXAMPLES
-    ---
     {input_template}
     {output_template}
-    END_EXAMPLES
     """
 
     format_template: str = """
