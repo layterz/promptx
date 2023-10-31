@@ -26,7 +26,16 @@ class Example(Entity):
     output: str
 
     def __init__(self, input, output, **kwargs):
-        super().__init__(input=input, output=output, **kwargs)
+        super().__init__(input=self.parse(input), output=self.parse(output), **kwargs)
+    
+    def parse(self, x):
+        def _serialize(x):
+            if issubclass(type(x), BaseModel):
+                return x.model_dump()
+        if isinstance(x, str):
+            return x
+        else:
+            return json.dumps(x, default=_serialize)
 
 class Template(Entity):
     
