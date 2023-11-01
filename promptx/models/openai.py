@@ -34,8 +34,8 @@ class ChatGPT(LLM):
     '''
 
     def __init__(self, api_key=None, org_id=None, **kwargs):
-        openai.api_key = api_key or os.environ.get('OPENAI_API_KEY')
-        openai.organization = org_id or os.environ.get('OPENAI_ORG_ID')
+        openai.api_key = api_key or os.environ.get('PXX_OPENAI_API_KEY')
+        openai.organization = org_id or os.environ.get('PXX_OPENAI_ORG_ID')
         super().__init__(**kwargs)
 
     def generate(self, x, context=None, history: List[PromptLog]=None, tools=None, **kwargs):

@@ -3,7 +3,7 @@ import time
 from typing import Callable, List
 from loguru import logger
 
-from .collection import Collection 
+from .collection import Collection, MemoryVectorDB
 from .world import Session
 from .application import App
 from .auth import DefaultUser 
@@ -28,10 +28,6 @@ def prompt(instructions=None, input=None, output=None, prompt=None, context=None
         retries=retries,
     )
     return DEFAULT_SESSION.prompt(**kwargs)
-
-
-def chain(*steps, **kwargs):
-    return DEFAULT_SESSION.chain(*steps, **kwargs)
 
 
 def store(*items, collection=None, **kwargs) -> Collection:
@@ -71,26 +67,10 @@ def session() -> Session:
     return DEFAULT_SESSION
 
 
-def run(world=None, **kwargs):
-    if world is None:
-        world = DEFAULT_WORLD
-    return world(**kwargs)
-
-
-DEFAULT_WORLD = None
-def set_default_world(world):
-    global DEFAULT_WORLD
-    DEFAULT_WORLD = world
-
-
 DEFAULT_SESSION = None
 def set_default_session(session):
     global DEFAULT_SESSION
     DEFAULT_SESSION = session
-
-
-Embedding = List[float]
-EmbedFunction = Callable[[List[str]], List[Embedding]]
 
 
 def find_project_root(path=None, config_filename='.px'):
@@ -106,15 +86,17 @@ def find_project_root(path=None, config_filename='.px'):
     return None
 
 
-def load(path='local'):
+def load(path='local', **env):
     if path == 'local':
-        path = find_project_root()
-
-    if path is None:
-        raise ValueError('could not find project')
+        project_path = find_project_root()
+        if project_path is not None:
+            path = project_path
 
     app = None
-    if path.startswith('http'):
+    if path == 'local':
+        db = MemoryVectorDB()
+        app = App.load(path, db=db, env=env)
+    elif path.startswith('http'):
         print('loading remote app from', path)
         raise NotImplementedError
     else:
@@ -122,8 +104,8 @@ def load(path='local'):
         from dotenv import load_dotenv
         load_dotenv(os.path.join(path, '.env'), override=True)
         logger.info(f'loaded environment variables from {os.path.join(path, ".env")}')
-        logger.info(f'API KEY {os.environ.get("OPENAI_API_KEY")[-5:]}')
-        app = App.load(path)
+        logger.info(f'API KEY {os.environ.get("PXX_OPENAI_API_KEY")[-5:]}')
+        app = App.load(path, env=env)
 
         # look for a config.py file and execute it
         config_file = os.path.join(path, 'config.py')
@@ -139,6 +121,3 @@ def load(path='local'):
     s = app.world.create_session(user)
     set_default_session(s)
     return app
-
-
-load()

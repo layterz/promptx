@@ -510,20 +510,35 @@ class Subscription(Entity):
         super().__init__(query=query, **kwargs)
 
 
-class VectorDB:
-    name: str
-
-    @abstractmethod
-    def get(self, ids=None, where=None, **kwargs):
-        '''
-        Get embeddings by ids or where clause.
-        '''
+class VectorCollection:
 
     @abstractmethod
     def query(self, texts, where=None, ids=None, **kwargs):
         '''
-        Query embeddings using a list of texts and optional where clause.
+        Return a list of results.
         '''
+    
+    @abstractmethod
+    def get(self, ids=None, where=None, **kwargs):
+        '''
+        Return a list of results.
+        '''
+    
+    @abstractmethod
+    def upsert(self, ids, documents, metadatas, **kwargs):
+        '''
+        Upsert a list of results.
+        '''
+    
+    @abstractmethod
+    def delete(self, ids=None, where=None, **kwargs):
+        '''
+        Delete a list of results.
+        '''
+
+
+class VectorDB:
+    name: str
 
     @abstractmethod
     def get_collection(self, name, **kwargs):
@@ -548,21 +563,12 @@ class VectorDB:
         '''
         Return a list of collections.
         '''
-    
-    @abstractmethod
-    def upsert(self, ids, documents, metadatas, **kwargs):
-        '''
-        Upsert embeddings.
-        '''
 
 
 class ChromaVectorDB(VectorDB):
 
     def __init__(self, endpoint=None, api_key=None, path=None, **kwargs):
         self.client = chromadb.PersistentClient(path=f'{path}/.px/db' if path else "./.px/db")
-
-    def query(self, texts, where=None, ids=None, **kwargs):
-        return self.client.query(texts, where=where, **kwargs)
     
     def get_or_create_collection(self, name, **kwargs):
         return self.client.get_or_create_collection(name, **kwargs)
@@ -581,12 +587,46 @@ class ChromaVectorDB(VectorDB):
     
     def collections(self):
         return self.client.list_collections()
+
+
+class MemoryDB(VectorCollection):
+    name: str
+
+    def __init__(self, name, **kwargs):
+        self.name = name
+
+    def get(self, ids=None, where=None, **kwargs):
+        return { 'ids': [], 'documents': [], 'metadatas': [] }
+    
+    def query(self, texts, where=None, ids=None, **kwargs):
+        return []
     
     def upsert(self, ids, documents, metadatas, **kwargs):
-        return self.client.upsert(ids, documents, metadatas, **kwargs)
+        pass
+
+    def delete(self, ids=None, where=None, **kwargs):
+        pass
+
+
+class MemoryVectorDB(VectorDB):
     
-    def get(self, ids=None, where=None, **kwargs):
-        return self.client.get(ids=ids, where=where, **kwargs)
+    def get_or_create_collection(self, name, **kwargs):
+        return MemoryDB(name)
+    
+    def create_collection(self, name, **kwargs):
+        pass
+    
+    def get_collection(self, name, **kwargs):
+        return MemoryDB(name)
+    
+    def delete_collection(self, name, **kwargs):
+        pass
+    
+    def collections(self):
+        return []
+    
+    def upsert(self, ids, documents, metadatas, **kwargs):
+        pass
 
 
 class EntitySeries(pd.Series):

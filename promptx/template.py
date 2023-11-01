@@ -37,6 +37,7 @@ class Example(Entity):
         else:
             return json.dumps(x, default=_serialize)
 
+
 class Template(Entity):
     
     template: str = """
@@ -100,23 +101,24 @@ class Template(Entity):
     type: str = 'template'
     name: str = None
     instructions: str = None
-    examples: Optional[List[Example]] = None
+    examples: List[Example] = None
     input: str = None
     output: str = None
     context: str = None
     data: Query = None
 
     def __init__(self, examples=None, **kwargs):
-        for i, example in enumerate(examples or []):
-            if isinstance(example, dict):
-                example = Example(**example)
-            elif isinstance(example, tuple):
-                example = Example(*example)
-            if not isinstance(example, Example):
-                raise ValueError(f'Invalid example: {example}')
-            examples[i] = example
-            
-        super().__init__(examples=examples, **kwargs)
+        if examples is not None:
+            for i, example in enumerate(examples):
+                if isinstance(example, dict):
+                    example = Example(**example)
+                elif isinstance(example, tuple):
+                    example = Example(*example)
+                if not isinstance(example, Example):
+                    continue
+                examples[i] = example
+            kwargs['examples'] = examples
+        super().__init__(**kwargs)
 
 
 class TemplateRunner:

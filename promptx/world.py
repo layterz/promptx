@@ -7,7 +7,7 @@ from typing import Any, Dict, List
 
 from .collection import Collection, CollectionEntity, Query, VectorDB, model_to_json_schema
 from .template import Template, TemplateRunner, MaxRetriesExceeded, MockLLM
-from .models import PromptLog, QueryLog
+from .models import PromptLog, QueryLog, LLM
 from .models.openai import ChatGPT
 
 
@@ -52,14 +52,6 @@ class Session:
             self.store(log, collection='logs')
             raise e
     
-    def _run_batch(self, t, inputs, llm, dryrun=False, retries=3, to_json=False, **kwargs):
-        o = []
-        for input in inputs:
-            r = self._run_prompt(t, input, dryrun=dryrun, retries=retries, to_json=to_json, **kwargs)
-            if r is not None:
-                o.append(r.content)
-        return o
-
     def prompt(self, instructions=None, input=None, output=None, id=None, context=None, template=None, llm=None, examples=None, allow_none=False, logs=None, tools=None, dryrun=False, retries=3, debug=False, silent=False, to_json=False, **kwargs):
         if output is not None:
             output = model_to_json_schema(output)
@@ -89,6 +81,9 @@ class Session:
             llm = self.query(ids=['default'], collection='models').first
         elif isinstance(llm, str):
             llm = self.query(ids=[llm], collection='models').first
+        
+        if llm is None and self.world.default_llm is not None:
+            llm = self.world.default_llm
         
         if llm is None:
             raise ValueError(f'No model found')
@@ -236,12 +231,16 @@ class World:
     sessions: List[Session]
     _collections: Dict[str, Collection]
     db: VectorDB
+    default_llm: LLM
 
-    def __init__(self, name, db):
+    def __init__(self, name, db, default_llm=None):
         self.name = name
         self.sessions = []
         self._collections = {}
+        # TODO: hack, should register as normal system
+        self.template_system = TemplateRunner()
         self.db = db
+        self.default_llm = default_llm or ChatGPT(id='default')
         
         session = self.create_session('setup')
         collection = self.db.get_or_create_collection('collections')
@@ -251,18 +250,14 @@ class World:
         self.create_collection(session, 'queries', 'Query stored objects in collections')
         self.create_collection(session, 'subscriptions', 'Subscriptions to queries')
         self.create_collection(session, 'agents', 'Configurations for interactive and autonomous AI agents')
-        self.create_collection(session, 'models', 'Configurations for AI models')
         self.create_collection(session, 'templates', 'Prompt templates used to interact with AI models')
+        self.create_collection(session, 'models', 'Configurations for AI models')
         
         for collection in self.db.collections():
             self.create_collection(session, collection.name)
-        
-        # TODO: hack, should register as normal system
-        self.template_system = TemplateRunner()
 
-        default_llm = ChatGPT(id='default')
-        session.store(default_llm, collection='models')
-    
+        session.store(self.default_llm, collection='models')
+
     def create_session(self, name=None, user=None):
         logger.info(f'Creating session: {name} / {user}')
         session = Session(self)

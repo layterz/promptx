@@ -8,7 +8,7 @@ from . import User, Account, _user, user, session
 
 def test_objects_are_returned_with_correct_schema(session, mocker):
     user = User(name="test", age=20, traits=['nice', 'mean'])
-    db = mocker.Mock(spec=VectorDB)
+    db = mocker.Mock(spec=VectorCollection)
     db.name = 'test'
     db.get.return_value = {'ids': [user.id], 'documents': [user.model_dump_json()], 'metadatas': [{'schema': json.dumps(user.model_json_schema())}]}
     collection = Collection.load(session, db)
@@ -19,7 +19,7 @@ def test_objects_are_returned_with_correct_schema(session, mocker):
 
 def test_embedding_an_entity(session, mocker):
     user = User(name="test", age=20, traits=['nice', 'mean'])
-    db = mocker.Mock(spec=VectorDB)
+    db = mocker.Mock(spec=VectorCollection)
     db.name = 'test'
     db.get.return_value = {'ids': [user.id], 'documents': [user.model_dump_json()], 'metadatas': [{'schema': json.dumps(user.model_json_schema())}]}
     collection = Collection.load(session, db)

@@ -14,7 +14,7 @@ class App:
     path: str
     world: World
 
-    def __init__(self, name, path, world=None, db=None):
+    def __init__(self, name, path, world=None, db=None, **kwargs):
         self.name = name
         self.path = path
         self.world = world or World(name, db=db)
@@ -31,18 +31,18 @@ class App:
 
         pretty.install()
 
-        env = env or os.environ
-        log_file_path = f"./log/{env.get('PX_ENV', 'development')}.log"  # Replace 'development' with your environment
-        level = env.get('PX_LOG_LEVEL', 'INFO')  # Replace 'CRITICAL' with your log level
+        env = {**os.environ, **(env or {})}
+        log_file_path = f"./log/{env.get('PXX_ENV', 'development')}.log"
+        level = env.get('PXX_LOG_LEVEL', 'INFO')
 
         # Configure Loguru
         logger.remove()
         logger.add(
             log_file_path,
-            rotation="10 MB",  # Rotate log files that exceed 10 MB
-            level=level,  # Minimum level to log
+            rotation="10 MB",
+            level=level,
             format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level: <8}</level> | <level>{message}</level>",
-            backtrace=True  # Enable traceback
+            backtrace=True
         )
 
         logger.info("Log file: " + log_file_path)

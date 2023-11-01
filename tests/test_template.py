@@ -197,8 +197,8 @@ def test_example_rendering(session):
     template = Template(instructions='Some example instructions', output=user.model_dump_json(),
                         examples=[Example(input='Some test input', output=user.model_dump_json())])
     session.store(template)
-    template = session.query(ids=[template.id]).first
-    p = runner.render(template, {'input': 'Some test input'})
+    template_r = session.query(ids=[template.id]).first
+    p = runner.render(template_r, {'input': 'Some test input'})
 
     assert 'EXAMPLES' in p
     assert 'John Wayne' in p
