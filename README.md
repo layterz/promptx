@@ -6,24 +6,6 @@ A framework for building AI systems.
 pip install pxx
 ```
 
-First, we need to create a project, which defines the embedding database that's being used.
-
-```bash
-px init .
-```
-
-*This will create a project in the current directory. Replace `.` with a path to create a project in a different directory.*
-
-A project is defined by a hidden `.px/` directory that `promptx` uses to store data and discover the project.
-
-```python
-from promptx import load
-
-load()
-```
-
-Now that `promptx` is loaded, we can call `prompt` to generate some data with the default model.
-
 ```python
 from promptx import prompt
 

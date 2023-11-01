@@ -9,7 +9,6 @@ import jsonschema
 import pandas as pd
 from pydantic import BaseModel, Field, ConfigDict, create_model
 from pydantic_core._pydantic_core import PydanticUndefinedType
-from IPython.display import display, HTML
 import chromadb
 
 
@@ -797,7 +796,7 @@ class Collection(pd.DataFrame):
 
         for item in items:
             if item.type not in REGISTERED_ENTITIES:
-                REGISTERED_ENTITIES[item.type] = item.__class__
+                REGISTERED_ENTITIES[item.type.lower()] = item.__class__
         return self
 
     def _create_records(self, *items, **kwargs):

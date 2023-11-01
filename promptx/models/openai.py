@@ -3,28 +3,7 @@ from typing import List
 import openai
 
 from . import LLM, ImageResponse, Response, Metrics, Callback, PromptLog
-
-
-class InstructGPT(LLM):
-    version: str = 'text-davinci-003'
-
-    def __init__(self, version=None):
-        self.version = version or self.version
-
-    def generate(self, x, **kwargs) -> Response:
-        output = openai.Completion.create(
-            model=self.version,
-            prompt=x
-        )
-        text = output.choices[0].text
-        return Response(
-            raw=text,
-            metrics=Metrics(
-                model=f'{self.__class__.__name__}.{self.version}',
-                input_tokens=len(x),
-                output_tokens=len(text),
-            )
-        )
+from ..collection import REGISTERED_ENTITIES
 
 
 class ChatGPT(LLM):
@@ -33,9 +12,7 @@ class ChatGPT(LLM):
     You are a helpful chat assistant.
     '''
 
-    def __init__(self, api_key, org_id, **kwargs):
-        openai.api_key = api_key
-        openai.organization = org_id
+    def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
     def generate(self, x, context=None, history: List[PromptLog]=None, tools=None, **kwargs):
@@ -77,12 +54,12 @@ class ChatGPT(LLM):
             ),
         )
 
+REGISTERED_ENTITIES['chatgpt'] = ChatGPT
+
 
 class DALLE(LLM):
 
     def __init__(self, api_key=None, org_id=None, **kwargs):
-        openai.api_key = api_key or os.environ.get('OPENAI_API_KEY')
-        openai.organization = org_id or os.environ.get('OPENAI_ORG_ID')
         super().__init__(**kwargs)
 
     def generate(self, x, **kwargs) -> Response:
@@ -98,3 +75,5 @@ class DALLE(LLM):
                 input_tokens=len(x),
             )
         )
+
+REGISTERED_ENTITIES['dalle'] = DALLE
