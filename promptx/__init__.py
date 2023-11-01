@@ -26,7 +26,6 @@ def prompt(instructions=None, input=None, output=None, prompt=None, context=None
         dryrun=dryrun,
         silent=silent,
         retries=retries,
-        store=store,
     )
     return DEFAULT_SESSION.prompt(**kwargs)
 
@@ -66,21 +65,6 @@ def chat(message, context=None, **kwargs):
 
 def evaluate(*testcases, **kwargs) -> Collection:
     return DEFAULT_SESSION.evaluate(*testcases, **kwargs)
-
-
-def history(query=None, **kwargs):
-    if query is not None:
-        return DEFAULT_SESSION.history(query, **kwargs)
-    else:
-        return DEFAULT_SESSION.history
-
-
-def templates(ids=None, **kwargs) -> Collection:
-    return DEFAULT_SESSION.world.templates(ids=ids, **kwargs)
-
-
-def systems(ids=None, **kwargs) -> Collection:
-    return DEFAULT_SESSION.world.systems(ids=ids, **kwargs)
 
 
 def session() -> Session:
@@ -155,3 +139,6 @@ def load(path='local'):
     s = app.world.create_session(user)
     set_default_session(s)
     return app
+
+
+load()
