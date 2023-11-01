@@ -768,7 +768,7 @@ class Collection(pd.DataFrame):
     def embed(self, *items, **kwargs):
         records = self._create_records(*items, **kwargs)
         if len(records) == 0:
-            raise ValueError('No items to embed')
+            return None
         
         # dedupe the records based on id
         records = {r['id']: r for r in records}.values()

@@ -7,6 +7,7 @@ from .world import World
 from .api import API
 from .admin import Admin
 from .collection import ChromaVectorDB
+from .models.openai import ChatGPT
 
 
 class App:
@@ -14,19 +15,21 @@ class App:
     path: str
     world: World
 
-    def __init__(self, name, path, world=None, db=None, **kwargs):
+    def __init__(self, name, path, world=None, db=None, llm=None, **kwargs):
         self.name = name
         self.path = path
-        self.world = world or World(name, db=db)
+        self.world = world or World(name, db=db, default_llm=llm)
     
     @classmethod
-    def load(cls, path, db=None, env=None):
+    def load(cls, path, db=None, llm=None, env=None):
         db = db or ChromaVectorDB(path=path)
+        llm = llm or ChatGPT(id='default', api_key=env.get('PXX_OPENAI_API_KEY'), org_id=env.get('PXX_OPENAI_ORG_ID'))
 
         config = {
             'name': 'local',
             'path': path,
             'db': db,
+            'llm': llm,
         }
 
         pretty.install()

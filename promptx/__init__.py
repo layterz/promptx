@@ -95,6 +95,7 @@ def load(path='local', **env):
     app = None
     if path == 'local':
         db = MemoryVectorDB()
+        env = {**os.environ, **(env or {})}
         app = App.load(path, db=db, env=env)
     elif path.startswith('http'):
         print('loading remote app from', path)
@@ -121,3 +122,8 @@ def load(path='local', **env):
     s = app.world.create_session(user)
     set_default_session(s)
     return app
+
+
+import os
+if os.environ.get('PXX_AUTOLOAD', True):
+    load()

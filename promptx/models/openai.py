@@ -33,9 +33,9 @@ class ChatGPT(LLM):
     You are a helpful chat assistant.
     '''
 
-    def __init__(self, api_key=None, org_id=None, **kwargs):
-        openai.api_key = api_key or os.environ.get('PXX_OPENAI_API_KEY')
-        openai.organization = org_id or os.environ.get('PXX_OPENAI_ORG_ID')
+    def __init__(self, api_key, org_id, **kwargs):
+        openai.api_key = api_key
+        openai.organization = org_id
         super().__init__(**kwargs)
 
     def generate(self, x, context=None, history: List[PromptLog]=None, tools=None, **kwargs):

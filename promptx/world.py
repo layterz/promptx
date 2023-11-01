@@ -78,9 +78,13 @@ class Session:
             raise ValueError(f'No template found with id {template}')
         
         if llm is None:
-            llm = self.query(ids=['default'], collection='models').first
+            response = self.query(ids=['default'], collection='models')
+            if response is not None:
+                llm = response.first
         elif isinstance(llm, str):
-            llm = self.query(ids=[llm], collection='models').first
+            response = self.query(ids=[llm], collection='models')
+            if response is not None:
+                llm = response.first
         
         if llm is None and self.world.default_llm is not None:
             llm = self.world.default_llm
@@ -240,7 +244,7 @@ class World:
         # TODO: hack, should register as normal system
         self.template_system = TemplateRunner()
         self.db = db
-        self.default_llm = default_llm or ChatGPT(id='default')
+        self.default_llm = default_llm
         
         session = self.create_session('setup')
         collection = self.db.get_or_create_collection('collections')
