@@ -106,6 +106,7 @@ def load(path='local', **env):
         load_dotenv(os.path.join(path, '.env'), override=True)
         logger.info(f'loaded environment variables from {os.path.join(path, ".env")}')
         logger.info(f'API KEY {os.environ.get("PXX_OPENAI_API_KEY")[-5:]}')
+        env = {**os.environ, **(env or {})}
         app = App.load(path, env=env)
 
         # look for a config.py file and execute it
