@@ -2,6 +2,15 @@
 
 A framework for building AI systems.
 
+**promptx** is a framework for working with generative models and embeddings. The example below goes through the basics of how to control the output of models and store the results as embeddings.
+
+Blog posts:
+
+[Teaching an LLM How to Read](https://layterz.github.io/posts/teaching-an-llm-how-to-read)
+[Generating Narratives: Writing Coherent Stories with LLMs](https://layterz.github.io/posts/generating-narratives)
+
+## Getting started
+
 ```bash
 pip install pxx
 ```
