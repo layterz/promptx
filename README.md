@@ -6,8 +6,8 @@ A framework for building AI systems.
 
 Blog posts:
 
-[Teaching an LLM How to Read](https://layterz.github.io/posts/teaching-an-llm-how-to-read)
-[Generating Narratives: Writing Coherent Stories with LLMs](https://layterz.github.io/posts/generating-narratives)
+- [Teaching an LLM How to Read](https://layterz.github.io/posts/teaching-an-llm-how-to-read)
+- [Generating Narratives: Writing Coherent Stories with LLMs](https://layterz.github.io/posts/generating-narratives)
 
 ## Getting started
 
