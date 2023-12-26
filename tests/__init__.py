@@ -45,7 +45,12 @@ def session():
         shutil.rmtree('tests/.px')
     except FileNotFoundError as e:
         pass
-    app = App.load('tests', env={'PX_ENV': 'test'})
+        
+    from promptx.collection import MemoryVectorDB
+    db = MemoryVectorDB()
+    from promptx.models import MockLLM
+    llm = MockLLM()
+    app = App.load('tests', db, llm, env={'PX_ENV': 'test'})
     session = app.world.create_session('test_store')
     yield session
     shutil.rmtree('tests/.px')
