@@ -1,17 +1,8 @@
 import os
-import time
-from loguru import logger
 
 from .collection import Collection, MemoryVectorDB
 from .world import Session
 from .application import App
-
-## TODO
-# make chromadb default and deal with unimplemented functions for InMem
-# publish to pypi
-# create math dataset
-# train mistral-7b using generated dataset
-# read the SSM papers
 
 def prompt(instructions=None, input=None, output=None, prompt=None, context=None, template=None, llm=None, examples=None, allow_none=False, history=None, tools=None, dryrun=False, retries=3, debug=False, silent=False, **kwargs):
     kwargs = dict(
