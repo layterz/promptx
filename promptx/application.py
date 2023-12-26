@@ -1,12 +1,9 @@
 import os
 from loguru import logger
 from rich import pretty
-from rich.logging import RichHandler
 import openai
 
 from .world import World
-from .api import API
-from .admin import Admin
 from .collection import ChromaVectorDB
 from .models.openai import ChatGPT
 
@@ -62,18 +59,6 @@ class App:
         logger.info("Log level: " + level)
 
         return cls(**config)
-
-    @property
-    def api(self):
-        if self._api is None:
-            self._api = API(self.world)
-        return self._api
-
-    @property
-    def admin(self):
-        if self._admin is None:
-            self._admin = Admin(self.world)
-        return self._admin
     
     def __repr__(self):
         return f'<App {self.name} path={self.path}>'

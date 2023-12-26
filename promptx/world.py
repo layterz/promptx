@@ -6,9 +6,8 @@ from pydantic import BaseModel
 from typing import Any, Dict, List
 
 from .collection import Collection, CollectionEntity, Query, VectorDB, model_to_json_schema
-from .template import Template, TemplateRunner, MaxRetriesExceeded, MockLLM
+from .template import Template, TemplateRunner, MaxRetriesExceeded
 from .models import PromptLog, QueryLog, LLM
-from .models.openai import ChatGPT
 
 
 class Session:

@@ -2,8 +2,6 @@ import os
 import click
 from rich import pretty, print
 import requests
-from IPython import embed
-from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 from . import load
 

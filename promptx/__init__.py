@@ -1,12 +1,10 @@
 import os
 import time
-from typing import Callable, List
 from loguru import logger
 
 from .collection import Collection, MemoryVectorDB
 from .world import Session
 from .application import App
-from .auth import DefaultUser 
 
 
 def prompt(instructions=None, input=None, output=None, prompt=None, context=None, template=None, llm=None, examples=None, allow_none=False, history=None, tools=None, dryrun=False, retries=3, debug=False, silent=False, **kwargs):
@@ -119,8 +117,7 @@ def load(path='local', **env):
             session = app.world.create_session(f'{app.name}_config_{int(time.time())}')
             module.setup(session)
     
-    user = DefaultUser()
-    s = app.world.create_session(user)
+    s = app.world.create_session()
     set_default_session(s)
     return app
 
