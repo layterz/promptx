@@ -1,7 +1,6 @@
 import time
 import random
 import json
-import urllib3
 from typing import * 
 import jsonschema
 from loguru import logger
@@ -10,7 +9,6 @@ import openai
 from jinja2 import Template as JinjaTemplate
 
 from .collection import Collection, Entity, Query, model_to_json_schema, create_entity_from_schema
-from .logging import *
 from .models import MockLLM
 
 
@@ -320,12 +318,6 @@ class TemplateRunner:
 
         try:
             response = llm.generate(prompt_input, context=context or t.context, history=history)
-        except (urllib3.exceptions.ReadTimeoutError,
-                urllib3.exceptions.ConnectTimeoutError,
-                urllib3.exceptions.NewConnectionError) as e:
-            logger.error(f'LLM generation failed: {e}')
-            time.sleep(2)
-            return self.forward(session, t, x, llm, retries=retries, **kwargs)
         except (openai.error.APIError,
                 openai.error.Timeout,
                 openai.error.ServiceUnavailableError) as e:
@@ -336,6 +328,9 @@ class TemplateRunner:
             logger.error(f'Hit rate limit for {self}: {e}')
             time.sleep(10)
             return self.forward(session, t, x, llm, retries=retries, **kwargs)
+        except Exception as e:
+            logger.error(f'Failed to generate {x}: {e}')
+            return self.forward(session, t, x, llm, retries=retries-1, **kwargs)
 
         try:
             response.content = self.process(session, t, px, response.raw, allow_none=allow_none, **kwargs)

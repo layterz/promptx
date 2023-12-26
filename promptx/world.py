@@ -7,7 +7,7 @@ from typing import Any, Dict, List
 
 from .collection import Collection, CollectionEntity, Query, VectorDB, model_to_json_schema
 from .template import Template, TemplateRunner, MaxRetriesExceeded
-from .models import PromptLog, QueryLog, LLM
+from .models import PromptLog, LLM
 
 
 class Session:
@@ -111,22 +111,6 @@ class Session:
         r =  c(*texts, ids=ids, where=where, limit=limit)
         if r is None:
             return None
-
-        def serialize(item):
-            if isinstance(item, BaseModel):
-                return item.model_dump_json()
-            else:
-                return item
-        
-        if False:
-            # TODO: fix this
-            log = QueryLog(
-                query=texts,
-                where=where,
-                collection=collection,
-                result=json.dumps(r.objects, default=serialize),
-            )
-            self.store(log, collection='queries')
         return r
     
     def chat(self, message, context=None, agent=None, **kwargs):

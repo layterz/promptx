@@ -1,13 +1,9 @@
-import base64
 import uuid
 from typing import Any, Dict
 from abc import abstractmethod
 from pydantic import BaseModel
-from IPython.display import display, Image
-
 
 from ..collection import Entity
-
 
 class PromptLog(BaseModel):
     id: str
@@ -58,13 +54,6 @@ class Response(BaseModel):
     metrics: Metrics = None
     callback: Callback = None
     cached: bool = False
-
-
-class ImageResponse(Response):
-    
-    def __repr__(self) -> str:
-        image_bytes = base64.b64decode(self.raw)
-        display(Image(data=image_bytes))
 
 
 class LLM(Entity):

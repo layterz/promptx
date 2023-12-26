@@ -5,13 +5,12 @@ with open('requirements.txt') as f:
 
 setup(
     name='pxx',
-    version='0.0.5',
+    version='0.0.6',
     description='An AI framework',
     packages=['promptx'],
     install_requires=requirements,
-    entry_points={
-        "console_scripts": [
-            "px = promptx.cli:main",
-        ],
+    extras_require={
+        'chromadb': ['chromadb==0.4.14'],
+        'openai': ['openai'],
     },
 )

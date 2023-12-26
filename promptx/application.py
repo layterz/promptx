@@ -4,7 +4,6 @@ from rich import pretty
 import openai
 
 from .world import World
-from .collection import ChromaVectorDB
 from .models.openai import ChatGPT
 
 
@@ -19,18 +18,16 @@ class App:
         self.world = world or World(name, db=db, default_llm=llm)
     
     @classmethod
-    def load(cls, path, db=None, llm=None, env=None):
-        db = db or ChromaVectorDB(path=path)
-
+    def load(cls, path, db, llm, env=None):
         if llm is None:
-            default_llm_id = os.environ.get('PXX_DEFAULT_LLM', 'default')
+            default_llm_id = os.environ.get('PXX_DEFAULT_LLM', 'chatgpt')
 
             if default_llm_id == 'chatgpt':
-                api_key = os.environ.get('PXX_OPENAI_API_KEY')
-                org_id = os.environ.get('PXX_OPENAI_ORG_ID')
-                openai.api_key = api_key or os.environ.get('OPENAI_API_KEY')
-                openai.organization = org_id or os.environ.get('OPENAI_ORG_ID')
-                llm = llm or ChatGPT(id='default', api_key=env.get('PXX_OPENAI_API_KEY'), org_id=env.get('PXX_OPENAI_ORG_ID'))
+                api_key = os.environ.get('OPENAI_API_KEY')
+                org_id = os.environ.get('OPENAI_ORG_ID')
+                openai.api_key = api_key
+                openai.organization = org_id
+                llm = llm or ChatGPT(id='default', api_key=openai.api_key, org_id=openai.organization)
 
         config = {
             'name': 'local',

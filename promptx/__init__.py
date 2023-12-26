@@ -6,6 +6,12 @@ from .collection import Collection, MemoryVectorDB
 from .world import Session
 from .application import App
 
+## TODO
+# make chromadb default and deal with unimplemented functions for InMem
+# publish to pypi
+# create math dataset
+# train mistral-7b using generated dataset
+# read the SSM papers
 
 def prompt(instructions=None, input=None, output=None, prompt=None, context=None, template=None, llm=None, examples=None, allow_none=False, history=None, tools=None, dryrun=False, retries=3, debug=False, silent=False, **kwargs):
     kwargs = dict(
@@ -84,44 +90,36 @@ def find_project_root(path=None, config_filename='.px'):
     return None
 
 
-def load(path='local', **env):
-    if path == 'local':
+def load(path=None, **env):
+    try:
+        from .adapters.chromadb import ChromaVectorDB
+        db = ChromaVectorDB()
+    except ImportError:
+        db = MemoryVectorDB()
+
+    try:
+        from .models.openai import ChatGPT
+        api_key = os.environ.get('OPENAI_API_KEY')
+        org_id = os.environ.get('OPENAI_ORG_ID')
+        llm = ChatGPT(id='default', api_key=api_key, org_id=org_id)
+    except ImportError:
+        from .models import MockLLM
+        llm = MockLLM()
+
+    app = None
+    if path is None:
         project_path = find_project_root()
         if project_path is not None:
             path = project_path
 
-    app = None
-    if path == 'local':
-        db = MemoryVectorDB()
-        env = {**os.environ, **(env or {})}
-        app = App.load(path, db=db, env=env)
-    elif path.startswith('http'):
-        print('loading remote app from', path)
-        raise NotImplementedError
-    else:
-        logger.info(f'loading local app from {path}')
-        from dotenv import load_dotenv
-        load_dotenv(os.path.join(path, '.env'), override=True)
-        logger.info(f'loaded environment variables from {os.path.join(path, ".env")}')
-        logger.info(f'API KEY {os.environ.get("PXX_OPENAI_API_KEY")[-5:]}')
-        env = {**os.environ, **(env or {})}
-        app = App.load(path, env=env)
-
-        # look for a config.py file and execute it
-        config_file = os.path.join(path, 'config.py')
-        if os.path.exists(config_file):
-            import importlib.util
-            spec = importlib.util.spec_from_file_location('config', config_file)
-            module = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(module)
-            session = app.world.create_session(f'{app.name}_config_{int(time.time())}')
-            module.setup(session)
-    
+    env = {**os.environ, **(env or {})}
+    app = App.load(path, db, llm, env=env)
     s = app.world.create_session()
     set_default_session(s)
     return app
 
 
 import os
+
 if os.environ.get('PXX_AUTOLOAD', True):
     load()

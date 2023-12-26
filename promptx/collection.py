@@ -9,7 +9,6 @@ import jsonschema
 import pandas as pd
 from pydantic import BaseModel, Field, ConfigDict, create_model
 from pydantic_core._pydantic_core import PydanticUndefinedType
-import chromadb
 
 
 REGISTERED_ENTITIES = {}
@@ -562,30 +561,6 @@ class VectorDB:
         '''
         Return a list of collections.
         '''
-
-
-class ChromaVectorDB(VectorDB):
-
-    def __init__(self, endpoint=None, api_key=None, path=None, **kwargs):
-        self.client = chromadb.PersistentClient(path=f'{path}/.px/db' if path else "./.px/db")
-    
-    def get_or_create_collection(self, name, **kwargs):
-        return self.client.get_or_create_collection(name, **kwargs)
-    
-    def create_collection(self, name, **kwargs):
-        return self.client.create_collection(name, **kwargs)
-    
-    def get_collection(self, name, **kwargs):
-        try:
-            return self.client.get_collection(name, **kwargs)
-        except ValueError:
-            return None
-    
-    def delete_collection(self, name, **kwargs):
-        return self.client.delete_collection(name, **kwargs)
-    
-    def collections(self):
-        return self.client.list_collections()
 
 
 class MemoryDB(VectorCollection):

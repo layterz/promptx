@@ -1,7 +1,7 @@
 from typing import List
 import openai
 
-from . import LLM, ImageResponse, Response, Metrics, Callback, PromptLog
+from . import LLM, Response, Metrics, Callback, PromptLog
 from ..collection import REGISTERED_ENTITIES
 
 
@@ -54,25 +54,3 @@ class ChatGPT(LLM):
         )
 
 REGISTERED_ENTITIES['chatgpt'] = ChatGPT
-
-
-class DALLE(LLM):
-
-    def __init__(self, api_key=None, org_id=None, **kwargs):
-        super().__init__(**kwargs)
-
-    def generate(self, x, **kwargs) -> Response:
-        output = openai.Image.create(
-            prompt=x,
-            n=1,
-            size='512x512',
-            response_format='b64_json',
-        )
-        return ImageResponse(
-            raw=output['data'][0]['b64_json'],
-            metrics=Metrics(
-                input_tokens=len(x),
-            )
-        )
-
-REGISTERED_ENTITIES['dalle'] = DALLE
