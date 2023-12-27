@@ -1,0 +1,2 @@
+recursive-include promptx/models *
+recursive-include promptx/adapters *
