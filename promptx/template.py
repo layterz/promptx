@@ -318,29 +318,33 @@ class TemplateRunner:
 
         try:
             response = llm.generate(prompt_input, context=context or t.context, history=history)
-        except (openai.error.APIError,
-                openai.error.Timeout,
-                openai.error.ServiceUnavailableError) as e:
+        except openai.APIError as e:
             logger.error(f'LLM generation failed: {e}')
             time.sleep(2)
-            return self.forward(session, t, x, llm, retries=retries, **kwargs)
-        except openai.error.RateLimitError as e:
-            logger.error(f'Hit rate limit for {self}: {e}')
-            time.sleep(10)
+            if retries <= 1:
+                raise e
             return self.forward(session, t, x, llm, retries=retries, **kwargs)
         except Exception as e:
             logger.error(f'Failed to generate {x}: {e}')
+            if retries <= 1:
+                raise e
             return self.forward(session, t, x, llm, retries=retries-1, **kwargs)
 
         try:
             response.content = self.process(session, t, px, response.raw, allow_none=allow_none, **kwargs)
         except jsonschema.exceptions.ValidationError as e:
             logger.error(f'Output validation failed: {e}')
+            if retries <= 1:
+                raise e
             return self.forward(session, t, x, llm, retries=retries-1, **kwargs)
         except json.JSONDecodeError as e:
             logger.warning(f'Failed to decode JSON from {e}')
+            if retries <= 1:
+                raise e
             return self.forward(session, t, x, llm, retries=retries-1, **kwargs)
         except Exception as e:
             logger.error(f'Failed to forward {x}: {e}')
+            if retries <= 1:
+                raise e
             return self.forward(session, t, x, llm, retries=retries-1, **kwargs)
         return response

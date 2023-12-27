@@ -493,7 +493,7 @@ class Entity(BaseModel):
 class Query(BaseModel):
     type: str = 'query'
     query: str = None
-    where: Dict[str, (int|str|bool)] = None
+    where: Dict[str, Union[int, str, bool]] = None
     collection: str = None
 
     def __init__(self, query=None, where=None, collection=None, **kwargs):
