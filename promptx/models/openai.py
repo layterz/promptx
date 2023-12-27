@@ -1,5 +1,7 @@
 from typing import List
-import openai
+from openai import OpenAI
+
+client = OpenAI()
 
 from . import LLM, Response, Metrics, Callback, PromptLog
 from ..collection import REGISTERED_ENTITIES
@@ -26,30 +28,20 @@ class ChatGPT(LLM):
         # OpenAI API has an annoying "feature" where it will throw 
         # an error if you set functions to an empty list or None.
         if tools is None or len(tools) == 0:
-            output = openai.ChatCompletion.create(
-                model=self.version,
-                messages=messages,
-            )
+            output = client.chat.completions.create(model=self.version,
+            messages=messages)
         else:
-            output = openai.ChatCompletion.create(
-                model=self.version,
-                messages=messages,
-                functions=tools,
-            )
+            output = client.chat.completions.create(model=self.version,
+            messages=messages,
+            functions=tools)
         
         message = output.choices[0].message
-        function_call = message.get('function_call')
-        if function_call is not None:
-            callback = Callback(
-                name=function_call.get('name'),
-                params=message,
-            )
         return Response(
-            raw=message.get('content'),
+            raw=message.content,
             metrics=Metrics(
                 model=f'{self.__class__.__name__}.{self.version}',
-                input_tokens=output.usage.get('prompt_tokens'),
-                output_tokens=output.usage.get('completion_tokens')
+                input_tokens=output.usage.prompt_tokens,
+                output_tokens=output.usage.completion_tokens,
             ),
         )
 

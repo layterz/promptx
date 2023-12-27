@@ -83,7 +83,7 @@ def test_invalild_json_output__validation(session, template, llm):
 
 # TODO: this should probably have some kind of separate retry budget
 def test_exception_handling(session, template, llm):
-    llm.generate.side_effect = [openai.error.Timeout, Response(raw='Test response')]
+    llm.generate.side_effect = [openai.Timeout, Response(raw='Test response')]
     template = Template(instructions='Some example instructions')
     
     o = session.prompt(template=template, llm=llm)

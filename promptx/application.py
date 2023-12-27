@@ -25,8 +25,8 @@ class App:
             if default_llm_id == 'chatgpt':
                 api_key = os.environ.get('OPENAI_API_KEY')
                 org_id = os.environ.get('OPENAI_ORG_ID')
-                openai.api_key = api_key
-                openai.organization = org_id
+                # TODO: The 'openai.organization' option isn't read in the client API. You will need to pass it when you instantiate the client, e.g. 'OpenAI(organization=org_id)'
+                # openai.organization = org_id
                 llm = llm or ChatGPT(id='default', api_key=openai.api_key, org_id=openai.organization)
 
         config = {
